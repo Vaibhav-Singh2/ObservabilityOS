@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { connectToDatabase, Project, Service, Log } from "@repo/db";
+import { connectToDatabase, Project, Service, Log, User } from "@repo/db";
 import { Logger } from "@repo/sdk";
 
 // Manual dotenv loading from the web app workspace
@@ -29,10 +29,18 @@ async function verify() {
   console.log("Connecting to database at:", process.env.MONGODB_URI);
   await connectToDatabase();
 
-  // 1. Setup Test Project
-  console.log("\n--- [Step 1] Setting up project ---");
+  // 1. Setup Test User and Project
+  console.log("\n--- [Step 1] Setting up user and project ---");
+  await User.deleteOne({ githubId: "dummy_test_user" });
+  const user = await User.create({
+    githubId: "dummy_test_user",
+    username: "testuser",
+    email: "testuser@example.com",
+  });
+
   await Project.deleteOne({ apiKey: TEST_API_KEY });
   const project = await Project.create({
+    ownerId: user._id,
     name: "E2E Verification Project",
     apiKey: TEST_API_KEY,
   });

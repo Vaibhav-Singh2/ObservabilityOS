@@ -2,6 +2,7 @@ import { Schema, model, models, Document, Types, Model } from "mongoose";
 
 export interface IProject {
   _id: Types.ObjectId;
+  ownerId: Types.ObjectId;
   name: string;
   apiKey: string;
   createdAt: Date;
@@ -12,6 +13,7 @@ export type ProjectDocument = IProject & Document;
 
 const ProjectSchema = new Schema<IProject>(
   {
+    ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
     name: { type: String, required: true },
     apiKey: { type: String, required: true, unique: true, index: true },
   },
