@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 import fs from "fs";
 import path from "path";
 import { connectToDatabase, Project, Service, Log, User } from "@repo/db";
@@ -96,21 +98,27 @@ async function verify() {
     console.log(`- Service: ${s.name} (Env: ${s.environment}) [ID: ${s._id}]`);
   }
 
-  const logs = await Log.find({ projectId: project._id }).sort({ timestamp: 1 });
+  const logs = await Log.find({ projectId: project._id }).sort({
+    timestamp: 1,
+  });
   console.log(`Found ${logs.length} logs in DB:`);
   for (const l of logs) {
     console.log(
       `[${l.timestamp.toISOString()}] [${l.level.toUpperCase()}] [Service ID: ${
         l.serviceId
-      }] ${l.message} (Trace: ${l.traceId || "none"})`
+      }] ${l.message} (Trace: ${l.traceId || "none"})`,
     );
     console.log(`  Metadata: ${JSON.stringify(l.metadata)}`);
   }
 
   if (logs.length === 3) {
-    console.log("\n✅ E2E Ingestion Verification Successful! All 3 logs were received and saved.");
+    console.log(
+      "\n✅ E2E Ingestion Verification Successful! All 3 logs were received and saved.",
+    );
   } else {
-    console.log(`\n❌ E2E Ingestion Verification Failed. Expected 3 logs, found ${logs.length}.`);
+    console.log(
+      `\n❌ E2E Ingestion Verification Failed. Expected 3 logs, found ${logs.length}.`,
+    );
   }
 }
 

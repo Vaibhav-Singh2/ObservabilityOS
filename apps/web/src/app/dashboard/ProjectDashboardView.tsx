@@ -29,6 +29,8 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
   const [serviceName, setServiceName] = useState("");
   const [environment, setEnvironment] = useState<"prod" | "staging" | "dev">("dev");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [sdkTab, setSdkTab] = useState<"basic" | "multi">("basic");
+
 
   const endpointUrl = typeof window !== "undefined"
     ? `${window.location.protocol}//${window.location.host}/api/ingest`
@@ -141,25 +143,74 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
         {/* Quick Integration card */}
         <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
           <div>
-            <div className="flex items-center gap-2 text-indigo-400 mb-3">
-              <Terminal className="w-5 h-5" />
-              <h3 className="text-sm font-bold uppercase tracking-wider">Quick SDK Setup</h3>
+            <div className="flex items-center justify-between mb-3 border-b border-slate-800/60 pb-2.5">
+              <div className="flex items-center gap-2 text-indigo-400">
+                <Terminal className="w-5 h-5" />
+                <h3 className="text-sm font-bold uppercase tracking-wider">SDK Setup</h3>
+              </div>
+              <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[10px]">
+                <button
+                  type="button"
+                  onClick={() => setSdkTab("basic")}
+                  className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                    sdkTab === "basic" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  Basic
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSdkTab("multi")}
+                  className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                    sdkTab === "multi" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  Multi-Service
+                </button>
+              </div>
             </div>
+            
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              Install the `@repo/sdk` package in your Node.js/TypeScript codebase and send logs immediately:
+              {sdkTab === "basic" 
+                ? "Install the SDK and configure a default service name to start routing logs:" 
+                : "Override the service per log or instantiate separate loggers for different components:"}
             </p>
-            <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-indigo-300 overflow-x-auto mb-4">
+
+            {sdkTab === "basic" ? (
+              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-indigo-300 overflow-x-auto mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
 const logger = new Logger({
   apiKey: "${project.apiKey.slice(0, 10)}...",
-  endpoint: "${endpointUrl}"
+  endpoint: "${endpointUrl}",
+  defaultService: "main-api" // Required default
 });
 
+logger.info("Service started successfully");`}
+              </pre>
+            ) : (
+              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-indigo-300 overflow-x-auto mb-4 select-all">
+{`import { Logger } from "@repo/sdk";
+
+const logger = new Logger({
+  apiKey: "${project.apiKey.slice(0, 10)}...",
+  endpoint: "${endpointUrl}",
+  defaultService: "main-api"
+});
+
+// 1. Override service dynamically:
 logger.info("Order processed", {
+  service: "payment-service", // custom destination
   metadata: { amount: 99.99 }
+});
+
+// 2. Or create a dedicated instance:
+const authLogger = new Logger({
+  apiKey: "${project.apiKey.slice(0, 10)}...",
+  defaultService: "auth-service"
 });`}
-            </pre>
+              </pre>
+            )}
           </div>
           <span className="text-[10px] text-slate-500">
             For monorepo projects, run <code className="font-mono text-slate-400">yarn add @repo/sdk</code>.
