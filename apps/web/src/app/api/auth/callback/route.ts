@@ -9,8 +9,10 @@ export async function GET(request: Request) {
 
     if (!code) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "Missing authorization code" } },
-        { status: 400 }
+        {
+          error: { code: "BAD_REQUEST", message: "Missing authorization code" },
+        },
+        { status: 400 },
       );
     }
 
@@ -22,33 +24,46 @@ export async function GET(request: Request) {
     if (!clientId || !clientSecret || !jwtSecret) {
       console.error("Missing auth configuration environment variables");
       return NextResponse.json(
-        { error: { code: "CONFIGURATION_ERROR", message: "Auth environment is not configured correctly" } },
-        { status: 500 }
+        {
+          error: {
+            code: "CONFIGURATION_ERROR",
+            message: "Auth environment is not configured correctly",
+          },
+        },
+        { status: 500 },
       );
     }
 
     // 1. Exchange code for GitHub token
-    const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
+    const tokenResponse = await fetch(
+      "https://github.com/login/oauth/access_token",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          redirect_uri: redirectUri,
+        }),
       },
-      body: JSON.stringify({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-        redirect_uri: redirectUri,
-      }),
-    });
+    );
 
     const tokenData = await tokenResponse.json();
 
     if (tokenData.error) {
       console.error("GitHub token exchange error:", tokenData);
       return NextResponse.json(
-        { error: { code: "UNAUTHORIZED", message: tokenData.error_description || "Token exchange failed" } },
-        { status: 401 }
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: tokenData.error_description || "Token exchange failed",
+          },
+        },
+        { status: 401 },
       );
     }
 
@@ -67,8 +82,13 @@ export async function GET(request: Request) {
     if (!githubProfile.id) {
       console.error("Failed to retrieve profile:", githubProfile);
       return NextResponse.json(
-        { error: { code: "UNAUTHORIZED", message: "Failed to get user profile from GitHub" } },
-        { status: 401 }
+        {
+          error: {
+            code: "UNAUTHORIZED",
+            message: "Failed to get user profile from GitHub",
+          },
+        },
+        { status: 401 },
       );
     }
 
@@ -83,18 +103,23 @@ export async function GET(request: Request) {
       });
       if (emailsResponse.ok) {
         const emails = await emailsResponse.json();
-        const primary = emails.find((e: any) => e.primary);
+        const primary = emails.find(
+          (e: { primary: boolean; email: string }) => e.primary,
+        );
         if (primary) {
           email = primary.email;
         }
       }
     } catch (e) {
-      console.warn("Failed to retrieve user emails, falling back to profile email:", e);
+      console.warn(
+        "Failed to retrieve user emails, falling back to profile email:",
+        e,
+      );
     }
 
     // 4. Connect to database and upsert User
     await connectToDatabase();
-    
+
     let user = await User.findOne({ githubId: String(githubProfile.id) });
     if (!user) {
       user = await User.create({
@@ -114,13 +139,13 @@ export async function GET(request: Request) {
     const sessionToken = jwt.sign(
       { userId: user._id.toString(), username: user.username },
       jwtSecret,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // 6. Redirect to dashboard with secure cookie set
     const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard`;
     const response = NextResponse.redirect(dashboardUrl);
-    
+
     response.cookies.set("session", sessionToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -133,8 +158,13 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Auth Callback Exception:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to process auth callback" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to process auth callback",
+        },
+      },
+      { status: 500 },
     );
   }
 }
