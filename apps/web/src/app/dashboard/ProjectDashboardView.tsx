@@ -20,7 +20,17 @@ interface ProjectDashboardViewProps {
   services: SerializedService[];
 }
 
+function formatDate(dateString: string) {
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return "N/A";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function ProjectDashboardView({ project, services }: ProjectDashboardViewProps) {
+
   const router = useRouter();
   const [showKey, setShowKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -177,19 +187,20 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
             </p>
 
             {sdkTab === "basic" ? (
-              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-indigo-300 overflow-x-auto mb-4 select-all">
+              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
 const logger = new Logger({
   apiKey: "${project.apiKey.slice(0, 10)}...",
   endpoint: "${endpointUrl}",
-  defaultService: "main-api" // Required default
+  // Required default service name
+  defaultService: "main-api"
 });
 
 logger.info("Service started successfully");`}
               </pre>
             ) : (
-              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[11px] font-mono text-indigo-300 overflow-x-auto mb-4 select-all">
+              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
 const logger = new Logger({
@@ -200,7 +211,7 @@ const logger = new Logger({
 
 // 1. Override service dynamically:
 logger.info("Order processed", {
-  service: "payment-service", // custom destination
+  service: "payment-service",
   metadata: { amount: 99.99 }
 });
 
@@ -279,7 +290,7 @@ const authLogger = new Logger({
                 <div className="space-y-2.5 text-xs text-slate-500">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-3.5 h-3.5" />
-                    <span>Created: {new Date(service.createdAt).toLocaleDateString()}</span>
+                    <span>Created: {formatDate(service.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-emerald-400/80 text-[11px] font-medium">
                     <Activity className="w-3.5 h-3.5 animate-pulse" />
