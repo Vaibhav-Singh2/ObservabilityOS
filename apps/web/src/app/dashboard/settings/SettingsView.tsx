@@ -20,6 +20,8 @@ interface SettingsViewProps {
     name: string;
     apiKey: string;
     slackWebhookUrl: string;
+    discordWebhookUrl: string;
+    teamsWebhookUrl: string;
     minErrorCount: number;
     zScoreThreshold: number;
   };
@@ -29,6 +31,8 @@ export default function SettingsView({ project }: SettingsViewProps) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl);
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState(project.discordWebhookUrl || "");
+  const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(project.teamsWebhookUrl || "");
   const [minErrorCount, setMinErrorCount] = useState(project.minErrorCount);
   const [zScoreThreshold, setZScoreThreshold] = useState(project.zScoreThreshold);
 
@@ -58,6 +62,8 @@ export default function SettingsView({ project }: SettingsViewProps) {
           projectId: project.id,
           name: name.trim(),
           slackWebhookUrl: slackWebhookUrl.trim(),
+          discordWebhookUrl: discordWebhookUrl.trim(),
+          teamsWebhookUrl: teamsWebhookUrl.trim(),
           minErrorCount: Number(minErrorCount),
           zScoreThreshold: Number(zScoreThreshold),
         }),
@@ -209,10 +215,11 @@ export default function SettingsView({ project }: SettingsViewProps) {
         <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
           <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-800/60 pb-2.5">
-            Slack Notification Integration
+            Notification Channel Webhooks
           </h2>
           
-          <div className="space-y-4 max-w-xl">
+          <div className="space-y-6 max-w-xl">
+            {/* Slack */}
             <div>
               <label htmlFor="slackWebhook" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                 Slack Incoming Webhook URL
@@ -226,10 +233,43 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                When an anomaly triggers an incident, a rich diagnostic incident card will be pushed to this Slack channel. 
-                {process.env.SLACK_WEBHOOK_URL && (
-                  <span className="block mt-0.5 text-indigo-400/90 font-medium">Default server webhook configuration is active as fallback.</span>
-                )}
+                Pushes rich diagnostic cards to your Slack channel on incidents and SLO budget status transitions.
+              </p>
+            </div>
+
+            {/* Discord */}
+            <div>
+              <label htmlFor="discordWebhook" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Discord Incoming Webhook URL
+              </label>
+              <input
+                id="discordWebhook"
+                type="url"
+                value={discordWebhookUrl}
+                onChange={(e) => setDiscordWebhookUrl(e.target.value)}
+                placeholder="e.g. https://discord.com/api/webhooks/XXXX"
+                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+              />
+              <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                Pushes embeds to Discord channel webhooks on anomalies and SLO budget changes.
+              </p>
+            </div>
+
+            {/* Microsoft Teams */}
+            <div>
+              <label htmlFor="teamsWebhook" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                Microsoft Teams Webhook URL
+              </label>
+              <input
+                id="teamsWebhook"
+                type="url"
+                value={teamsWebhookUrl}
+                onChange={(e) => setTeamsWebhookUrl(e.target.value)}
+                placeholder="e.g. https://outlook.office.com/webhook/XXXX"
+                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+              />
+              <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
+                Pushes Office 365 Connector cards to Microsoft Teams channel on alerts.
               </p>
             </div>
           </div>

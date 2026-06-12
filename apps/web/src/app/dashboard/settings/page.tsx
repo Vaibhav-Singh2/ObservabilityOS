@@ -53,6 +53,8 @@ export default async function SettingsPage({ searchParams }: PageProps) {
     name: activeProject.name,
     apiKey: activeProject.apiKey,
     slackWebhookUrl: activeProject.slackWebhookUrl || "",
+    discordWebhookUrl: activeProject.discordWebhookUrl || "",
+    teamsWebhookUrl: activeProject.teamsWebhookUrl || "",
     minErrorCount: activeProject.minErrorCount ?? 3,
     zScoreThreshold: activeProject.zScoreThreshold ?? 3.0,
   };

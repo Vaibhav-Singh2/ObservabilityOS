@@ -6,6 +6,7 @@ export interface ISlo {
   target: number; // e.g. 99.0
   windowDays: number; // e.g. 7 or 30
   latencyThresholdMs?: number; // only required for latency type
+  status?: "healthy" | "warning" | "breached";
 }
 
 export interface IService {
@@ -26,6 +27,7 @@ const SloSchema = new Schema<ISlo>({
   target: { type: Number, required: true },
   windowDays: { type: Number, required: true, default: 30 },
   latencyThresholdMs: { type: Number },
+  status: { type: String, enum: ["healthy", "warning", "breached"], default: "healthy" },
 });
 
 const ServiceSchema = new Schema<IService>(

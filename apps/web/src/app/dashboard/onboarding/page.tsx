@@ -53,6 +53,8 @@ export default async function OnboardingPage({ searchParams }: PageProps) {
     name: activeProject.name,
     apiKey: activeProject.apiKey,
     slackWebhookUrl: activeProject.slackWebhookUrl || "",
+    discordWebhookUrl: activeProject.discordWebhookUrl || "",
+    teamsWebhookUrl: activeProject.teamsWebhookUrl || "",
   };
 
   return (

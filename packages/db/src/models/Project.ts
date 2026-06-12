@@ -8,6 +8,8 @@ export interface IProject {
   createdAt: Date;
   updatedAt: Date;
   slackWebhookUrl?: string;
+  discordWebhookUrl?: string;
+  teamsWebhookUrl?: string;
   minErrorCount?: number;
   zScoreThreshold?: number;
   plan: 'free' | 'pro';
@@ -27,6 +29,8 @@ const ProjectSchema = new Schema<IProject>(
     name: { type: String, required: true },
     apiKey: { type: String, required: true, unique: true, index: true },
     slackWebhookUrl: { type: String, default: "" },
+    discordWebhookUrl: { type: String, default: "" },
+    teamsWebhookUrl: { type: String, default: "" },
     minErrorCount: { type: Number, default: 3 },
     zScoreThreshold: { type: Number, default: 3.0 },
     plan: { type: String, enum: ["free", "pro"], default: "free" },

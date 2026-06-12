@@ -8,6 +8,8 @@ const settingsUpdateSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
   name: z.string().min(1, "Project name cannot be empty"),
   slackWebhookUrl: z.string().optional().or(z.literal("")),
+  discordWebhookUrl: z.string().optional().or(z.literal("")),
+  teamsWebhookUrl: z.string().optional().or(z.literal("")),
   minErrorCount: z.number().int().min(1, "Minimum error count must be at least 1"),
   zScoreThreshold: z.number().min(1.0, "Z-Score threshold must be at least 1.0"),
 });
@@ -58,6 +60,8 @@ export async function PATCH(request: Request) {
     // Update settings
     project.name = validatedData.name.trim();
     project.slackWebhookUrl = validatedData.slackWebhookUrl?.trim() || "";
+    project.discordWebhookUrl = validatedData.discordWebhookUrl?.trim() || "";
+    project.teamsWebhookUrl = validatedData.teamsWebhookUrl?.trim() || "";
     project.minErrorCount = validatedData.minErrorCount;
     project.zScoreThreshold = validatedData.zScoreThreshold;
 
@@ -70,6 +74,8 @@ export async function PATCH(request: Request) {
         name: project.name,
         apiKey: project.apiKey,
         slackWebhookUrl: project.slackWebhookUrl,
+        discordWebhookUrl: project.discordWebhookUrl,
+        teamsWebhookUrl: project.teamsWebhookUrl,
         minErrorCount: project.minErrorCount,
         zScoreThreshold: project.zScoreThreshold,
       },

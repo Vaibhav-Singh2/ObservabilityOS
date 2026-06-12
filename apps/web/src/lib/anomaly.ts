@@ -1,6 +1,7 @@
 import { connectToDatabase, Log, Service, Deploy, Incident, Project } from "@repo/db";
 import { generateIncidentAnalysis, LogContext, DeployContext } from "@repo/ai";
 import { Types } from "mongoose";
+import { dispatchMultiChannelIncidentAlert } from "./alerts";
 
 // Setup queue and worker dependencies dynamically to avoid crash if ioredis fails to connect.
 let queue: any = null;
@@ -253,113 +254,21 @@ export async function processAnomalyDetection(
 
   console.log(`[Anomaly Engine] Created Incident: ${incident._id} - ${analysis.title}`);
 
-  // 9. Dispatch Slack Webhook Alert
-  const slackWebhookUrl = projectDoc?.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL;
-  await dispatchSlackAlert(projectId, serviceName, environment, incident._id.toString(), analysis, slackWebhookUrl);
-}
+  // 9. Dispatch Multi-channel Webhook Alerts (Slack, Discord, MS Teams)
+  if (projectDoc) {
+    const slackUrl = projectDoc.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL;
+    const discordUrl = projectDoc.discordWebhookUrl;
+    const teamsUrl = projectDoc.teamsWebhookUrl;
 
-async function dispatchSlackAlert(
-  projectId: string,
-  serviceName: string,
-  environment: string,
-  incidentId: string,
-  analysis: any,
-  slackWebhookUrl?: string
-) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const dashboardLink = `${appUrl}/dashboard/incidents?projectId=${projectId}&incidentId=${incidentId}`;
-
-  const slackPayload = {
-    blocks: [
-      {
-        type: "header",
-        text: {
-          type: "plain_text",
-          text: "🚨 ObservabilityOS Incident Alert",
-          emoji: true,
-        },
-      },
-      {
-        type: "section",
-        fields: [
-          {
-            type: "mrkdwn",
-            text: `*Service:*\n\`${serviceName}\``,
-          },
-          {
-            type: "mrkdwn",
-            text: `*Environment:*\n\`${environment}\``,
-          },
-        ],
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*Title:*\n*${analysis.title}*`,
-        },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*AI Analysis Summary:*\n${analysis.summary}`,
-        },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*Root Cause:*\n${analysis.rootCause}`,
-        },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*Suggested Troubleshooting Steps:*\n${analysis.suggestedFix
-            .map((step: string, idx: number) => `${idx + 1}. ${step}`)
-            .join("\n")}`,
-        },
-      },
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: "Investigate Incident",
-              emoji: true,
-            },
-            style: "danger",
-            url: dashboardLink,
-            action_id: "view_incident_dashboard",
-          },
-        ],
-      },
-    ],
-  };
-
-  if (slackWebhookUrl) {
-    try {
-      const response = await fetch(slackWebhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(slackPayload),
-      });
-
-      if (!response.ok) {
-        console.error(`[Slack Webhook] Failed with status ${response.status}: ${await response.text()}`);
-      } else {
-        console.log(`[Slack Webhook] Dispatched incident alert for incident ${incidentId}`);
-      }
-    } catch (err) {
-      console.error("[Slack Webhook] Connection error:", err);
+    if (!slackUrl && !discordUrl && !teamsUrl) {
+      console.log("\n--- [Incident Alert Payload Logged (No Webhooks Configured)] ---");
+      console.log(`Incident ID: ${incident._id}`);
+      console.log(`Title: ${analysis.title}`);
+      console.log(`Summary: ${analysis.summary}`);
+      console.log(`Root Cause: ${analysis.rootCause}`);
+      console.log("--------------------------------------------------------------\n");
+    } else {
+      await dispatchMultiChannelIncidentAlert(projectDoc, serviceName, environment, incident._id.toString(), analysis);
     }
-  } else {
-    console.log("\n--- [Slack Alert Payload Logged (No Webhook Destination Configured)] ---");
-    console.log(JSON.stringify(slackPayload, null, 2));
-    console.log("--------------------------------------------------------------------\n");
   }
 }

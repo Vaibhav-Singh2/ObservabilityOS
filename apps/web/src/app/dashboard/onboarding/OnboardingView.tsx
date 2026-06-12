@@ -24,6 +24,8 @@ interface OnboardingViewProps {
     name: string;
     apiKey: string;
     slackWebhookUrl: string;
+    discordWebhookUrl: string;
+    teamsWebhookUrl: string;
   };
 }
 
@@ -33,8 +35,24 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedInstall, setCopiedInstall] = useState(false);
-  const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl);
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl || "");
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState(project.discordWebhookUrl || "");
+  const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(project.teamsWebhookUrl || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // SLO Config state
+  const [enableAvailSlo, setEnableAvailSlo] = useState(true);
+  const [availSloTarget, setAvailSloTarget] = useState(99.0);
+  const [availSloWindow, setAvailSloWindow] = useState(30);
+
+  const [enableLatencySlo, setEnableLatencySlo] = useState(true);
+  const [latencySloTarget, setLatencySloTarget] = useState(95.0);
+  const [latencySloThreshold, setLatencySloThreshold] = useState(500);
+  const [latencySloWindow, setLatencySloWindow] = useState(30);
+
+  const [services, setServices] = useState<any[]>([]);
+  const [isLoadingServices, setIsLoadingServices] = useState(false);
+  const [isSavingSlos, setIsSavingSlos] = useState(false);
   
   // Ingestion tracking states
   const [isIngested, setIsIngested] = useState(false);
@@ -106,6 +124,25 @@ logger.info("ObservabilityOS integration successful!", {
     };
   }, [step, isIngested, project.id]);
 
+  // Fetch services when entering SLO setup step
+  useEffect(() => {
+    if (step === 5 && services.length === 0) {
+      setIsLoadingServices(true);
+      fetch(`/api/services?projectId=${project.id}`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Failed to fetch services");
+          return res.json();
+        })
+        .then((data) => {
+          if (data.services) {
+            setServices(data.services);
+          }
+        })
+        .catch((err) => console.error("[Onboarding] Fetch services error:", err))
+        .finally(() => setIsLoadingServices(false));
+    }
+  }, [step, project.id, services.length]);
+
   const handleCopyText = (text: string, type: "key" | "code" | "install") => {
     navigator.clipboard.writeText(text);
     if (type === "key") {
@@ -117,6 +154,70 @@ logger.info("ObservabilityOS integration successful!", {
     } else if (type === "install") {
       setCopiedInstall(true);
       setTimeout(() => setCopiedInstall(false), 2000);
+    }
+  };
+
+  const handleSaveSlos = async () => {
+    setIsSavingSlos(true);
+    try {
+      const targetService = services[0];
+      if (!targetService) {
+        // No services, skip to webhooks step
+        setStep(6);
+        return;
+      }
+
+      const promises = [];
+
+      if (enableAvailSlo) {
+        promises.push(
+          fetch("/api/services/slo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectId: project.id,
+              serviceId: targetService._id,
+              slo: {
+                name: "Availability SLO",
+                type: "availability",
+                target: availSloTarget,
+                windowDays: availSloWindow,
+              },
+            }),
+          })
+        );
+      }
+
+      if (enableLatencySlo) {
+        promises.push(
+          fetch("/api/services/slo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              projectId: project.id,
+              serviceId: targetService._id,
+              slo: {
+                name: "Latency SLO",
+                type: "latency",
+                target: latencySloTarget,
+                windowDays: latencySloWindow,
+                latencyThresholdMs: latencySloThreshold,
+              },
+            }),
+          })
+        );
+      }
+
+      if (promises.length > 0) {
+        await Promise.all(promises);
+      }
+
+      setStep(6);
+    } catch (err) {
+      console.error("[Onboarding] Error saving SLOs:", err);
+      setStep(6);
+    } finally {
+      setIsSavingSlos(false);
     }
   };
 
@@ -132,6 +233,8 @@ logger.info("ObservabilityOS integration successful!", {
           projectId: project.id,
           name: project.name,
           slackWebhookUrl: slackWebhookUrl.trim(),
+          discordWebhookUrl: discordWebhookUrl.trim(),
+          teamsWebhookUrl: teamsWebhookUrl.trim(),
           minErrorCount: 3, // keep original defaults
           zScoreThreshold: 3.0,
         }),
@@ -156,7 +259,8 @@ logger.info("ObservabilityOS integration successful!", {
     "Install SDK",
     "Integrate Code",
     "Ingest Logs",
-    "Alert Webhook"
+    "Define SLOs",
+    "Webhooks"
   ];
 
   return (
@@ -166,7 +270,7 @@ logger.info("ObservabilityOS integration successful!", {
         <div className="absolute top-4 left-4 right-4 h-0.5 bg-slate-900 -z-10" />
         <div 
           className="absolute top-4 left-4 h-0.5 bg-indigo-600 -z-10 transition-all duration-300"
-          style={{ width: `${((step - 1) / 4) * 100}%` }}
+          style={{ width: `${((step - 1) / 5) * 100}%` }}
         />
         
         <div className="flex justify-between items-center px-2">
@@ -407,49 +511,252 @@ logger.info("ObservabilityOS integration successful!", {
                 disabled={!isIngested}
                 className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 disabled:text-slate-500 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-lg shadow-indigo-600/10"
               >
-                Configure Alerts
+                Define SLO Targets
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
           </div>
         )}
 
-        {/* STEP 5: Webhooks & Finish */}
+        {/* STEP 5: Define SLO Targets */}
         {step === 5 && (
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center mb-2 text-indigo-400">
+                <Sparkles className="w-6 h-6 animate-pulse" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Define Service Level Objectives (SLOs)</h2>
+              <p className="text-sm text-slate-400 leading-relaxed font-sans">
+                Set compliance targets for the ingested services. We've detected your service <span className="text-white font-semibold">"{services[0]?.name || "main-api"}"</span> in <span className="text-indigo-400 font-semibold">{services[0]?.environment || "staging"}</span>.
+              </p>
+            </div>
+
+            {isLoadingServices ? (
+              <div className="flex flex-col items-center justify-center py-10 space-y-3">
+                <RefreshCw className="w-6 h-6 text-indigo-500 animate-spin" />
+                <span className="text-xs text-slate-500 font-medium">Resolving ingested services...</span>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {/* Availability SLO preset card */}
+                <div className={`p-4 border rounded-xl transition-all duration-200 ${
+                  enableAvailSlo 
+                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/5" 
+                    : "bg-slate-900/40 border-slate-850 opacity-60"
+                }`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        id="enableAvail"
+                        checked={enableAvailSlo}
+                        onChange={(e) => setEnableAvailSlo(e.target.checked)}
+                        className="rounded border-slate-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <div>
+                        <label htmlFor="enableAvail" className="text-sm font-bold text-slate-200 cursor-pointer select-none">
+                          Availability Target (Preset Default: 99.0%)
+                        </label>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Alerts if error logs exceed the error budget percentage in the given window.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {enableAvailSlo && (
+                    <div className="mt-4 grid grid-cols-2 gap-4 pl-7 border-l-2 border-indigo-950 pt-2">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compliance Target (%)</label>
+                        <input 
+                          type="number"
+                          step="0.1"
+                          min="0.1"
+                          max="100"
+                          value={availSloTarget}
+                          onChange={(e) => setAvailSloTarget(parseFloat(e.target.value) || 99.0)}
+                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Rolling Window (Days)</label>
+                        <input 
+                          type="number"
+                          min="1"
+                          max="90"
+                          value={availSloWindow}
+                          onChange={(e) => setAvailSloWindow(parseInt(e.target.value) || 30)}
+                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Latency SLO preset card */}
+                <div className={`p-4 border rounded-xl transition-all duration-200 ${
+                  enableLatencySlo 
+                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/5" 
+                    : "bg-slate-900/40 border-slate-850 opacity-60"
+                }`}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <input 
+                        type="checkbox" 
+                        id="enableLatency"
+                        checked={enableLatencySlo}
+                        onChange={(e) => setEnableLatencySlo(e.target.checked)}
+                        className="rounded border-slate-800 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      />
+                      <div>
+                        <label htmlFor="enableLatency" className="text-sm font-bold text-slate-200 cursor-pointer select-none">
+                          Latency Performance (Preset Default: 500ms at 95.0%)
+                        </label>
+                        <p className="text-[11px] text-slate-500 mt-0.5">
+                          Tracks the percentage of requests completing within the threshold speed limit.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {enableLatencySlo && (
+                    <div className="mt-4 grid grid-cols-3 gap-4 pl-7 border-l-2 border-indigo-950 pt-2">
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Threshold (ms)</label>
+                        <input 
+                          type="number"
+                          min="1"
+                          value={latencySloThreshold}
+                          onChange={(e) => setLatencySloThreshold(parseInt(e.target.value) || 500)}
+                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compliance (%)</label>
+                        <input 
+                          type="number"
+                          step="0.1"
+                          min="0.1"
+                          max="100"
+                          value={latencySloTarget}
+                          onChange={(e) => setLatencySloTarget(parseFloat(e.target.value) || 95.0)}
+                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Window (Days)</label>
+                        <input 
+                          type="number"
+                          min="1"
+                          max="90"
+                          value={latencySloWindow}
+                          onChange={(e) => setLatencySloWindow(parseInt(e.target.value) || 30)}
+                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-4 border-t border-slate-850/40">
+              <button
+                type="button"
+                onClick={() => setStep(4)}
+                className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-bold transition-colors cursor-pointer"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back
+              </button>
+
+              <button
+                type="button"
+                onClick={handleSaveSlos}
+                disabled={isSavingSlos}
+                className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white px-5 py-2.5 rounded-lg text-xs font-bold transition-colors cursor-pointer shadow-lg shadow-indigo-600/10"
+              >
+                {isSavingSlos ? (
+                  <>
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    Saving SLOs...
+                  </>
+                ) : (
+                  <>
+                    Configure Alerts
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 6: Webhooks & Finish */}
+        {step === 6 && (
           <form onSubmit={handleCompleteOnboarding} className="space-y-6">
             <div className="space-y-2">
               <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center mb-2 text-indigo-400">
                 <Volume2 className="w-6 h-6 animate-pulse" />
               </div>
-              <h2 className="text-xl font-bold text-white">Setup Slack Alerts</h2>
+              <h2 className="text-xl font-bold text-white">Setup Webhook Notifications</h2>
               <p className="text-sm text-slate-400 leading-relaxed font-sans">
-                Finally, set up alerting integrations to get instant AI diagnostic summaries pushed directly to your team's Slack.
+                Finally, set up alerting integrations to get instant AI diagnostic summaries and SLO budget updates pushed directly to your team's communication channels.
               </p>
             </div>
 
             <div className="space-y-4 max-w-xl">
               <div>
-                <label htmlFor="webhookInput" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                <label htmlFor="slackWebhookInput" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                   Slack Incoming Webhook URL
                 </label>
                 <input
-                  id="webhookInput"
+                  id="slackWebhookInput"
                   type="url"
                   value={slackWebhookUrl}
                   onChange={(e) => setSlackWebhookUrl(e.target.value)}
                   placeholder="https://hooks.slack.com/services/T000/B000/XXXX"
                   className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
                 />
-                <p className="text-[10px] text-slate-500 mt-1.5">
-                  You can skip this step and configure webhook preferences later inside your Project Settings page.
-                </p>
               </div>
+
+              <div>
+                <label htmlFor="discordWebhookInput" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  Discord Incoming Webhook URL
+                </label>
+                <input
+                  id="discordWebhookInput"
+                  type="url"
+                  value={discordWebhookUrl}
+                  onChange={(e) => setDiscordWebhookUrl(e.target.value)}
+                  placeholder="https://discord.com/api/webhooks/XXXX"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="teamsWebhookInput" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                  Microsoft Teams Webhook URL
+                </label>
+                <input
+                  id="teamsWebhookInput"
+                  type="url"
+                  value={teamsWebhookUrl}
+                  onChange={(e) => setTeamsWebhookUrl(e.target.value)}
+                  placeholder="https://outlook.office.com/webhook/XXXX"
+                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+                />
+              </div>
+
+              <p className="text-[10px] text-slate-500 mt-1.5">
+                You can skip these webhooks and configure notification channels later inside your Project Settings page.
+              </p>
             </div>
 
             <div className="flex items-center justify-between pt-4 border-t border-slate-800/40">
               <button
                 type="button"
-                onClick={() => setStep(4)}
+                onClick={() => setStep(5)}
                 className="inline-flex items-center gap-1.5 text-slate-400 hover:text-white text-xs font-bold transition-colors cursor-pointer"
               >
                 <ArrowLeft className="w-4 h-4" />
