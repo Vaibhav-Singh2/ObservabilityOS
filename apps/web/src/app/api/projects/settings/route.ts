@@ -1,0 +1,97 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { connectToDatabase, Project, User } from "@repo/db";
+import jwt from "jsonwebtoken";
+import { z } from "zod";
+
+const settingsUpdateSchema = z.object({
+  projectId: z.string().min(1, "projectId is required"),
+  name: z.string().min(1, "Project name cannot be empty"),
+  slackWebhookUrl: z.string().optional().or(z.literal("")),
+  minErrorCount: z.number().int().min(1, "Minimum error count must be at least 1"),
+  zScoreThreshold: z.number().min(1.0, "Z-Score threshold must be at least 1.0"),
+});
+
+async function getAuthenticatedUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  if (!token) return null;
+
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) return null;
+
+  try {
+    const decoded: any = jwt.verify(token, jwtSecret);
+    await connectToDatabase();
+    return await User.findById(decoded.userId);
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
+        { status: 401 }
+      );
+    }
+
+    const rawBody = await request.json();
+    const validatedData = settingsUpdateSchema.parse(rawBody);
+
+    // Verify project belongs to user (Tenant isolation)
+    const project = await Project.findOne({
+      _id: validatedData.projectId,
+      ownerId: user._id,
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
+        { status: 404 }
+      );
+    }
+
+    // Update settings
+    project.name = validatedData.name.trim();
+    project.slackWebhookUrl = validatedData.slackWebhookUrl?.trim() || "";
+    project.minErrorCount = validatedData.minErrorCount;
+    project.zScoreThreshold = validatedData.zScoreThreshold;
+
+    await project.save();
+
+    return NextResponse.json({
+      success: true,
+      project: {
+        id: project._id.toString(),
+        name: project.name,
+        apiKey: project.apiKey,
+        slackWebhookUrl: project.slackWebhookUrl,
+        minErrorCount: project.minErrorCount,
+        zScoreThreshold: project.zScoreThreshold,
+      },
+    });
+  } catch (error) {
+    console.error("Project settings PATCH Error:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Validation failed: " + error.errors.map((e) => e.message).join(", "),
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to update project settings" } },
+      { status: 500 }
+    );
+  }
+}

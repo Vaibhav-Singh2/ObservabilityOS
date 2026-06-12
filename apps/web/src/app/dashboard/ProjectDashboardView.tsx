@@ -9,6 +9,11 @@ interface SerializedService {
   name: string;
   environment: "prod" | "staging" | "dev";
   createdAt: string;
+  totalLogs: number;
+  errorRate: number;
+  availability: number;
+  avgLatency: number | null;
+  healthStatus: "healthy" | "warning" | "incident";
 }
 
 interface ProjectDashboardViewProps {
@@ -267,38 +272,128 @@ const authLogger = new Logger({
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service) => (
-              <div
-                key={service.id}
-                className="bg-slate-900/50 border border-slate-900 hover:border-slate-800/80 rounded-xl p-5 transition-all duration-200"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-white truncate max-w-[150px]">{service.name}</h3>
-                  <span
-                    className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                      service.environment === "prod"
-                        ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                        : service.environment === "staging"
-                        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                    }`}
-                  >
-                    {service.environment}
-                  </span>
-                </div>
-                
-                <div className="space-y-2.5 text-xs text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5" />
-                    <span>Created: {formatDate(service.createdAt)}</span>
+            {services.map((service) => {
+              const healthColors = {
+                healthy: {
+                  bg: "bg-emerald-500",
+                  ping: "bg-emerald-400",
+                  text: "text-emerald-400",
+                  label: "Healthy"
+                },
+                warning: {
+                  bg: "bg-amber-500",
+                  ping: "bg-amber-400",
+                  text: "text-amber-400",
+                  label: "Warning"
+                },
+                incident: {
+                  bg: "bg-rose-500",
+                  ping: "bg-rose-400",
+                  text: "text-rose-400",
+                  label: "Incident"
+                }
+              };
+              const health = healthColors[service.healthStatus] || healthColors.healthy;
+
+              return (
+                <div
+                  key={service.id}
+                  className="bg-slate-900/50 border border-slate-900 hover:border-slate-800/80 rounded-xl p-5 transition-all duration-200"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="relative flex h-2 w-2 shrink-0">
+                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health.ping}`} />
+                        <span className={`relative inline-flex rounded-full h-2 w-2 ${health.bg}`} />
+                      </span>
+                      <h3 className="text-sm font-bold text-white truncate max-w-[130px]">{service.name}</h3>
+                    </div>
+                    <span
+                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                        service.environment === "prod"
+                          ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                          : service.environment === "staging"
+                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                      }`}
+                    >
+                      {service.environment}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-emerald-400/80 text-[11px] font-medium">
-                    <Activity className="w-3.5 h-3.5 animate-pulse" />
-                    <span>Awaiting incoming streams</span>
+
+                  {/* Metrics grid */}
+                  <div className="grid grid-cols-3 gap-2 border-t border-b border-slate-800/60 py-3 mb-3">
+                    <div className="text-center">
+                      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Uptime</span>
+                      <span className={`text-xs font-mono font-bold ${
+                        service.totalLogs === 0 
+                          ? "text-slate-400"
+                          : service.availability >= 99 
+                          ? "text-emerald-400" 
+                          : service.availability >= 95 
+                          ? "text-amber-400" 
+                          : "text-rose-400"
+                      }`}>
+                        {service.totalLogs === 0 ? "100.0%" : `${service.availability.toFixed(1)}%`}
+                      </span>
+                    </div>
+                    <div className="text-center border-l border-r border-slate-800/60">
+                      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Error Rate</span>
+                      <span className={`text-xs font-mono font-bold ${
+                        service.totalLogs === 0 
+                          ? "text-slate-400"
+                          : service.errorRate > 5 
+                          ? "text-rose-400" 
+                          : service.errorRate > 1 
+                          ? "text-amber-400" 
+                          : "text-emerald-400"
+                      }`}>
+                        {service.totalLogs === 0 ? "0.0%" : `${service.errorRate.toFixed(1)}%`}
+                      </span>
+                    </div>
+                    <div className="text-center">
+                      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Avg Latency</span>
+                      <span className={`text-xs font-mono font-bold ${
+                        service.avgLatency === null 
+                          ? "text-slate-550" 
+                          : service.avgLatency > 500 
+                          ? "text-rose-400" 
+                          : service.avgLatency > 200 
+                          ? "text-amber-400" 
+                          : "text-emerald-400"
+                      }`}>
+                        {service.avgLatency === null ? "—" : `${service.avgLatency}ms`}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2.5 text-xs text-slate-500">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <div className="flex items-center gap-1.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Created: {formatDate(service.createdAt)}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-650 font-mono">{service.totalLogs} logs</span>
+                    </div>
+
+                    {service.totalLogs === 0 ? (
+                      <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium bg-slate-950/40 border border-slate-900/60 rounded px-2 py-1">
+                        <Activity className="w-3.5 h-3.5 text-slate-600" />
+                        <span>Awaiting incoming streams</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/60 border border-slate-900 rounded px-2 py-1 justify-between">
+                        <div className="flex items-center gap-1.5">
+                          <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                          <span className={health.text}>{health.label}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500 font-normal">Active streams</span>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

@@ -1,5 +1,6 @@
 export { 
   generateIncidentAnalysis, 
+  generateEmailDigestSummary,
   type IncidentAnalysis 
 } from "./llm";
 
@@ -9,3 +10,8 @@ export {
   type LogContext, 
   type DeployContext 
 } from "./prompts/incident";
+
+export {
+  type IncidentDigestContext,
+  type DigestPromptInput
+} from "./prompts/digest";

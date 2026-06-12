@@ -1,4 +1,4 @@
-import { connectToDatabase, Log, Service, Deploy, Incident } from "@repo/db";
+import { connectToDatabase, Log, Service, Deploy, Incident, Project } from "@repo/db";
 import { generateIncidentAnalysis, LogContext, DeployContext } from "@repo/ai";
 import { Types } from "mongoose";
 
@@ -76,6 +76,11 @@ export async function processAnomalyDetection(
 ): Promise<void> {
   await connectToDatabase();
 
+  // Fetch Project to read custom alert configurations
+  const projectDoc = await Project.findById(projectId);
+  const minErrorCount = projectDoc?.minErrorCount ?? 3;
+  const zScoreThreshold = projectDoc?.zScoreThreshold ?? 3.0;
+
   const now = new Date();
   const nowMs = now.getTime();
   const currentWindowStart = nowMs - 5 * 60 * 1000; // Last 5 minutes
@@ -99,9 +104,9 @@ export async function processAnomalyDetection(
     (l) => l.timestamp.getTime() >= currentWindowStart
   ).length;
 
-  // Anomaly baseline: require at least 3 errors in the current 5 min window to trigger.
-  // This avoids spamming alerts on 1 or 2 isolated occurrences.
-  if (currentCount < 3) {
+  // Anomaly baseline: require at least minErrorCount errors in the current 5 min window to trigger.
+  // This avoids spamming alerts on isolated occurrences.
+  if (currentCount < minErrorCount) {
     return; 
   }
 
@@ -128,14 +133,14 @@ export async function processAnomalyDetection(
   let isAnomalous = false;
 
   if (stdDev === 0) {
-    // If historical baseline is completely quiet (stdDev = 0) and we suddenly get >= 3 errors
-    if (currentCount >= 3) {
+    // If historical baseline is completely quiet (stdDev = 0) and we suddenly get >= minErrorCount errors
+    if (currentCount >= minErrorCount) {
       isAnomalous = true;
       zScore = 5.0; // High default Z-Score for spike from 0 baseline
     }
   } else {
     zScore = (currentCount - mean) / stdDev;
-    if (zScore >= 3.0) {
+    if (zScore >= zScoreThreshold) {
       isAnomalous = true;
     }
   }
@@ -249,7 +254,8 @@ export async function processAnomalyDetection(
   console.log(`[Anomaly Engine] Created Incident: ${incident._id} - ${analysis.title}`);
 
   // 9. Dispatch Slack Webhook Alert
-  await dispatchSlackAlert(projectId, serviceName, environment, incident._id.toString(), analysis);
+  const slackWebhookUrl = projectDoc?.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL;
+  await dispatchSlackAlert(projectId, serviceName, environment, incident._id.toString(), analysis, slackWebhookUrl);
 }
 
 async function dispatchSlackAlert(
@@ -257,9 +263,9 @@ async function dispatchSlackAlert(
   serviceName: string,
   environment: string,
   incidentId: string,
-  analysis: any
+  analysis: any,
+  slackWebhookUrl?: string
 ) {
-  const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const dashboardLink = `${appUrl}/dashboard/incidents?projectId=${projectId}&incidentId=${incidentId}`;
 
@@ -335,9 +341,9 @@ async function dispatchSlackAlert(
     ],
   };
 
-  if (SLACK_WEBHOOK_URL) {
+  if (slackWebhookUrl) {
     try {
-      const response = await fetch(SLACK_WEBHOOK_URL, {
+      const response = await fetch(slackWebhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(slackPayload),
@@ -352,7 +358,7 @@ async function dispatchSlackAlert(
       console.error("[Slack Webhook] Connection error:", err);
     }
   } else {
-    console.log("\n--- [Slack Alert Payload Logged (No SLACK_WEBHOOK_URL Configured)] ---");
+    console.log("\n--- [Slack Alert Payload Logged (No Webhook Destination Configured)] ---");
     console.log(JSON.stringify(slackPayload, null, 2));
     console.log("--------------------------------------------------------------------\n");
   }

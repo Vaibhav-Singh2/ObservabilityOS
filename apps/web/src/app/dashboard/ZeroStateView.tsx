@@ -23,7 +23,7 @@ export default function ZeroStateView() {
       if (res.ok) {
         const { project } = await res.json();
         setProjectName("");
-        router.push(`/dashboard?projectId=${project._id}`);
+        router.push(`/dashboard/onboarding?projectId=${project._id}`);
         router.refresh();
       } else {
         const err = await res.json();
