@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Copy, Check, Eye, EyeOff, Plus, Terminal, Activity, Server, Layers, Calendar } from "lucide-react";
+import { Copy, Check, Eye, EyeOff, Plus, Terminal, Activity, Server, Layers, Calendar, GitBranch, GitCommit } from "lucide-react";
 
 interface SerializedService {
   id: string;
@@ -16,6 +16,17 @@ interface SerializedService {
   healthStatus: "healthy" | "warning" | "incident";
 }
 
+interface SerializedDeployment {
+  id: string;
+  serviceId: string;
+  serviceName: string;
+  commitSha: string;
+  commitMessage: string;
+  branch: string;
+  environment: "prod" | "staging" | "dev";
+  deployedAt: string | null;
+}
+
 interface ProjectDashboardViewProps {
   project: {
     id: string;
@@ -23,6 +34,7 @@ interface ProjectDashboardViewProps {
     apiKey: string;
   };
   services: SerializedService[];
+  deployments: SerializedDeployment[];
 }
 
 function formatDate(dateString: string) {
@@ -34,7 +46,23 @@ function formatDate(dateString: string) {
   return `${year}-${month}-${day}`;
 }
 
-export default function ProjectDashboardView({ project, services }: ProjectDashboardViewProps) {
+function timeAgo(dateString: string | null) {
+  if (!dateString) return "N/A";
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return "N/A";
+  const now = new Date();
+  const diffMs = now.getTime() - d.getTime();
+  const diffMins = Math.floor(diffMs / (60 * 1000));
+  const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
+  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  return `${diffDays}d ago`;
+}
+
+export default function ProjectDashboardView({ project, services, deployments = [] }: ProjectDashboardViewProps) {
 
   const router = useRouter();
   const [showKey, setShowKey] = useState(false);
@@ -44,7 +72,7 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
   const [serviceName, setServiceName] = useState("");
   const [environment, setEnvironment] = useState<"prod" | "staging" | "dev">("dev");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [sdkTab, setSdkTab] = useState<"basic" | "multi">("basic");
+  const [sdkTab, setSdkTab] = useState<"basic" | "multi" | "deploy">("basic");
 
 
   const endpointUrl = typeof window !== "undefined"
@@ -116,7 +144,7 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
               <div>
                 <label className="block text-xs font-semibold text-slate-500 mb-1">Ingestion Endpoint</label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 select-all truncate">
+                  <div className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-330 select-all truncate">
                     {endpointUrl}
                   </div>
                   <button
@@ -180,7 +208,16 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
                     sdkTab === "multi" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
                   }`}
                 >
-                  Multi-Service
+                  Multi
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSdkTab("deploy")}
+                  className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
+                    sdkTab === "deploy" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  Git Deploy
                 </button>
               </div>
             </div>
@@ -188,10 +225,12 @@ export default function ProjectDashboardView({ project, services }: ProjectDashb
             <p className="text-xs text-slate-400 leading-relaxed mb-4">
               {sdkTab === "basic" 
                 ? "Install the SDK and configure a default service name to start routing logs:" 
-                : "Override the service per log or instantiate separate loggers for different components:"}
+                : sdkTab === "multi"
+                ? "Override the service per log or instantiate separate loggers for different components:"
+                : "Notify ObservabilityOS of new releases to correlate errors with deployments:"}
             </p>
 
-            {sdkTab === "basic" ? (
+            {sdkTab === "basic" && (
               <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
@@ -204,7 +243,9 @@ const logger = new Logger({
 
 logger.info("Service started successfully");`}
               </pre>
-            ) : (
+            )}
+
+            {sdkTab === "multi" && (
               <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
@@ -227,9 +268,27 @@ const authLogger = new Logger({
 });`}
               </pre>
             )}
+
+            {sdkTab === "deploy" && (
+              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
+{`# Send release webhook in CI/CD pipeline:
+curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: ${project.apiKey.slice(0, 10)}..." \\
+  -d '{
+    "service": "main-api",
+    "environment": "prod",
+    "commitSha": "sha256...",
+    "commitMessage": "Release production v1.0",
+    "branch": "main"
+  }'`}
+              </pre>
+            )}
           </div>
           <span className="text-[10px] text-slate-500">
-            For monorepo projects, run <code className="font-mono text-slate-400">yarn add @repo/sdk</code>.
+            {sdkTab === "deploy"
+              ? "Ensure the commit SHA is passed when deploying."
+              : "For monorepo projects, run "}<code className="font-mono text-slate-400">{sdkTab === "deploy" ? "POST /api/webhooks/github" : "yarn add @repo/sdk"}</code>.
           </span>
         </div>
       </section>
@@ -298,7 +357,8 @@ const authLogger = new Logger({
               return (
                 <div
                   key={service.id}
-                  className="bg-slate-900/50 border border-slate-900 hover:border-slate-800/80 rounded-xl p-5 transition-all duration-200"
+                  onClick={() => router.push(`/dashboard/services/${service.id}?projectId=${project.id}`)}
+                  className="bg-slate-900/50 border border-slate-900 hover:border-indigo-500/40 rounded-xl p-5 transition-all duration-200 cursor-pointer hover:bg-slate-900/80 group"
                 >
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2 min-w-0">
@@ -306,7 +366,7 @@ const authLogger = new Logger({
                         <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health.ping}`} />
                         <span className={`relative inline-flex rounded-full h-2 w-2 ${health.bg}`} />
                       </span>
-                      <h3 className="text-sm font-bold text-white truncate max-w-[130px]">{service.name}</h3>
+                      <h3 className="text-sm font-bold text-white truncate max-w-[130px] group-hover:text-indigo-400 transition-colors">{service.name}</h3>
                     </div>
                     <span
                       className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
@@ -394,6 +454,88 @@ const authLogger = new Logger({
                 </div>
               );
             })}
+          </div>
+        )}
+      </section>
+
+      {/* Recent Releases & Deployments Section */}
+      <section className="space-y-6">
+        <div className="flex items-center justify-between border-b border-slate-900 pb-4">
+          <div className="flex items-center gap-3">
+            <GitBranch className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-lg font-bold text-white">Recent Releases & Deployments</h2>
+            <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-xs text-slate-400 font-semibold">
+              {deployments.length}
+            </span>
+          </div>
+        </div>
+
+        {deployments.length === 0 ? (
+          <div className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-12 text-center max-w-2xl mx-auto">
+            <GitCommit className="w-10 h-10 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-sm font-bold text-slate-300 mb-1">No tracked deployments</h3>
+            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+              Log code deployments in your CI/CD pipeline to immediately correlate error spikes and latency regressions with code changes.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-slate-900/20 border border-slate-905 rounded-xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="border-b border-slate-900 bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                    <th className="py-3 px-4">Release Commit / Branch</th>
+                    <th className="py-3 px-4">Service</th>
+                    <th className="py-3 px-4">Environment</th>
+                    <th className="py-3 px-4 text-right">Deployed At</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-900 bg-slate-950/20">
+                  {deployments.map((deploy) => (
+                    <tr key={deploy.id} className="hover:bg-slate-900/30 transition-colors">
+                      <td className="py-3.5 px-4 font-sans">
+                        <div className="flex flex-col gap-0.5 max-w-xs md:max-w-md lg:max-w-xl">
+                          <span className="font-semibold text-slate-200 truncate">{deploy.commitMessage}</span>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                            <span className="bg-slate-900 px-1.5 py-0.5 rounded border border-slate-850/60 text-slate-400">
+                              {deploy.commitSha.slice(0, 7)}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <GitBranch className="w-3 h-3 text-slate-600" />
+                              {deploy.branch}
+                            </span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3.5 px-4 font-mono font-semibold text-slate-300">
+                        {deploy.serviceName}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                            deploy.environment === "prod"
+                              ? "bg-rose-500/10 border-rose-500/20 text-rose-450"
+                              : deploy.environment === "staging"
+                              ? "bg-amber-500/10 border-amber-500/20 text-amber-450"
+                              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-450"
+                          }`}
+                        >
+                          {deploy.environment}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right text-slate-450 font-medium">
+                        <div className="flex flex-col items-end font-sans">
+                          <span>{timeAgo(deploy.deployedAt)}</span>
+                          <span className="text-[10px] text-slate-500 font-normal">
+                            {deploy.deployedAt ? new Date(deploy.deployedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </section>

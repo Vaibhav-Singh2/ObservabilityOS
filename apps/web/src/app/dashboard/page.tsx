@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Service, Log, Incident } from "@repo/db";
+import { connectToDatabase, User, Project, Service, Log, Incident, Deploy } from "@repo/db";
 import jwt from "jsonwebtoken";
 import ProjectDashboardView from "./ProjectDashboardView";
 import ZeroStateView from "./ZeroStateView";
@@ -86,6 +86,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     status: { $in: ["open", "investigating"] }
   });
 
+  // Fetch recent deployments
+  const recentDeploys = await Deploy.find({ projectId: activeProject._id })
+    .populate("serviceId")
+    .sort({ deployedAt: -1 })
+    .limit(10);
+
   // Create maps for efficient lookups
   const statsMap = new Map(stats.map(s => [s._id.toString(), s]));
   const openIncidentsServiceIds = new Set(openIncidents.map(inc => inc.serviceId.toString()));
@@ -130,10 +136,28 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     };
   });
 
+  const serializedDeployments = recentDeploys.map(d => {
+    const serviceName = (d.serviceId as any)?.name || "unknown-service";
+    const serviceIdStr = (d.serviceId as any)?._id 
+      ? (d.serviceId as any)._id.toString() 
+      : d.serviceId?.toString() || "";
+    return {
+      id: d._id.toString(),
+      serviceId: serviceIdStr,
+      serviceName,
+      commitSha: d.commitSha,
+      commitMessage: d.commitMessage,
+      branch: d.branch,
+      environment: d.environment,
+      deployedAt: d.deployedAt ? d.deployedAt.toISOString() : null,
+    };
+  });
+
   return (
     <ProjectDashboardView
       project={serializedProject}
       services={serializedServices}
+      deployments={serializedDeployments}
     />
   );
 }
