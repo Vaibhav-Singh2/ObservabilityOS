@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Log } from "@repo/db";
 import { z } from "zod";
 import { Types } from "mongoose";
+import { triggerAnomalyCheck } from "@/lib/anomaly";
 
 // Validation schema for single log items
 const logItemSchema = z.object({
@@ -120,6 +121,24 @@ export async function POST(request: Request) {
     });
 
     await Log.insertMany(logsToInsert);
+
+    // Trigger Anomaly Detection asynchronously for each unique service+environment in the batch
+    const uniqueServiceEnvs = new Map<string, { serviceId: Types.ObjectId; environment: "prod" | "staging" | "dev" }>();
+    for (const logItem of logsToInsert) {
+      if (logItem.serviceId) {
+        const key = `${logItem.serviceId.toString()}-${logItem.environment}`;
+        uniqueServiceEnvs.set(key, { 
+          serviceId: logItem.serviceId as Types.ObjectId, 
+          environment: logItem.environment as "prod" | "staging" | "dev"
+        });
+      }
+    }
+
+    for (const { serviceId, environment } of uniqueServiceEnvs.values()) {
+      triggerAnomalyCheck(project._id.toString(), serviceId.toString(), environment).catch((err) => {
+        console.error(`[Ingest Route] Failed to trigger anomaly check for service ${serviceId}:`, err);
+      });
+    }
 
     return NextResponse.json({
       success: true,

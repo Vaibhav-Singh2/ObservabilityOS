@@ -3,6 +3,7 @@ import { Schema, model, models, Document, Types, Model } from "mongoose";
 export interface IIncident {
   _id: Types.ObjectId;
   projectId: Types.ObjectId;
+  serviceId: Types.ObjectId;
   title: string;
   summary: string;
   rootCause: string;
@@ -24,6 +25,7 @@ export type IncidentDocument = IIncident & Document;
 const IncidentSchema = new Schema<IIncident>(
   {
     projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
+    serviceId: { type: Schema.Types.ObjectId, ref: "Service", required: true, index: true },
     title: { type: String, required: true },
     summary: { type: String, required: true },
     rootCause: { type: String, required: true },

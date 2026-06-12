@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Activity, LayoutDashboard, AlertOctagon, Search, LogOut, Menu, X } from "lucide-react";
 import ProjectSelector from "./ProjectSelector";
 
@@ -19,6 +19,8 @@ interface DashboardShellProps {
 export default function DashboardShell({ user, projects, children }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const activeProjectId = searchParams.get("projectId") || projects[0]?.id;
 
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
@@ -71,18 +73,19 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
             Overview
           </Link>
 
-          <div
-            id="nav_incidents_disabled"
-            className="flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg text-slate-500 cursor-not-allowed group relative"
+          <Link
+            id="nav_incidents"
+            href={activeProjectId ? `/dashboard/incidents?projectId=${activeProjectId}` : "/dashboard/incidents"}
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              pathname.startsWith("/dashboard/incidents") 
+                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+            }`}
           >
-            <span className="flex items-center gap-3">
-              <AlertOctagon className="w-4 h-4 text-slate-600" />
-              Incidents
-            </span>
-            <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 border border-slate-800">
-              Wk 2
-            </span>
-          </div>
+            <AlertOctagon className="w-4 h-4 text-indigo-400" />
+            Incidents
+          </Link>
 
           <div
             id="nav_search_disabled"
