@@ -1,15 +1,32 @@
 import { Schema, model, models, Document, Types, Model } from "mongoose";
 
+export interface ISlo {
+  name: string;
+  type: "availability" | "latency";
+  target: number; // e.g. 99.0
+  windowDays: number; // e.g. 7 or 30
+  latencyThresholdMs?: number; // only required for latency type
+}
+
 export interface IService {
   _id: Types.ObjectId;
   projectId: Types.ObjectId;
   name: string;
   environment: "prod" | "staging" | "dev";
+  slos?: ISlo[];
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type ServiceDocument = IService & Document;
+
+const SloSchema = new Schema<ISlo>({
+  name: { type: String, required: true },
+  type: { type: String, enum: ["availability", "latency"], required: true },
+  target: { type: Number, required: true },
+  windowDays: { type: Number, required: true, default: 30 },
+  latencyThresholdMs: { type: Number },
+});
 
 const ServiceSchema = new Schema<IService>(
   {
@@ -21,6 +38,7 @@ const ServiceSchema = new Schema<IService>(
       required: true,
       default: "prod",
     },
+    slos: { type: [SloSchema], default: [] },
   },
   { timestamps: true }
 );

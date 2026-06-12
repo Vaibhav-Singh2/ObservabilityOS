@@ -12,7 +12,13 @@ import {
   AlertCircle, 
   CheckCircle2, 
   Activity, 
-  RefreshCw 
+  RefreshCw,
+  ShieldCheck,
+  Plus,
+  Trash2,
+  Sliders,
+  Percent,
+  Info
 } from "lucide-react";
 
 interface ServiceProps {
@@ -53,6 +59,21 @@ interface MetricPoint {
   latency: number;
 }
 
+interface SloStatusPoint {
+  name: string;
+  type: "availability" | "latency";
+  target: number;
+  windowDays: number;
+  latencyThresholdMs?: number;
+  compliance: number;
+  totalRequests: number;
+  goodRequests: number;
+  badRequests: number;
+  budgetRemaining: number;
+  budgetRemainingPercent: number;
+  status: "healthy" | "warning" | "breached";
+}
+
 export default function ServiceDetailView({ 
   projectId, 
   service, 
@@ -64,9 +85,23 @@ export default function ServiceDetailView({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // SLO States
+  const [sloStatus, setSloStatus] = useState<SloStatusPoint[]>([]);
+  const [isLoadingSlos, setIsLoadingSlos] = useState(true);
+  const [isSloModalOpen, setIsSloModalOpen] = useState(false);
+  const [isSubmittingSlo, setIsSubmittingSlo] = useState(false);
+
+  // Form states for new/edit SLO
+  const [sloName, setSloName] = useState("");
+  const [sloType, setSloType] = useState<"availability" | "latency">("availability");
+  const [sloTarget, setSloTarget] = useState(99.0);
+  const [sloWindow, setSloWindow] = useState(30);
+  const [sloLatencyMs, setSloLatencyMs] = useState(500);
+
   const activeIncidents = incidents.filter(i => i.status !== "resolved");
   const isHealthy = activeIncidents.length === 0;
 
+  // Load metrics
   useEffect(() => {
     let active = true;
     async function loadMetrics() {
@@ -97,6 +132,91 @@ export default function ServiceDetailView({
       active = false;
     };
   }, [timeRange, projectId, service.id]);
+
+  // Load SLO status helper
+  const loadSloStatus = async () => {
+    setIsLoadingSlos(true);
+    try {
+      const res = await fetch(
+        `/api/services/slo/status?projectId=${projectId}&serviceId=${service.id}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setSloStatus(data.slos || []);
+      }
+    } catch (e) {
+      console.error("Failed to load SLO statuses:", e);
+    } finally {
+      setIsLoadingSlos(false);
+    }
+  };
+
+  useEffect(() => {
+    loadSloStatus();
+  }, [projectId, service.id]);
+
+  // Handle SLO submission
+  const handleCreateSlo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!sloName.trim()) return;
+
+    setIsSubmittingSlo(true);
+    try {
+      const res = await fetch("/api/services/slo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          serviceId: service.id,
+          slo: {
+            name: sloName.trim(),
+            type: sloType,
+            target: Number(sloTarget),
+            windowDays: Number(sloWindow),
+            latencyThresholdMs: sloType === "latency" ? Number(sloLatencyMs) : undefined,
+          },
+        }),
+      });
+
+      if (res.ok) {
+        setSloName("");
+        setSloType("availability");
+        setSloTarget(99.0);
+        setSloWindow(30);
+        setSloLatencyMs(500);
+        setIsSloModalOpen(false);
+        await loadSloStatus();
+      } else {
+        const err = await res.json();
+        alert(err.error?.message || "Failed to create SLO");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving SLO target");
+    } finally {
+      setIsSubmittingSlo(false);
+    }
+  };
+
+  // Handle SLO deletion
+  const handleDeleteSlo = async (name: string) => {
+    if (!confirm(`Are you sure you want to delete the SLO "${name}"?`)) return;
+
+    try {
+      const res = await fetch(
+        `/api/services/slo?projectId=${projectId}&serviceId=${service.id}&sloName=${encodeURIComponent(name)}`,
+        { method: "DELETE" }
+      );
+      if (res.ok) {
+        await loadSloStatus();
+      } else {
+        alert("Failed to delete SLO target");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting SLO target");
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -152,7 +272,7 @@ export default function ServiceDetailView({
               className={`px-3 py-1.5 rounded-md font-semibold transition-all cursor-pointer ${
                 timeRange === r 
                   ? "bg-indigo-600 text-white shadow" 
-                  : "text-slate-450 hover:text-slate-200"
+                  : "text-slate-455 hover:text-slate-200"
               }`}
             >
               {r === "1h" ? "1 Hour" : r === "24h" ? "24 Hours" : "7 Days"}
@@ -161,11 +281,157 @@ export default function ServiceDetailView({
         </div>
       </div>
 
+      {/* Service Level Objectives (SLOs) Section */}
+      <section className="bg-slate-950 border border-slate-900 rounded-2xl p-6 space-y-6">
+        <div className="flex items-center justify-between pb-4 border-b border-slate-900">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-indigo-400" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white">Service Level Objectives (SLOs)</h2>
+          </div>
+          <button
+            onClick={() => setIsSloModalOpen(true)}
+            className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-850 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+          >
+            <Sliders className="w-3.5 h-3.5" />
+            Configure SLOs
+          </button>
+        </div>
+
+        {isLoadingSlos ? (
+          <div className="text-center py-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
+            <RefreshCw className="w-4 h-4 animate-spin text-indigo-500" />
+            Calculating budgets...
+          </div>
+        ) : sloStatus.length === 0 ? (
+          <div className="text-center py-8 max-w-md mx-auto space-y-4">
+            <ShieldCheck className="w-10 h-10 text-slate-700 mx-auto" />
+            <div>
+              <h3 className="text-xs font-bold text-slate-350 uppercase tracking-wider font-sans">No SLOs Configured</h3>
+              <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                Define availability or latency objectives to track rolling-window error budgets and maintain reliability targets.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsSloModalOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              Define First SLO Target
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {sloStatus.map((slo) => {
+              const theme = {
+                healthy: {
+                  border: "border-emerald-500/20 bg-emerald-500/5",
+                  text: "text-emerald-450",
+                  bar: "bg-emerald-500",
+                  badge: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                },
+                warning: {
+                  border: "border-amber-500/20 bg-amber-500/5",
+                  text: "text-amber-450",
+                  bar: "bg-amber-500",
+                  badge: "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                },
+                breached: {
+                  border: "border-rose-500/20 bg-rose-500/5",
+                  text: "text-rose-450",
+                  bar: "bg-rose-500 animate-pulse",
+                  badge: "bg-rose-500/10 text-rose-400 border-rose-500/20"
+                }
+              }[slo.status];
+
+              return (
+                <div key={slo.name} className="border border-slate-900 bg-slate-900/15 rounded-xl p-5 space-y-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <h3 className="text-sm font-bold text-white leading-tight">{slo.name}</h3>
+                      <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                        <span className="capitalize">{slo.type} SLO</span>
+                        <span>•</span>
+                        <span>Rolling {slo.windowDays}d Window</span>
+                        {slo.type === "latency" && (
+                          <>
+                            <span>•</span>
+                            <span>Threshold: &lt;={slo.latencyThresholdMs}ms</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    <span className={`text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded border ${theme.badge}`}>
+                      {slo.status === "healthy" ? "Compliant" : slo.status === "warning" ? "Low Budget" : "Breached"}
+                    </span>
+                  </div>
+
+                  {/* Compliance Progress Bar */}
+                  <div className="space-y-1.5">
+                    <div className="flex justify-between items-end text-xs">
+                      <div className="space-x-1">
+                        <span className="font-mono font-bold text-slate-200 text-sm">{slo.compliance.toFixed(3)}%</span>
+                        <span className="text-slate-500 font-sans">compliance</span>
+                      </div>
+                      <span className="text-slate-550 text-[10px] font-semibold">Target: &gt;={slo.target}%</span>
+                    </div>
+
+                    <div className="h-2 bg-slate-950 border border-slate-900 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full transition-all duration-500 ${theme.bar}`}
+                        style={{ width: `${Math.min(100, Math.max(0, (slo.compliance / 100) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Error Budget Widget */}
+                  <div className={`p-3 rounded-lg border ${theme.border} flex items-center justify-between gap-4`}>
+                    <div className="flex items-center gap-2">
+                      <div className="space-y-0.5">
+                        <span className="block text-[9px] font-bold text-slate-500 uppercase tracking-wider">Remaining Error Budget</span>
+                        <span className="text-xs font-mono font-bold text-slate-200">
+                          {slo.budgetRemaining < 0 ? 0 : Math.round(slo.budgetRemaining)} events
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className={`block text-sm font-mono font-bold ${theme.text}`}>
+                        {slo.budgetRemainingPercent}%
+                      </span>
+                      <span className="text-[9px] text-slate-500">budget left</span>
+                    </div>
+                  </div>
+
+                  {/* Detailed statistics */}
+                  <div className="grid grid-cols-3 gap-2 pt-1.5 text-center text-[10px] text-slate-500 font-mono">
+                    <div>
+                      <span className="block text-slate-600 font-semibold uppercase text-[8px] tracking-wider mb-0.5">Total Requests</span>
+                      <span className="text-slate-400 font-bold">{slo.totalRequests}</span>
+                    </div>
+                    <div className="border-l border-r border-slate-900">
+                      <span className="block text-slate-600 font-semibold uppercase text-[8px] tracking-wider mb-0.5">Good requests</span>
+                      <span className="text-slate-400 font-bold">{slo.goodRequests}</span>
+                    </div>
+                    <div>
+                      <span className="block text-slate-650 font-semibold uppercase text-[8px] tracking-wider mb-0.5">SLO Failures</span>
+                      <span className={`font-bold ${slo.badRequests > 0 ? "text-rose-450" : "text-slate-400"}`}>
+                        {slo.badRequests}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
       {/* Main Charts Console */}
       {isLoading ? (
         <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-3 min-h-[300px]">
           <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin" />
-          <p className="text-sm font-semibold text-slate-450">Loading timeseries metrics metrics...</p>
+          <p className="text-sm font-semibold text-slate-455">Loading timeseries metrics metrics...</p>
         </div>
       ) : error ? (
         <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-3 min-h-[300px] text-rose-400">
@@ -174,7 +440,7 @@ export default function ServiceDetailView({
         </div>
       ) : metrics.length === 0 ? (
         <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-4 min-h-[300px]">
-          <Activity className="w-10 h-10 text-slate-700" />
+          <Activity className="w-10 h-10 text-slate-755" />
           <div>
             <h3 className="text-sm font-bold text-slate-350 mb-1">No Metrics Data Found</h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
@@ -230,7 +496,7 @@ export default function ServiceDetailView({
                   <GitCommit className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
                   <div className="min-w-0 flex-1 space-y-1">
                     <p className="font-semibold text-slate-200 truncate">{d.commitMessage}</p>
-                    <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                    <div className="flex items-center gap-3 text-[10px] text-slate-550">
                       <span className="font-mono bg-slate-950 px-1 py-0.5 rounded border border-slate-800/80 text-slate-400">{d.commitSha.slice(0, 7)}</span>
                       <span>Branch: {d.branch}</span>
                       <span>{d.deployedAt ? new Date(d.deployedAt).toLocaleString() : ""}</span>
@@ -249,13 +515,13 @@ export default function ServiceDetailView({
             Recent Service Incidents
           </h2>
           {incidents.length === 0 ? (
-            <p className="text-xs text-slate-500 italic py-4">No incidents detected for this service.</p>
+            <p className="text-xs text-slate-550 italic py-4">No incidents detected for this service.</p>
           ) : (
             <div className="space-y-4">
               {incidents.map((i) => {
                 const statusColor = 
                   i.status === "open"
-                    ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                    ? "bg-rose-500/10 border-rose-500/20 text-rose-450"
                     : i.status === "investigating"
                     ? "bg-amber-500/10 border-amber-500/20 text-amber-450"
                     : "bg-emerald-500/10 border-emerald-500/20 text-emerald-450";
@@ -282,6 +548,188 @@ export default function ServiceDetailView({
           )}
         </section>
       </div>
+
+      {/* Configure SLO Modal */}
+      {isSloModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl p-6 relative flex flex-col max-h-[90vh]">
+            <h3 className="text-lg font-bold text-white mb-1">Configure SLO targets</h3>
+            <p className="text-xs text-slate-400 mb-6">
+              Establish performance and availability targets for this service.
+            </p>
+
+            <div className="flex-1 overflow-y-auto space-y-6 pr-1">
+              {/* List of active SLOs */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-550">Active SLO Targets ({sloStatus.length})</h4>
+                {sloStatus.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic bg-slate-950/40 p-4 border border-dashed border-slate-800 rounded-lg text-center">
+                    No SLO targets currently defined.
+                  </p>
+                ) : (
+                  <div className="divide-y divide-slate-850 bg-slate-955 border border-slate-850 rounded-lg overflow-hidden">
+                    {sloStatus.map((slo) => (
+                      <div key={slo.name} className="flex items-center justify-between p-3 gap-4 text-xs">
+                        <div className="space-y-0.5">
+                          <span className="font-semibold text-slate-200">{slo.name}</span>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
+                            <span className="capitalize">{slo.type}</span>
+                            <span>Target: {slo.target}%</span>
+                            <span>Window: {slo.windowDays} days</span>
+                            {slo.type === "latency" && <span>Threshold: &lt;={slo.latencyThresholdMs}ms</span>}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSlo(slo.name)}
+                          className="p-1.5 hover:bg-slate-900 text-slate-500 hover:text-rose-455 rounded transition-colors cursor-pointer"
+                          title="Delete Target"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Add SLO Form */}
+              <form onSubmit={handleCreateSlo} className="border-t border-slate-800/80 pt-6 space-y-4">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Add / Edit SLO Target</h4>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Name */}
+                  <div className="md:col-span-2">
+                    <label htmlFor="sloNameInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                      SLO Objective Name
+                    </label>
+                    <input
+                      id="sloNameInput"
+                      type="text"
+                      required
+                      value={sloName}
+                      onChange={(e) => setSloName(e.target.value)}
+                      placeholder="e.g. Core API Availability"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors"
+                    />
+                  </div>
+
+                  {/* Type */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                      Objective Type
+                    </label>
+                    <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setSloType("availability")}
+                        className={`flex-1 py-1.5 rounded-md font-semibold text-center cursor-pointer transition-colors ${
+                          sloType === "availability" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                      >
+                        Availability
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSloType("latency")}
+                        className={`flex-1 py-1.5 rounded-md font-semibold text-center cursor-pointer transition-colors ${
+                          sloType === "latency" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                      >
+                        Latency
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Target % */}
+                  <div>
+                    <label htmlFor="sloTargetInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                      Target Reliability (%)
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="sloTargetInput"
+                        type="number"
+                        required
+                        step="0.01"
+                        min="0"
+                        max="100"
+                        value={sloTarget}
+                        onChange={(e) => setSloTarget(Math.min(100, Math.max(0, parseFloat(e.target.value) || 99.0)))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                      />
+                      <Percent className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                    </div>
+                  </div>
+
+                  {/* Window Days */}
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                      Rolling Window Period
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[7, 30].map((d) => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setSloWindow(d)}
+                          className={`py-2 rounded-lg border text-xs font-semibold capitalize transition-all cursor-pointer ${
+                            sloWindow === d
+                              ? "bg-slate-950 border-indigo-500 text-indigo-400"
+                              : "bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700"
+                          }`}
+                        >
+                          {d} Days
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Latency Threshold (Ms) */}
+                  {sloType === "latency" && (
+                    <div>
+                      <label htmlFor="sloLatencyInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                        Latency Threshold (ms)
+                      </label>
+                      <input
+                        id="sloLatencyInput"
+                        type="number"
+                        required
+                        min="1"
+                        value={sloLatencyMs}
+                        onChange={(e) => setSloLatencyMs(Math.max(1, parseInt(e.target.value) || 500))}
+                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmittingSlo}
+                    className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-4 py-2 text-xs font-semibold rounded-lg text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow"
+                  >
+                    <Plus className="w-4 h-4" />
+                    {isSubmittingSlo ? "Saving..." : "Save Objective Target"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-slate-800/80 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setIsSloModalOpen(false)}
+                className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
+              >
+                Close Configuration
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
