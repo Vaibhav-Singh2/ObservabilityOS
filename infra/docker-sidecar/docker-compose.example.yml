@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Example Application service producing logs
+  my-app:
+    image: node:18-alpine
+    container_name: app-service
+    working_dir: /app
+    volumes:
+      # Mount a shared volume to output logs into
+      - shared-logs:/var/log/my-app
+    # Simulates writing logs to a file periodically
+    command: >
+      sh -c "mkdir -p /var/log/my-app && while true; do echo '{\"level\":\"info\",\"message\":\"User logged in\",\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\",\"metadata\":{\"userId\":\"user_123\"}}' >> /var/log/my-app/app.log; sleep 5; echo '{\"level\":\"error\",\"message\":\"DB query failed, connection pool exhausted\",\"timestamp\":\"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'\"}' >> /var/log/my-app/app.log; sleep 15; done"
+
+  # ObservabilityOS Sidecar log shipper service
+  observability-sidecar:
+    build: .
+    container_name: obs-sidecar
+    depends_on:
+      - my-app
+    volumes:
+      # Mount the same shared volume to read the log file
+      - shared-logs:/var/log/my-app:ro
+    environment:
+      # URL pointing to the ObservabilityOS ingest server
+      - API_URL=http://host.docker.internal:3000/api/ingest
+      # API Key generated from ObservabilityOS dashboard setting
+      - API_KEY=project_api_key_goes_here
+      # Metadata config for logs
+      - SERVICE_NAME=payment-gateway-app
+      - ENVIRONMENT=prod
+      # Point to the shared log file to tail
+      - LOG_FILE=/var/log/my-app/app.log
+      - BATCH_SIZE=5
+      - FLUSH_INTERVAL_MS=1000
+    extra_hosts:
+      # Allow connection to host localhost on Linux/Docker
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  shared-logs:

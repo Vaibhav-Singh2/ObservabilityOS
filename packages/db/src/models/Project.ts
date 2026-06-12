@@ -10,6 +10,13 @@ export interface IProject {
   slackWebhookUrl?: string;
   minErrorCount?: number;
   zScoreThreshold?: number;
+  plan: 'free' | 'pro';
+  subscriptionStatus: 'active' | 'trialing' | 'past_due' | 'canceled' | 'none';
+  billingProvider: 'stripe' | 'razorpay' | 'manual' | 'none';
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  razorpayCustomerId?: string;
+  razorpaySubscriptionId?: string;
 }
 
 export type ProjectDocument = IProject & Document;
@@ -22,6 +29,13 @@ const ProjectSchema = new Schema<IProject>(
     slackWebhookUrl: { type: String, default: "" },
     minErrorCount: { type: Number, default: 3 },
     zScoreThreshold: { type: Number, default: 3.0 },
+    plan: { type: String, enum: ["free", "pro"], default: "free" },
+    subscriptionStatus: { type: String, enum: ["active", "trialing", "past_due", "canceled", "none"], default: "none" },
+    billingProvider: { type: String, enum: ["stripe", "razorpay", "manual", "none"], default: "none" },
+    stripeCustomerId: { type: String },
+    stripeSubscriptionId: { type: String },
+    razorpayCustomerId: { type: String },
+    razorpaySubscriptionId: { type: String },
   },
   { timestamps: true }
 );

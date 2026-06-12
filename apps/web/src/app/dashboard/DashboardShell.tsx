@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Activity, LayoutDashboard, AlertOctagon, Search, Settings, LogOut, Menu, X } from "lucide-react";
+import { Activity, LayoutDashboard, AlertOctagon, Search, Settings, LogOut, Menu, X, CreditCard } from "lucide-react";
 import ProjectSelector from "./ProjectSelector";
 
 interface DashboardShellProps {
@@ -99,6 +99,20 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
           >
             <Search className="w-4 h-4 text-indigo-400" />
             Log Search
+          </Link>
+
+          <Link
+            id="nav_billing"
+            href={activeProjectId ? `/dashboard/billing?projectId=${activeProjectId}` : "/dashboard/billing"}
+            onClick={() => setSidebarOpen(false)}
+            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+              pathname.startsWith("/dashboard/billing") 
+                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+            }`}
+          >
+            <CreditCard className="w-4 h-4 text-indigo-400" />
+            Billing
           </Link>
 
           <Link
