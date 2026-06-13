@@ -26,14 +26,14 @@ export default function LandingPage() {
           </div>
 
           <div>
-            <Link
+            <a
               id="header_login_btn"
               href="/api/auth/github"
               className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 h-9 rounded-lg text-sm font-medium transition-all duration-200"
             >
               <Github className="w-4 h-4" />
               Sign In
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -62,14 +62,14 @@ export default function LandingPage() {
             <p className="text-sm text-slate-400 mb-6">
               Connect your GitHub account to set up your first project and receive your ingestion keys.
             </p>
-            <Link
+            <a
               id="landing_github_oauth_btn"
               href="/api/auth/github"
               className="w-full inline-flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-950 font-semibold h-12 rounded-xl transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-white/5"
             >
               <Github className="w-5 h-5" />
               Sign up with GitHub
-            </Link>
+            </a>
             <div className="mt-4 text-[11px] text-slate-500 flex justify-center gap-4">
               <span className="flex items-center gap-1">
                 <Shield className="w-3 h-3 text-emerald-500" /> Secure OAuth
