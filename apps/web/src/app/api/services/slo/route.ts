@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, User } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { logAuditEvent } from "@/lib/audit";
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -80,6 +81,8 @@ export async function POST(request: Request) {
       latencyThresholdMs: slo.type === "latency" ? slo.latencyThresholdMs : undefined,
     };
 
+    const action = existingIndex > -1 ? "slo.update" : "slo.create";
+
     if (existingIndex > -1) {
       service.slos[existingIndex] = newSlo;
     } else {
@@ -87,6 +90,20 @@ export async function POST(request: Request) {
     }
 
     await service.save();
+
+    await logAuditEvent({
+      projectId: project._id,
+      userId: user._id,
+      action,
+      targetEntity: "slo",
+      targetId: slo.name,
+      metadata: {
+        serviceId,
+        type: slo.type,
+        target: slo.target,
+        windowDays: slo.windowDays,
+      },
+    });
 
     return NextResponse.json({ success: true, slos: service.slos });
   } catch (error) {
@@ -151,6 +168,17 @@ export async function DELETE(request: Request) {
     // Filter out the SLO
     service.slos = service.slos.filter(s => s.name.toLowerCase() !== sloName.toLowerCase());
     await service.save();
+
+    await logAuditEvent({
+      projectId: project._id,
+      userId: user._id,
+      action: "slo.delete",
+      targetEntity: "slo",
+      targetId: sloName,
+      metadata: {
+        serviceId,
+      },
+    });
 
     return NextResponse.json({ success: true, slos: service.slos });
   } catch (error) {

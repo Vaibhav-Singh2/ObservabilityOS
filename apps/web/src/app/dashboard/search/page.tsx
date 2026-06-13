@@ -87,11 +87,21 @@ export default async function SearchPage({ searchParams }: PageProps) {
     };
   });
 
+  const serializedSavedQueries = activeProject.savedQueries ? activeProject.savedQueries.map(q => ({
+    name: q.name,
+    query: q.query || "",
+    level: q.level || "all",
+    serviceId: q.serviceId || "all",
+    environment: q.environment || "all",
+    timeRange: q.timeRange || "24h",
+  })) : [];
+
   return (
     <SearchView
       project={serializedProject}
       services={serializedServices}
       initialLogs={serializedLogs}
+      savedQueries={serializedSavedQueries}
     />
   );
 }

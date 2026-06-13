@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, User } from "@repo/db";
 import jwt from "jsonwebtoken";
+import { logAuditEvent } from "@/lib/audit";
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -177,4 +178,86 @@ export async function PATCH(request: Request) {
     );
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
+        { status: 401 }
+      );
+    }
+
+    const { searchParams } = new URL(request.url);
+    const projectId = searchParams.get("projectId");
+    const serviceId = searchParams.get("serviceId");
+
+    if (!projectId || !serviceId) {
+      return NextResponse.json(
+        { error: { code: "BAD_REQUEST", message: "projectId and serviceId are required" } },
+        { status: 400 }
+      );
+    }
+
+    // Verify project belongs to user
+    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    if (!project) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
+        { status: 404 }
+      );
+    }
+
+    const service = await Service.findOne({ _id: serviceId, projectId: project._id });
+    if (!service) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Service not found in this project" } },
+        { status: 404 }
+      );
+    }
+
+    const serviceName = service.name;
+    const serviceEnv = service.environment;
+
+    // Delete service
+    await service.deleteOne();
+
+    // Clean up associated resources in background or sequentially
+    // In Mongoose / MongoDB Atlas, we delete documents matching the serviceId.
+    const { Incident, Deploy, Log, Comment, Metric } = require("@repo/db");
+    
+    // Find all incidents to clean up their comments
+    const incidentDocs = await Incident.find({ serviceId: service._id });
+    const incidentIds = incidentDocs.map((inc: any) => inc._id);
+
+    await Comment.deleteMany({ incidentId: { $in: incidentIds } });
+    await Incident.deleteMany({ serviceId: service._id });
+    await Deploy.deleteMany({ serviceId: service._id });
+    await Log.deleteMany({ serviceId: service._id });
+    await Metric.deleteMany({ serviceId: service._id });
+
+    // Write audit log
+    await logAuditEvent({
+      projectId: project._id,
+      userId: user._id,
+      action: "service.delete",
+      targetEntity: "service",
+      targetId: serviceName,
+      metadata: {
+        name: serviceName,
+        environment: serviceEnv,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Services DELETE Error:", error);
+    return NextResponse.json(
+      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to delete service" } },
+      { status: 500 }
+    );
+  }
+}
+
 

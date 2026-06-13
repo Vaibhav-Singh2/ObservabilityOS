@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, User } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { logAuditEvent } from "@/lib/audit";
 
 const settingsUpdateSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
@@ -57,6 +58,12 @@ export async function PATCH(request: Request) {
       );
     }
 
+    // Check if webhooks changed
+    const slackChanged = project.slackWebhookUrl !== (validatedData.slackWebhookUrl?.trim() || "");
+    const discordChanged = project.discordWebhookUrl !== (validatedData.discordWebhookUrl?.trim() || "");
+    const teamsChanged = project.teamsWebhookUrl !== (validatedData.teamsWebhookUrl?.trim() || "");
+    const webhookUpdated = slackChanged || discordChanged || teamsChanged;
+
     // Update settings
     project.name = validatedData.name.trim();
     project.slackWebhookUrl = validatedData.slackWebhookUrl?.trim() || "";
@@ -66,6 +73,21 @@ export async function PATCH(request: Request) {
     project.zScoreThreshold = validatedData.zScoreThreshold;
 
     await project.save();
+
+    if (webhookUpdated) {
+      await logAuditEvent({
+        projectId: project._id,
+        userId: user._id,
+        action: "webhook.update",
+        targetEntity: "webhook",
+        targetId: project._id.toString(),
+        metadata: {
+          slackChanged,
+          discordChanged,
+          teamsChanged,
+        },
+      });
+    }
 
     return NextResponse.json({
       success: true,

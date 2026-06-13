@@ -7,5 +7,6 @@ export { User, type IUser, type UserDocument } from "./models/User";
 export { Deploy, type IDeploy, type DeployDocument } from "./models/Deploy";
 export { Metric, type IMetric, type MetricDocument } from "./models/Metric";
 export { Comment, type IComment, type CommentDocument } from "./models/Comment";
+export { AuditLog, type IAuditLog, type AuditLogDocument } from "./models/AuditLog";
 
 

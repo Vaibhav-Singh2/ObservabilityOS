@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { 
   Settings, 
@@ -11,7 +11,8 @@ import {
   EyeOff, 
   AlertTriangle, 
   Terminal,
-  Volume2
+  Volume2,
+  RefreshCw
 } from "lucide-react";
 
 interface SettingsViewProps {
@@ -30,6 +31,29 @@ interface SettingsViewProps {
 export default function SettingsView({ project }: SettingsViewProps) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
+
+  // Audit Logs States
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [isLoadingAudit, setIsLoadingAudit] = useState(true);
+
+  const fetchAuditLogs = async () => {
+    setIsLoadingAudit(true);
+    try {
+      const res = await fetch(`/api/projects/audit-logs?projectId=${project.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setAuditLogs(data.auditLogs || []);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoadingAudit(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuditLogs();
+  }, [project.id]);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl);
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState(project.discordWebhookUrl || "");
   const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(project.teamsWebhookUrl || "");
@@ -302,6 +326,87 @@ export default function SettingsView({ project }: SettingsViewProps) {
           </button>
         </div>
       </form>
+
+      {/* System & Project Audit Logs Section */}
+      <section className="bg-slate-900 border border-slate-805 rounded-2xl p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <div className="flex items-center justify-between mb-4 border-b border-slate-800/60 pb-2.5">
+          <div className="flex items-center gap-2">
+            <Terminal className="w-4 h-4 text-indigo-400" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+              System & Configuration Audit Logs
+            </h2>
+          </div>
+          <button
+            type="button"
+            onClick={fetchAuditLogs}
+            className="p-1.5 hover:bg-slate-950 text-slate-500 hover:text-slate-300 rounded transition-colors cursor-pointer"
+            title="Refresh logs"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {isLoadingAudit ? (
+          <div className="text-center py-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
+            <RefreshCw className="w-4 h-4 animate-spin text-indigo-500" />
+            Loading system audit logs...
+          </div>
+        ) : auditLogs.length === 0 ? (
+          <p className="text-xs text-slate-600 italic py-4 text-center">
+            No configuration changes or SRE actions recorded yet.
+          </p>
+        ) : (
+          <div className="border border-slate-850 rounded-lg overflow-hidden bg-slate-950/60 text-xs font-mono">
+            <div className="grid grid-cols-12 gap-3 bg-slate-900/60 border-b border-slate-850 px-4 py-2 font-bold uppercase tracking-wider text-slate-500 text-[10px]">
+              <div className="col-span-3">Timestamp</div>
+              <div className="col-span-2">User</div>
+              <div className="col-span-3">Action</div>
+              <div className="col-span-4">Details</div>
+            </div>
+            <div className="divide-y divide-slate-850 max-h-[300px] overflow-y-auto pr-1">
+              {auditLogs.map((log) => {
+                const dateStr = new Date(log.createdAt).toLocaleString();
+                let details = "";
+                if (log.action === "service.delete") {
+                  details = `Service deleted: "${log.targetId}" (${log.metadata?.environment})`;
+                } else if (log.action === "slo.create") {
+                  details = `SLO created: "${log.targetId}" (Target: ${log.metadata?.target}%)`;
+                } else if (log.action === "slo.update") {
+                  details = `SLO updated: "${log.targetId}" (Target: ${log.metadata?.target}%)`;
+                } else if (log.action === "slo.delete") {
+                  details = `SLO deleted: "${log.targetId}"`;
+                } else if (log.action === "webhook.update") {
+                  const changes = [];
+                  if (log.metadata?.slackChanged) changes.push("Slack");
+                  if (log.metadata?.discordChanged) changes.push("Discord");
+                  if (log.metadata?.teamsChanged) changes.push("Teams");
+                  details = `Webhooks updated: ${changes.join(", ") || "none"}`;
+                } else {
+                  details = `Action on ${log.targetEntity}: ${log.targetId || ""}`;
+                }
+
+                return (
+                  <div key={log.id} className="grid grid-cols-12 gap-3 px-4 py-2.5 items-center hover:bg-slate-900/30 transition-colors text-slate-350">
+                    <div className="col-span-3 text-slate-500 truncate">{dateStr}</div>
+                    <div className="col-span-2 text-slate-300 font-semibold truncate">
+                      {log.user?.username || "System"}
+                    </div>
+                    <div className="col-span-3">
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold border border-indigo-500/20 bg-indigo-500/5 text-indigo-400 uppercase tracking-wider font-mono">
+                        {log.action}
+                      </span>
+                    </div>
+                    <div className="col-span-4 text-slate-200 truncate" title={details}>
+                      {details}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

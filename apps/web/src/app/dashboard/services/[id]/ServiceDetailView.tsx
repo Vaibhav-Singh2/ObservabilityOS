@@ -11,6 +11,7 @@ import {
   GitBranch, 
   GitCommit, 
   AlertCircle, 
+  AlertTriangle,
   CheckCircle2, 
   Activity, 
   RefreshCw,
@@ -110,6 +111,35 @@ export default function ServiceDetailView({
   const [runbookUrl, setRunbookUrl] = useState(service.runbookUrl || "");
   const [troubleshootingSteps, setTroubleshootingSteps] = useState(service.troubleshootingSteps || "");
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isDeletingService, setIsDeletingService] = useState(false);
+
+  const handleDeleteService = async () => {
+    const confirmation = prompt(`To delete this service, please type its name: "${service.name}"`);
+    if (confirmation !== service.name) {
+      alert("Name verification failed. Service deletion canceled.");
+      return;
+    }
+
+    setIsDeletingService(true);
+    try {
+      const res = await fetch(`/api/services?projectId=${projectId}&serviceId=${service.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setIsSettingsModalOpen(false);
+        router.push(`/dashboard?projectId=${projectId}`);
+      } else {
+        const data = await res.json();
+        alert(data.error?.message || "Failed to delete service");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting service");
+    } finally {
+      setIsDeletingService(false);
+    }
+  };
 
   const handleSaveSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -824,6 +854,29 @@ export default function ServiceDetailView({
                 <p className="text-[10px] text-slate-500 mt-1">
                   Step-by-step checklist or reference instructions to guide developers when resolving incidents.
                 </p>
+              </div>
+              {/* Danger Zone */}
+              <div className="pt-4 border-t border-slate-805/80 space-y-3">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-rose-500 flex items-center gap-1.5">
+                  <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
+                  Danger Zone
+                </span>
+                <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <span className="block text-xs font-semibold text-rose-400">Delete Service</span>
+                    <span className="block text-[10px] text-slate-500 leading-relaxed font-sans">
+                      Permanently delete this service, its associated SLO targets, anomalies, log records, and comments. This action is irreversible.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={isDeletingService}
+                    onClick={handleDeleteService}
+                    className="bg-rose-900/10 hover:bg-rose-600 border border-rose-900/30 hover:border-rose-550 text-rose-400 hover:text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0"
+                  >
+                    {isDeletingService ? "Deleting..." : "Delete Service"}
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/80">
