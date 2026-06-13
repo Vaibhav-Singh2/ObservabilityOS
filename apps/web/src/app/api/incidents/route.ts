@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Incident, Project, User } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
+import { delCache } from "@/lib/redis";
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -115,6 +116,9 @@ export async function PATCH(request: Request) {
     }
 
     await incident.save();
+
+    // Invalidate dashboard cache
+    await delCache(`dashboard:project:${incident.projectId.toString()}`);
 
     // Populate service and deploy to return full object
     const updatedIncident = await Incident.findById(incidentId)

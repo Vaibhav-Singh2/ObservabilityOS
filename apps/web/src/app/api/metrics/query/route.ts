@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Metric, User } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
+import { getCache, setCache } from "@/lib/redis";
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -74,6 +75,12 @@ export async function GET(request: Request) {
       bucketMs = 2 * 60 * 60 * 1000; // 2 hours for 7 days
     }
 
+    const cacheKey = `metrics:query:${project._id.toString()}:${service._id.toString()}:${timeRange}`;
+    const cachedData = await getCache<any[]>(cacheKey);
+    if (cachedData) {
+      return NextResponse.json({ metrics: cachedData });
+    }
+
     const startTime = new Date(startTimeMs);
 
     // Grouping by time bucket using Mongo aggregate
@@ -111,6 +118,9 @@ export async function GET(request: Request) {
       memoryLimit: Number(d.avgLimit.toFixed(2)),
       latency: Number(d.avgLatency.toFixed(2)),
     }));
+
+    // Cache results for 5 minutes (300 seconds)
+    await setCache(cacheKey, formattedMetrics, 300);
 
     return NextResponse.json({ metrics: formattedMetrics });
   } catch (error) {

@@ -55,23 +55,6 @@ export async function GET(request: Request) {
       );
     }
 
-    // Build query conditions
-    const conditions: Record<string, any> = {
-      projectId: project._id,
-    };
-
-    if (level !== "all") {
-      conditions.level = level;
-    }
-
-    if (serviceId !== "all") {
-      conditions.serviceId = new Types.ObjectId(serviceId);
-    }
-
-    if (environment !== "all") {
-      conditions.environment = environment;
-    }
-
     // Time filter
     const now = Date.now();
     let startTime = now - 24 * 60 * 60 * 1000; // default 24h
@@ -80,18 +63,83 @@ export async function GET(request: Request) {
     } else if (timeRange === "7d") {
       startTime = now - 7 * 24 * 60 * 60 * 1000;
     }
-    conditions.timestamp = { $gte: new Date(startTime) };
 
-    // Text search query on message
+    let logs: any[] = [];
+    let searchUsed = false;
+
     if (query.trim() !== "") {
-      conditions.message = { $regex: query.trim(), $options: "i" };
+      try {
+        const pipeline: any[] = [
+          {
+            $search: {
+              index: "default",
+              text: {
+                query: query.trim(),
+                path: "message",
+              },
+            },
+          },
+          {
+            $match: {
+              projectId: project._id,
+            },
+          },
+        ];
+
+        // Apply filters in match stage
+        const matchStage = pipeline[1].$match;
+        if (level !== "all") {
+          matchStage.level = level;
+        }
+        if (serviceId !== "all") {
+          matchStage.serviceId = new Types.ObjectId(serviceId);
+        }
+        if (environment !== "all") {
+          matchStage.environment = environment;
+        }
+        matchStage.timestamp = { $gte: new Date(startTime) };
+
+        pipeline.push({ $sort: { timestamp: -1 } });
+        pipeline.push({ $limit: 100 });
+
+        const aggResult = await Log.aggregate(pipeline);
+        logs = await Log.populate(aggResult, { path: "serviceId", select: "name environment" });
+        searchUsed = true;
+      } catch (err) {
+        console.warn("Atlas Search ($search) failed/unsupported, falling back to regex search:", err);
+      }
     }
 
-    // Fetch logs, limited to 100
-    const logs = await Log.find(conditions)
-      .populate("serviceId", "name environment")
-      .sort({ timestamp: -1 })
-      .limit(100);
+    if (!searchUsed) {
+      // Build query conditions
+      const conditions: Record<string, any> = {
+        projectId: project._id,
+      };
+
+      if (level !== "all") {
+        conditions.level = level;
+      }
+
+      if (serviceId !== "all") {
+        conditions.serviceId = new Types.ObjectId(serviceId);
+      }
+
+      if (environment !== "all") {
+        conditions.environment = environment;
+      }
+
+      conditions.timestamp = { $gte: new Date(startTime) };
+
+      if (query.trim() !== "") {
+        conditions.message = { $regex: query.trim(), $options: "i" };
+      }
+
+      // Fetch logs, limited to 100
+      logs = await Log.find(conditions)
+        .populate("serviceId", "name environment")
+        .sort({ timestamp: -1 })
+        .limit(100);
+    }
 
     const serializedLogs = logs.map((l) => {
       const s = l.serviceId as any;

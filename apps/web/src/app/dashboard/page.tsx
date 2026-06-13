@@ -4,6 +4,7 @@ import { connectToDatabase, User, Project, Service, Log, Incident, Deploy } from
 import jwt from "jsonwebtoken";
 import ProjectDashboardView from "./ProjectDashboardView";
 import ZeroStateView from "./ZeroStateView";
+import { getCache, setCache } from "@/lib/redis";
 
 interface PageProps {
   searchParams: Promise<{ projectId?: string }>;
@@ -50,108 +51,122 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     return <ZeroStateView />;
   }
 
-  // Fetch all services for the active project
-  const services = await Service.find({ projectId: activeProject._id }).sort({ name: 1, environment: 1 });
+  const cacheKey = `dashboard:project:${activeProjectId}`;
+  const cachedDashboard = await getCache<{ services: any[]; deployments: any[] }>(cacheKey);
 
-  // Calculate 24h statistics using aggregation
-  const start24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
-  const stats = await Log.aggregate([
-    {
-      $match: {
-        projectId: activeProject._id,
-        timestamp: { $gte: start24h }
-      }
-    },
-    {
-      $group: {
-        _id: "$serviceId",
-        totalLogs: { $sum: 1 },
-        errorLogs: {
-          $sum: {
-            $cond: [{ $eq: ["$level", "error"] }, 1, 0]
-          }
-        },
-        avgLatency: {
-          $avg: {
-            $ifNull: ["$metadata.latencyMs", "$metadata.latency"]
+  let serializedServices: any[] = [];
+  let serializedDeployments: any[] = [];
+
+  if (cachedDashboard) {
+    serializedServices = cachedDashboard.services;
+    serializedDeployments = cachedDashboard.deployments;
+  } else {
+    // Fetch all services for the active project
+    const services = await Service.find({ projectId: activeProject._id }).sort({ name: 1, environment: 1 });
+
+    // Calculate 24h statistics using aggregation
+    const start24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const stats = await Log.aggregate([
+      {
+        $match: {
+          projectId: activeProject._id,
+          timestamp: { $gte: start24h }
+        }
+      },
+      {
+        $group: {
+          _id: "$serviceId",
+          totalLogs: { $sum: 1 },
+          errorLogs: {
+            $sum: {
+              $cond: [{ $eq: ["$level", "error"] }, 1, 0]
+            }
+          },
+          avgLatency: {
+            $avg: {
+              $ifNull: ["$metadata.latencyMs", "$metadata.latency"]
+            }
           }
         }
       }
-    }
-  ]);
+    ]);
 
-  // Fetch open/investigating incidents for this project
-  const openIncidents = await Incident.find({
-    projectId: activeProject._id,
-    status: { $in: ["open", "investigating"] }
-  });
+    // Fetch open/investigating incidents for this project
+    const openIncidents = await Incident.find({
+      projectId: activeProject._id,
+      status: { $in: ["open", "investigating"] }
+    });
 
-  // Fetch recent deployments
-  const recentDeploys = await Deploy.find({ projectId: activeProject._id })
-    .populate("serviceId")
-    .sort({ deployedAt: -1 })
-    .limit(10);
+    // Fetch recent deployments
+    const recentDeploys = await Deploy.find({ projectId: activeProject._id })
+      .populate("serviceId")
+      .sort({ deployedAt: -1 })
+      .limit(10);
 
-  // Create maps for efficient lookups
-  const statsMap = new Map(stats.map(s => [s._id.toString(), s]));
-  const openIncidentsServiceIds = new Set(openIncidents.map(inc => inc.serviceId.toString()));
+    // Create maps for efficient lookups
+    const statsMap = new Map(stats.map(s => [s._id.toString(), s]));
+    const openIncidentsServiceIds = new Set(openIncidents.map(inc => inc.serviceId.toString()));
+
+    serializedServices = services.map(s => {
+      const serviceStats = statsMap.get(s._id.toString()) || { totalLogs: 0, errorLogs: 0, avgLatency: null };
+      const totalLogs = serviceStats.totalLogs;
+      const errorLogs = serviceStats.errorLogs;
+      const errorRate = totalLogs > 0 ? (errorLogs / totalLogs) * 100 : 0;
+      const availability = totalLogs > 0 ? ((totalLogs - errorLogs) / totalLogs) * 100 : 100;
+      const avgLatency = serviceStats.avgLatency !== null && serviceStats.avgLatency !== undefined
+        ? Math.round(serviceStats.avgLatency as number)
+        : null;
+
+      // Determine health status:
+      // Incident (red) if there is an active open incident for this service
+      // Warning (yellow) if error rate > 5% (and totalLogs > 0)
+      // Healthy (green) otherwise
+      let healthStatus: "healthy" | "warning" | "incident" = "healthy";
+      if (openIncidentsServiceIds.has(s._id.toString())) {
+        healthStatus = "incident";
+      } else if (totalLogs > 0 && errorRate > 5) {
+        healthStatus = "warning";
+      }
+
+      return {
+        id: s._id.toString(),
+        name: s.name,
+        environment: s.environment,
+        createdAt: s.createdAt.toISOString(),
+        totalLogs,
+        errorRate: Number(errorRate.toFixed(2)),
+        availability: Number(availability.toFixed(2)),
+        avgLatency,
+        healthStatus,
+      };
+    });
+
+    serializedDeployments = recentDeploys.map(d => {
+      const serviceName = (d.serviceId as any)?.name || "unknown-service";
+      const serviceIdStr = (d.serviceId as any)?._id 
+        ? (d.serviceId as any)._id.toString() 
+        : d.serviceId?.toString() || "";
+      return {
+        id: d._id.toString(),
+        serviceId: serviceIdStr,
+        serviceName,
+        commitSha: d.commitSha,
+        commitMessage: d.commitMessage,
+        branch: d.branch,
+        environment: d.environment,
+        deployedAt: d.deployedAt ? d.deployedAt.toISOString() : null,
+      };
+    });
+
+    // Cache the serialized results for 5 minutes (300 seconds)
+    await setCache(cacheKey, { services: serializedServices, deployments: serializedDeployments }, 300);
+  }
 
   const serializedProject = {
     id: activeProject._id.toString(),
     name: activeProject.name,
     apiKey: activeProject.apiKey,
   };
-
-  const serializedServices = services.map(s => {
-    const serviceStats = statsMap.get(s._id.toString()) || { totalLogs: 0, errorLogs: 0, avgLatency: null };
-    const totalLogs = serviceStats.totalLogs;
-    const errorLogs = serviceStats.errorLogs;
-    const errorRate = totalLogs > 0 ? (errorLogs / totalLogs) * 100 : 0;
-    const availability = totalLogs > 0 ? ((totalLogs - errorLogs) / totalLogs) * 100 : 100;
-    const avgLatency = serviceStats.avgLatency !== null && serviceStats.avgLatency !== undefined
-      ? Math.round(serviceStats.avgLatency as number)
-      : null;
-
-    // Determine health status:
-    // Incident (red) if there is an active open incident for this service
-    // Warning (yellow) if error rate > 5% (and totalLogs > 0)
-    // Healthy (green) otherwise
-    let healthStatus: "healthy" | "warning" | "incident" = "healthy";
-    if (openIncidentsServiceIds.has(s._id.toString())) {
-      healthStatus = "incident";
-    } else if (totalLogs > 0 && errorRate > 5) {
-      healthStatus = "warning";
-    }
-
-    return {
-      id: s._id.toString(),
-      name: s.name,
-      environment: s.environment,
-      createdAt: s.createdAt.toISOString(),
-      totalLogs,
-      errorRate: Number(errorRate.toFixed(2)),
-      availability: Number(availability.toFixed(2)),
-      avgLatency,
-      healthStatus,
-    };
-  });
-
-  const serializedDeployments = recentDeploys.map(d => {
-    const serviceName = (d.serviceId as any)?.name || "unknown-service";
-    const serviceIdStr = (d.serviceId as any)?._id 
-      ? (d.serviceId as any)._id.toString() 
-      : d.serviceId?.toString() || "";
-    return {
-      id: d._id.toString(),
-      serviceId: serviceIdStr,
-      serviceName,
-      commitSha: d.commitSha,
-      commitMessage: d.commitMessage,
-      branch: d.branch,
-      environment: d.environment,
-      deployedAt: d.deployedAt ? d.deployedAt.toISOString() : null,
-    };
-  });
 
   return (
     <ProjectDashboardView

@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Metric } from "@repo/db";
 import { z } from "zod";
 import { Types } from "mongoose";
+import { delCache } from "@/lib/redis";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Validation schema for single metric item
 const metricItemSchema = z.object({
@@ -50,6 +52,20 @@ export async function POST(request: Request) {
           },
         },
         { status: 401 }
+      );
+    }
+
+    // Rate Limiting: 100 requests per 60 seconds per API key
+    const rateLimit = await checkRateLimit(apiKey, 100, 60000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "TOO_MANY_REQUESTS",
+            message: "Rate limit exceeded. Maximum 100 requests per minute.",
+          },
+        },
+        { status: 429 }
       );
     }
 
@@ -120,6 +136,21 @@ export async function POST(request: Request) {
     });
 
     await Metric.insertMany(metricsToInsert);
+
+    // Invalidate cached query keys for affected services
+    const uniqueServiceIds = new Set<string>();
+    for (const m of metricsToInsert) {
+      if (m.serviceId) {
+        uniqueServiceIds.add(m.serviceId.toString());
+      }
+    }
+
+    const projectIdStr = project._id.toString();
+    for (const serviceIdStr of uniqueServiceIds) {
+      await delCache(`metrics:query:${projectIdStr}:${serviceIdStr}:1h`);
+      await delCache(`metrics:query:${projectIdStr}:${serviceIdStr}:24h`);
+      await delCache(`metrics:query:${projectIdStr}:${serviceIdStr}:7d`);
+    }
 
     return NextResponse.json({
       success: true,

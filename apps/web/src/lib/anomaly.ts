@@ -2,6 +2,7 @@ import { connectToDatabase, Log, Service, Deploy, Incident, Project } from "@rep
 import { generateIncidentAnalysis, LogContext, DeployContext } from "@repo/ai";
 import { Types } from "mongoose";
 import { dispatchMultiChannelIncidentAlert } from "./alerts";
+import { delCache } from "./redis";
 
 // Setup queue and worker dependencies dynamically to avoid crash if ioredis fails to connect.
 let queue: any = null;
@@ -251,6 +252,9 @@ export async function processAnomalyDetection(
     deployId: recentDeploys[0]?._id || undefined,
     ttd: 5 * 60 * 1000,
   });
+
+  // Invalidate dashboard cache
+  await delCache(`dashboard:project:${projectId}`);
 
   console.log(`[Anomaly Engine] Created Incident: ${incident._id} - ${analysis.title}`);
 

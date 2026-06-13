@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Deploy } from "@repo/db";
 import { z } from "zod";
+import { delCache } from "@/lib/redis";
 
 const deployPayloadSchema = z.object({
   service: z.string().min(1, "Service name is required"),
@@ -74,6 +75,9 @@ export async function POST(request: Request) {
       deployedAt: new Date(),
       metadata: validatedData.metadata || {},
     });
+
+    // Invalidate dashboard cache
+    await delCache(`dashboard:project:${project._id.toString()}`);
 
     return NextResponse.json({
       success: true,

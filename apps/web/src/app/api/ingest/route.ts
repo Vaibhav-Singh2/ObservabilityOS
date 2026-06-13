@@ -3,6 +3,7 @@ import { connectToDatabase, Project, Service, Log } from "@repo/db";
 import { z } from "zod";
 import { Types } from "mongoose";
 import { triggerAnomalyCheck } from "@/lib/anomaly";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Validation schema for single log items
 const logItemSchema = z.object({
@@ -51,6 +52,20 @@ export async function POST(request: Request) {
           },
         },
         { status: 401 }
+      );
+    }
+
+    // Rate Limiting: 100 requests per 60 seconds per API key
+    const rateLimit = await checkRateLimit(apiKey, 100, 60000);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "TOO_MANY_REQUESTS",
+            message: "Rate limit exceeded. Maximum 100 requests per minute.",
+          },
+        },
+        { status: 429 }
       );
     }
 

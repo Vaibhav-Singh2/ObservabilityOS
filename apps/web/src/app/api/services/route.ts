@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, User } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { logAuditEvent } from "@/lib/audit";
+import { delCache } from "@/lib/redis";
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -114,6 +115,9 @@ export async function POST(request: Request) {
       name: name.trim(),
       environment,
     });
+
+    // Invalidate dashboard cache
+    await delCache(`dashboard:project:${project._id.toString()}`);
 
     return NextResponse.json({ service }, { status: 201 });
   } catch (error) {
@@ -249,6 +253,9 @@ export async function DELETE(request: Request) {
         environment: serviceEnv,
       },
     });
+
+    // Invalidate dashboard cache
+    await delCache(`dashboard:project:${project._id.toString()}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {
