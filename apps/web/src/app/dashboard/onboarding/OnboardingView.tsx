@@ -81,7 +81,7 @@ logger.info("ObservabilityOS integration successful!", {
 
   // Start polling when on Step 4
   useEffect(() => {
-    if (step === 4 && !isIngested) {
+    if (step === 4) {
       setPollingStatus("polling");
       const checkIngestion = async () => {
         try {
@@ -92,8 +92,6 @@ logger.info("ObservabilityOS integration successful!", {
               setIsIngested(true);
               setIngestionCount(data.logs.length);
               setPollingStatus("success");
-              // Clear polling
-              if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
             }
           }
         } catch (err) {
@@ -122,7 +120,7 @@ logger.info("ObservabilityOS integration successful!", {
         pollIntervalRef.current = null;
       }
     };
-  }, [step, isIngested, project.id]);
+  }, [step, project.id]);
 
   // Fetch services when entering SLO setup step
   useEffect(() => {
