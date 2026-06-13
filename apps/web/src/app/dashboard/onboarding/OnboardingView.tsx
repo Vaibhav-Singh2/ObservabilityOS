@@ -489,10 +489,7 @@ logger.info("ObservabilityOS integration successful!", {
             <div className="bg-slate-900/60 border border-slate-850 rounded-xl p-4">
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Or test instantly using cURL:</h4>
               <pre className="text-[9px] font-mono text-indigo-400 overflow-x-auto whitespace-pre-wrap select-all bg-slate-950 p-2.5 rounded border border-slate-900 break-all leading-normal">
-{`curl -X POST "${endpointUrl}" \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: ${project.apiKey}" \\
-  -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`}
+{`curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${project.apiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`}
               </pre>
             </div>
 
