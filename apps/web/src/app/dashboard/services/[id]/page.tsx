@@ -73,6 +73,8 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
     name: service.name,
     environment: service.environment,
     createdAt: service.createdAt.toISOString(),
+    runbookUrl: service.runbookUrl || null,
+    troubleshootingSteps: service.troubleshootingSteps || null,
   };
 
   const serializedDeployments = deployments.map(d => ({

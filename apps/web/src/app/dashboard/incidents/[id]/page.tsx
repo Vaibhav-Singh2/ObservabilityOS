@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Incident, Log } from "@repo/db";
+import { connectToDatabase, User, Project, Incident, Log, Comment } from "@repo/db";
 import jwt from "jsonwebtoken";
 import IncidentDetailsView from "./IncidentDetailsView";
 
@@ -87,6 +87,8 @@ export default async function IncidentDetailPage({ params, searchParams }: PageP
           id: serviceObj._id.toString(),
           name: serviceObj.name,
           environment: serviceObj.environment,
+          runbookUrl: serviceObj.runbookUrl || null,
+          troubleshootingSteps: serviceObj.troubleshootingSteps || null,
         }
       : null,
     deploy: deployObj
@@ -109,11 +111,38 @@ export default async function IncidentDetailPage({ params, searchParams }: PageP
     metadata: l.metadata || null,
   }));
 
+  // Fetch comments
+  const comments = await Comment.find({ incidentId: incident._id })
+    .populate("userId")
+    .sort({ createdAt: 1 });
+
+  const serializedComments = comments.map(c => {
+    const u = c.userId as any;
+    return {
+      id: c._id.toString(),
+      content: c.content,
+      createdAt: c.createdAt.toISOString(),
+      user: u ? {
+        id: u._id.toString(),
+        username: u.username,
+        avatarUrl: u.avatarUrl || null,
+      } : null,
+    };
+  });
+
+  const serializedUser = {
+    id: user._id.toString(),
+    username: user.username,
+    avatarUrl: user.avatarUrl || null,
+  };
+
   return (
     <IncidentDetailsView
       projectId={project._id.toString()}
       incident={serializedIncident}
       initialLogs={serializedLogs}
+      comments={serializedComments}
+      currentUser={serializedUser}
     />
   );
 }

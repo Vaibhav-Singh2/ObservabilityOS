@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import NextLink from "next/link";
+import { useRouter } from "next/navigation";
 import { 
   ArrowLeft, 
   Cpu, 
@@ -26,6 +27,8 @@ interface ServiceProps {
   name: string;
   environment: "prod" | "staging" | "dev";
   createdAt: string;
+  runbookUrl?: string | null;
+  troubleshootingSteps?: string | null;
 }
 
 interface DeploymentProps {
@@ -80,6 +83,7 @@ export default function ServiceDetailView({
   deployments, 
   incidents 
 }: ServiceDetailProps) {
+  const router = useRouter();
   const [timeRange, setTimeRange] = useState<"1h" | "24h" | "7d">("24h");
   const [metrics, setMetrics] = useState<MetricPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -100,6 +104,42 @@ export default function ServiceDetailView({
 
   const activeIncidents = incidents.filter(i => i.status !== "resolved");
   const isHealthy = activeIncidents.length === 0;
+
+  // Service settings states
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [runbookUrl, setRunbookUrl] = useState(service.runbookUrl || "");
+  const [troubleshootingSteps, setTroubleshootingSteps] = useState(service.troubleshootingSteps || "");
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  const handleSaveSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSavingSettings(true);
+    try {
+      const res = await fetch("/api/services", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          serviceId: service.id,
+          runbookUrl: runbookUrl.trim(),
+          troubleshootingSteps: troubleshootingSteps,
+        }),
+      });
+
+      if (res.ok) {
+        setIsSettingsModalOpen(false);
+        router.refresh();
+      } else {
+        const data = await res.json();
+        alert(data.error?.message || "Failed to save settings");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error saving service settings");
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
 
   // Load metrics
   useEffect(() => {
@@ -288,13 +328,22 @@ export default function ServiceDetailView({
             <ShieldCheck className="w-5 h-5 text-indigo-400" />
             <h2 className="text-sm font-bold uppercase tracking-wider text-white">Service Level Objectives (SLOs)</h2>
           </div>
-          <button
-            onClick={() => setIsSloModalOpen(true)}
-            className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-850 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            Configure SLOs
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-850 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              Service Settings
+            </button>
+            <button
+              onClick={() => setIsSloModalOpen(true)}
+              className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-850 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            >
+              <Sliders className="w-3.5 h-3.5" />
+              Configure SLOs
+            </button>
+          </div>
         </div>
 
         {isLoadingSlos ? (
@@ -727,6 +776,73 @@ export default function ServiceDetailView({
                 Close Configuration
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Service Settings Modal */}
+      {isSettingsModalOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl p-6 relative flex flex-col max-h-[90vh]">
+            <h3 className="text-lg font-bold text-white mb-1">Service Settings</h3>
+            <p className="text-xs text-slate-400 mb-6">
+              Configure runbook links and custom troubleshooting steps for {service.name}.
+            </p>
+
+            <form onSubmit={handleSaveSettings} className="space-y-5 flex-1 overflow-y-auto pr-1">
+              {/* Runbook URL */}
+              <div>
+                <label htmlFor="runbookUrlInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                  Runbook URL
+                </label>
+                <input
+                  id="runbookUrlInput"
+                  type="url"
+                  value={runbookUrl}
+                  onChange={(e) => setRunbookUrl(e.target.value)}
+                  placeholder="https://wiki.company.com/runbooks/service-name"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  External document link rendered directly inside incidents triggered by this service.
+                </p>
+              </div>
+
+              {/* Troubleshooting Steps */}
+              <div>
+                <label htmlFor="troubleshootingInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
+                  Troubleshooting Checklist / Guidelines
+                </label>
+                <textarea
+                  id="troubleshootingInput"
+                  rows={6}
+                  value={troubleshootingSteps}
+                  onChange={(e) => setTroubleshootingSteps(e.target.value)}
+                  placeholder="1. Verify database connectivity&#10;2. Check memory utilization metrics&#10;3. Inspect dependency service health logs"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors resize-none font-sans leading-relaxed"
+                />
+                <p className="text-[10px] text-slate-500 mt-1">
+                  Step-by-step checklist or reference instructions to guide developers when resolving incidents.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/80">
+                <button
+                  type="button"
+                  onClick={() => setIsSettingsModalOpen(false)}
+                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingSettings}
+                  className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-4 py-2 text-xs font-semibold rounded-lg text-white transition-colors cursor-pointer"
+                >
+                  {isSavingSettings ? "Saving..." : "Save Settings"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

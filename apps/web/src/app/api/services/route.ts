@@ -123,3 +123,58 @@ export async function POST(request: Request) {
     );
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
+        { status: 401 }
+      );
+    }
+
+    const { projectId, serviceId, runbookUrl, troubleshootingSteps } = await request.json();
+    if (!projectId || !serviceId) {
+      return NextResponse.json(
+        { error: { code: "BAD_REQUEST", message: "projectId and serviceId are required" } },
+        { status: 400 }
+      );
+    }
+
+    // Verify project belongs to user
+    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    if (!project) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
+        { status: 404 }
+      );
+    }
+
+    const service = await Service.findOne({ _id: serviceId, projectId: project._id });
+    if (!service) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Service not found in this project" } },
+        { status: 404 }
+      );
+    }
+
+    if (runbookUrl !== undefined) {
+      service.runbookUrl = runbookUrl.trim();
+    }
+    if (troubleshootingSteps !== undefined) {
+      service.troubleshootingSteps = troubleshootingSteps;
+    }
+
+    await service.save();
+
+    return NextResponse.json({ service });
+  } catch (error) {
+    console.error("Services PATCH Error:", error);
+    return NextResponse.json(
+      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to update service" } },
+      { status: 500 }
+    );
+  }
+}
+

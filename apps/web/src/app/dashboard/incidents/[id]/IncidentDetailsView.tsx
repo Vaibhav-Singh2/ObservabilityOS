@@ -16,7 +16,12 @@ import {
   ChevronDown,
   ChevronUp,
   Square,
-  CheckSquare
+  CheckSquare,
+  Download,
+  BookOpen,
+  ExternalLink,
+  MessageSquare,
+  Trash2
 } from "lucide-react";
 
 interface LogItem {
@@ -49,6 +54,8 @@ interface IncidentDetailsProps {
       id: string;
       name: string;
       environment: string;
+      runbookUrl?: string | null;
+      troubleshootingSteps?: string | null;
     } | null;
     deploy: {
       id: string;
@@ -61,13 +68,88 @@ interface IncidentDetailsProps {
   initialLogs: LogItem[];
 }
 
-export default function IncidentDetailsView({ projectId, incident: initialIncident, initialLogs }: IncidentDetailsProps) {
+interface CommentItem {
+  id: string;
+  content: string;
+  createdAt: string;
+  user: {
+    id: string;
+    username: string;
+    avatarUrl: string | null;
+  } | null;
+}
+
+export default function IncidentDetailsView({ 
+  projectId, 
+  incident: initialIncident, 
+  initialLogs,
+  comments: initialComments,
+  currentUser
+}: IncidentDetailsProps & { 
+  comments: CommentItem[];
+  currentUser: { id: string; username: string; avatarUrl: string | null; };
+}) {
   const router = useRouter();
   const [incident, setIncident] = useState(initialIncident);
   const [logs] = useState<LogItem[]>(initialLogs);
   const [actionChecked, setActionChecked] = useState<Record<number, boolean>>({});
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+
+  const [comments, setComments] = useState<CommentItem[]>(initialComments);
+  const [newCommentText, setNewCommentText] = useState("");
+  const [isPostingComment, setIsPostingComment] = useState(false);
+
+  const handleAddComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCommentText.trim()) return;
+
+    setIsPostingComment(true);
+    try {
+      const res = await fetch("/api/incidents/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          projectId,
+          incidentId: incident.id,
+          content: newCommentText.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setComments((prev) => [...prev, data.comment]);
+        setNewCommentText("");
+      } else {
+        alert("Failed to add comment");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error adding comment");
+    } finally {
+      setIsPostingComment(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: string) => {
+    if (!confirm("Are you sure you want to delete this comment?")) return;
+
+    try {
+      const res = await fetch(
+        `/api/incidents/comments?projectId=${projectId}&commentId=${commentId}`,
+        { method: "DELETE" }
+      );
+
+      if (res.ok) {
+        setComments((prev) => prev.filter((c) => c.id !== commentId));
+      } else {
+        alert("Failed to delete comment");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting comment");
+    }
+  };
 
   const updateStatus = async (newStatus: "open" | "investigating" | "resolved") => {
     setIsUpdating(true);
@@ -162,6 +244,17 @@ export default function IncidentDetailsView({ projectId, incident: initialIncide
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 shrink-0">
+          {/* Export Post-Mortem Button */}
+          <button
+            onClick={() => {
+              window.location.href = `/api/incidents/export?projectId=${projectId}&incidentId=${incident.id}`;
+            }}
+            className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-850 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            Export Post-Mortem
+          </button>
+
           {incident.status !== "resolved" ? (
             <>
               {incident.status === "open" && (
@@ -312,10 +405,123 @@ export default function IncidentDetailsView({ projectId, incident: initialIncide
               })}
             </div>
           </div>
+
+          {/* Collaboration & Comments Card */}
+          <div className="rounded-xl border border-slate-900 bg-slate-950 p-6 space-y-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <MessageSquare className="w-4 h-4 text-slate-500" />
+              Collaboration & SRE Comments
+            </h2>
+
+            {/* Comments List */}
+            <div className="space-y-4">
+              {comments.length === 0 ? (
+                <p className="text-xs text-slate-500 italic bg-slate-900/10 p-4 border border-dashed border-slate-900 rounded-lg text-center">
+                  No comments posted yet. Start the discussion below.
+                </p>
+              ) : (
+                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+                  {comments.map((comment) => {
+                    const isAuthor = comment.user?.id === currentUser.id;
+                    return (
+                      <div key={comment.id} className="flex gap-3 text-xs bg-slate-900/30 border border-slate-900/60 p-4 rounded-xl relative group">
+                        {/* Avatar */}
+                        <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center shrink-0 font-bold text-indigo-400 uppercase select-none">
+                          {comment.user?.username.slice(0, 2) || "SR"}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 space-y-1.5 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <span className="font-semibold text-slate-200">{comment.user?.username || "Unknown"}</span>
+                            <span className="text-[10px] text-slate-500">
+                              {new Date(comment.createdAt).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-slate-350 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                        </div>
+
+                        {/* Delete Button */}
+                        {isAuthor && (
+                          <button
+                            onClick={() => handleDeleteComment(comment.id)}
+                            className="absolute top-3 right-3 p-1 rounded hover:bg-rose-500/10 text-slate-500 hover:text-rose-400 opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
+                            title="Delete comment"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Add Comment Form */}
+            <form onSubmit={handleAddComment} className="border-t border-slate-900 pt-6 space-y-3">
+              <label htmlFor="newComment" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                Add Discussion Note
+              </label>
+              <textarea
+                id="newComment"
+                required
+                rows={3}
+                value={newCommentText}
+                onChange={(e) => setNewCommentText(e.target.value)}
+                placeholder="Share diagnostics, debug steps, or link post-mortems..."
+                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg p-3 text-xs focus:outline-none transition-colors placeholder:text-slate-700 resize-none font-sans leading-relaxed"
+              />
+              <div className="flex justify-end">
+                <button
+                  type="submit"
+                  disabled={isPostingComment || !newCommentText.trim()}
+                  className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-4 py-2 rounded-lg text-xs font-semibold text-white transition-colors cursor-pointer"
+                >
+                  <MessageSquare className="w-3.5 h-3.5" />
+                  {isPostingComment ? "Posting..." : "Post Comment"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
 
         {/* Right Column (1/3 width) - Plan & Stats */}
         <div className="space-y-6">
+          {/* Service Runbook & References */}
+          {incident.service && (incident.service.runbookUrl || incident.service.troubleshootingSteps) && (
+            <div className="rounded-xl border border-indigo-950/40 bg-slate-950 p-6 space-y-4">
+              <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                <BookOpen className="w-4 h-4 text-indigo-400" />
+                Service Runbook
+              </h2>
+              
+              {incident.service.runbookUrl && (
+                <div className="space-y-1.5">
+                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Reference Link</span>
+                  <a
+                    href={incident.service.runbookUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs text-indigo-455 hover:text-indigo-350 font-semibold underline break-all"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    {incident.service.runbookUrl}
+                  </a>
+                </div>
+              )}
+
+              {incident.service.troubleshootingSteps && (
+                <div className="space-y-2 pt-2 border-t border-slate-900">
+                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Troubleshooting Steps</span>
+                  <div className="text-xs text-slate-350 leading-relaxed whitespace-pre-wrap font-sans bg-slate-900/30 p-3 rounded-lg border border-slate-900">
+                    {incident.service.troubleshootingSteps}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Action Checklist */}
           <div className="rounded-xl border border-slate-900 bg-slate-950 p-6 space-y-4">
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">

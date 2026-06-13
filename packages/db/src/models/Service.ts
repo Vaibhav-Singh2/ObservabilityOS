@@ -15,6 +15,8 @@ export interface IService {
   name: string;
   environment: "prod" | "staging" | "dev";
   slos?: ISlo[];
+  runbookUrl?: string;
+  troubleshootingSteps?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -41,6 +43,8 @@ const ServiceSchema = new Schema<IService>(
       default: "prod",
     },
     slos: { type: [SloSchema], default: [] },
+    runbookUrl: { type: String, required: false },
+    troubleshootingSteps: { type: String, required: false },
   },
   { timestamps: true }
 );
