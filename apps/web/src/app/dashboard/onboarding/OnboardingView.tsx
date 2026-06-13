@@ -575,27 +575,37 @@ logger.info("ObservabilityOS integration successful!", {
                   {enableAvailSlo && (
                     <div className="mt-4 grid grid-cols-2 gap-4 pl-7 border-l-2 border-indigo-950 pt-2">
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compliance Target (%)</label>
-                        <input 
-                          type="number"
-                          step="0.1"
-                          min="0.1"
-                          max="100"
-                          value={availSloTarget}
-                          onChange={(e) => setAvailSloTarget(parseFloat(e.target.value) || 99.0)}
-                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
-                        />
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compliance Target</label>
+                        <div className="relative">
+                          <input 
+                            type="number"
+                            step="0.1"
+                            min="0.1"
+                            max="100"
+                            value={availSloTarget}
+                            onChange={(e) => setAvailSloTarget(parseFloat(e.target.value) || 99.0)}
+                            className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500/80 text-slate-100 rounded-lg pl-3 pr-8 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500/30 hover:border-slate-700 transition-all"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none uppercase">
+                            %
+                          </span>
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Rolling Window (Days)</label>
-                        <input 
-                          type="number"
-                          min="1"
-                          max="90"
-                          value={availSloWindow}
-                          onChange={(e) => setAvailSloWindow(parseInt(e.target.value) || 30)}
-                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
-                        />
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Rolling Window</label>
+                        <div className="relative">
+                          <input 
+                            type="number"
+                            min="1"
+                            max="90"
+                            value={availSloWindow}
+                            onChange={(e) => setAvailSloWindow(parseInt(e.target.value) || 30)}
+                            className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500/80 text-slate-100 rounded-lg pl-3 pr-14 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500/30 hover:border-slate-700 transition-all"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">
+                            days
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -630,37 +640,52 @@ logger.info("ObservabilityOS integration successful!", {
                   {enableLatencySlo && (
                     <div className="mt-4 grid grid-cols-3 gap-4 pl-7 border-l-2 border-indigo-950 pt-2">
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Threshold (ms)</label>
-                        <input 
-                          type="number"
-                          min="1"
-                          value={latencySloThreshold}
-                          onChange={(e) => setLatencySloThreshold(parseInt(e.target.value) || 500)}
-                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
-                        />
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Threshold</label>
+                        <div className="relative">
+                          <input 
+                            type="number"
+                            min="1"
+                            value={latencySloThreshold}
+                            onChange={(e) => setLatencySloThreshold(parseInt(e.target.value) || 500)}
+                            className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500/80 text-slate-100 rounded-lg pl-3 pr-10 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500/30 hover:border-slate-700 transition-all"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">
+                            ms
+                          </span>
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compliance (%)</label>
-                        <input 
-                          type="number"
-                          step="0.1"
-                          min="0.1"
-                          max="100"
-                          value={latencySloTarget}
-                          onChange={(e) => setLatencySloTarget(parseFloat(e.target.value) || 95.0)}
-                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
-                        />
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Compliance</label>
+                        <div className="relative">
+                          <input 
+                            type="number"
+                            step="0.1"
+                            min="0.1"
+                            max="100"
+                            value={latencySloTarget}
+                            onChange={(e) => setLatencySloTarget(parseFloat(e.target.value) || 95.0)}
+                            className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500/80 text-slate-100 rounded-lg pl-3 pr-8 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500/30 hover:border-slate-700 transition-all"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none uppercase">
+                            %
+                          </span>
+                        </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Window (Days)</label>
-                        <input 
-                          type="number"
-                          min="1"
-                          max="90"
-                          value={latencySloWindow}
-                          onChange={(e) => setLatencySloWindow(parseInt(e.target.value) || 30)}
-                          className="w-full bg-slate-905 border border-slate-800 text-slate-100 rounded px-2.5 py-1.5 text-xs font-mono focus:outline-none focus:border-indigo-500"
-                        />
+                        <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Window</label>
+                        <div className="relative">
+                          <input 
+                            type="number"
+                            min="1"
+                            max="90"
+                            value={latencySloWindow}
+                            onChange={(e) => setLatencySloWindow(parseInt(e.target.value) || 30)}
+                            className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500/80 text-slate-100 rounded-lg pl-3 pr-14 py-2 text-xs font-mono focus:outline-none focus:ring-1 focus:ring-indigo-500/30 hover:border-slate-700 transition-all"
+                          />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-500 pointer-events-none lowercase">
+                            days
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}
@@ -668,7 +693,7 @@ logger.info("ObservabilityOS integration successful!", {
               </div>
             )}
 
-            <div className="flex items-center justify-between pt-4 border-t border-slate-850/40">
+            <div className="flex items-center justify-between pt-4 border-t border-slate-800/40">
               <button
                 type="button"
                 onClick={() => setStep(4)}
