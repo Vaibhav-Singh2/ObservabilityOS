@@ -73,61 +73,84 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
             Overview
           </Link>
 
-          <Link
-            id="nav_incidents"
-            href={activeProjectId ? `/dashboard/incidents?projectId=${activeProjectId}` : "/dashboard/incidents"}
-            onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              pathname.startsWith("/dashboard/incidents") 
-                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-            }`}
-          >
-            <AlertOctagon className="w-4 h-4 text-indigo-400" />
-            Incidents
-          </Link>
+          {projects.length > 0 ? (
+            <>
+              <Link
+                id="nav_incidents"
+                href={activeProjectId ? `/dashboard/incidents?projectId=${activeProjectId}` : "/dashboard/incidents"}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/incidents") 
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                }`}
+              >
+                <AlertOctagon className="w-4 h-4 text-indigo-400" />
+                Incidents
+              </Link>
 
-          <Link
-            id="nav_search"
-            href={activeProjectId ? `/dashboard/search?projectId=${activeProjectId}` : "/dashboard/search"}
-            onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              pathname.startsWith("/dashboard/search") 
-                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-            }`}
-          >
-            <Search className="w-4 h-4 text-indigo-400" />
-            Log Search
-          </Link>
+              <Link
+                id="nav_search"
+                href={activeProjectId ? `/dashboard/search?projectId=${activeProjectId}` : "/dashboard/search"}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/search") 
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                }`}
+              >
+                <Search className="w-4 h-4 text-indigo-400" />
+                Log Search
+              </Link>
 
-          <Link
-            id="nav_billing"
-            href={activeProjectId ? `/dashboard/billing?projectId=${activeProjectId}` : "/dashboard/billing"}
-            onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              pathname.startsWith("/dashboard/billing") 
-                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-            }`}
-          >
-            <CreditCard className="w-4 h-4 text-indigo-400" />
-            Billing
-          </Link>
+              <Link
+                id="nav_billing"
+                href={activeProjectId ? `/dashboard/billing?projectId=${activeProjectId}` : "/dashboard/billing"}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/billing") 
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                }`}
+              >
+                <CreditCard className="w-4 h-4 text-indigo-400" />
+                Billing
+              </Link>
 
-          <Link
-            id="nav_settings"
-            href={activeProjectId ? `/dashboard/settings?projectId=${activeProjectId}` : "/dashboard/settings"}
-            onClick={() => setSidebarOpen(false)}
-            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              pathname.startsWith("/dashboard/settings") 
-                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
-                : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-            }`}
-          >
-            <Settings className="w-4 h-4 text-indigo-400" />
-            Settings
-          </Link>
+              <Link
+                id="nav_settings"
+                href={activeProjectId ? `/dashboard/settings?projectId=${activeProjectId}` : "/dashboard/settings"}
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/settings") 
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                }`}
+              >
+                <Settings className="w-4 h-4 text-indigo-400" />
+                Settings
+              </Link>
+            </>
+          ) : (
+            <>
+              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
+                <AlertOctagon className="w-4 h-4 text-slate-700" />
+                Incidents
+              </div>
+              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
+                <Search className="w-4 h-4 text-slate-700" />
+                Log Search
+              </div>
+              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
+                <CreditCard className="w-4 h-4 text-slate-700" />
+                Billing
+              </div>
+              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
+                <Settings className="w-4 h-4 text-slate-700" />
+                Settings
+              </div>
+            </>
+          )}
         </nav>
 
         {/* Footer info & logout */}
