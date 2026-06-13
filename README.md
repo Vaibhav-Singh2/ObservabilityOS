@@ -1,159 +1,154 @@
-# Turborepo starter
+# ObservabilityOS
 
-This Turborepo starter is maintained by the Turborepo core team.
+ObservabilityOS is an AI-native log analytics and system performance monitoring startup platform built for high-performance engineering teams. It provides automatic anomaly detection, AI-generated incident analysis, metrics visualization, SLO budget tracking, multi-channel alerts, saved search console shortcuts, log CSV/JSON exports, and administrative audit logs.
 
-## Using this example
+---
 
-Run the following command:
+## 🌟 Key Features
 
-```sh
-npx create-turbo@latest
+*   **Ingestion Engine**: Structured JSON log ingestion and timeseries metrics ingestion via secure high-throughput REST APIs.
+*   **AI-Native Anomaly Analysis**: Statistical Z-Score anomaly engine combined with Claude/GPT-4 models to generate descriptive incident cards ("What happened, Why, and how to fix it").
+*   **Correlated Deployments**: Links incoming deploy webhooks (GitHub) to regression spikes within a 30-minute window for faster MTTR.
+*   **SLO & Error Budget Tracking**: Configure Service Level Objectives (availability & latency) over rolling windows, computing budgets entirely within MongoDB index-based counts.
+*   **Performance Optimization**:
+    *   **Atlas Search Index**: Lucene-backed full-text log search with a graceful regex fallback for local testing.
+    *   **Redis Cache Layer**: Caches heavy dashboard aggregates and metrics query buckets with automated mutation-based invalidations.
+*   **Security Hardening**: Enforces sliding-window rate limiting on public ingest paths, global Helmet security headers, secure cookies, and strict tenant isolation.
+*   **Multi-channel Alerting**: Alerts SREs when SLOs transition between states (healthy, warning, breached) via Slack, Discord, and Microsoft Teams.
+*   **Saved Queries & Exporting**: Stream download logs in CSV/JSON format and save search configurations to a quick-access console sidebar.
+*   **Administrative Audit Trail**: Log administrative configuration mutations (SLOs, webhooks, service deletions) chronologically in the settings console.
+
+---
+
+## 📂 Repository Structure
+
+ObservabilityOS is managed as a **Turborepo** monorepo workspace:
+
+```text
+├── apps
+│   ├── web                   # Next.js 16 App Router Web Console & APIs
+│   └── docs                  # Next.js Documentation site
+├── packages
+│   ├── db                    # Shared Mongoose/MongoDB connection & model schemas
+│   ├── ai                    # LLM Prompt builders & narrative incident summarizers
+│   ├── sdk                   # TypeScript Logger Winston/Pino-like wrapper SDK
+│   ├── typescript-config     # Shared base TSConfig options
+│   └── ui                    # Shared React UI components
+├── scratch                   # Week-by-week verification and validation scripts
+└── context                   # Product, Business, and Technical architectural guidelines
 ```
 
-## What's inside?
+---
 
-This Turborepo includes the following packages/apps:
+## 🚀 Getting Started
 
-### Apps and Packages
+### Prerequisites
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+Ensure you have the following installed locally:
+- **Node.js**: `v18` or higher
+- **Yarn**: `1.22` (default workspace package manager)
+- **MongoDB**: Standalone local instance (e.g. Docker, replica set) or Atlas cluster
+- **Redis**: Standalone local instance (listening on port `6379`)
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+To spin up MongoDB and Redis quickly using Docker:
+```bash
+docker-compose up -d
 ```
 
-Without global `turbo`, use your package manager:
+### Installation
 
-```sh
-cd my-turborepo
-npx turbo build
-yarn dlx turbo build
-yarn exec turbo build
+1. Clone this repository and run Yarn to install monorepo dependencies:
+   ```bash
+   yarn install
+   ```
+
+2. Create a `.env` file in `apps/web/.env` with the following variables:
+   ```env
+   # Database Configuration
+   MONGODB_URI=mongodb://localhost:27017/observability-os
+   
+   # Redis Configuration
+   REDIS_URL=redis://localhost:6379
+   
+   # Auth Configuration
+   JWT_SECRET=your_jwt_secret_token_here
+   
+   # GitHub OAuth Configuration
+   GITHUB_CLIENT_ID=your_github_client_id
+   GITHUB_CLIENT_SECRET=your_github_client_secret
+   
+   # App URL Configuration
+   NEXT_PUBLIC_APP_URL=http://localhost:3000
+   
+   # AI / LLM Configuration (Optional for mock fallback)
+   GEMINI_API_KEY=your_gemini_api_key
+   ```
+
+3. Build the shared packages:
+   ```bash
+   yarn build
+   ```
+
+4. Spin up the local development servers:
+   ```bash
+   yarn dev
+   ```
+   Open `http://localhost:3000` to access the ObservabilityOS console.
+
+---
+
+## 📦 Ingesting Data
+
+### 1. Ingesting Logs via the SDK
+
+Install the `@repo/sdk` package inside your application:
+```typescript
+import { Logger } from "@repo/sdk";
+
+const logger = new Logger({
+  apiKey: "your_project_api_key",
+  endpoint: "http://localhost:3000/api/ingest",
+  defaultService: "billing-service",
+  defaultEnvironment: "prod",
+  batchSize: 10,
+  flushIntervalMs: 2000,
+});
+
+// Logs are batched and shipped automatically
+logger.info("Payment succeeded", { metadata: { transactionId: "tx_12345" } });
+logger.error("Database connection refused", { traceId: "tr_abc123" });
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+### 2. Ingesting Metrics via REST API
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+Ship system metrics (CPU, memory, latency) via a POST request:
+```bash
+curl -X POST http://localhost:3000/api/metrics/ingest \
+  -H "Content-Type: application/json" \
+  -H "x-api-key: your_project_api_key" \
+  -d '{
+    "service": "auth-service",
+    "environment": "prod",
+    "cpuUsage": 12.4,
+    "memoryUsage": 512.0,
+    "memoryLimit": 2048.0,
+    "latencyMs": 42.5
+  }'
 ```
 
-Without global `turbo`:
+---
 
-```sh
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-yarn exec turbo build --filter=docs
+## 🧪 Verification & Testing
+
+Verify that all caching, rate limiting, and cascade deletion scripts are fully passing:
+
+```bash
+# Run week 9 tests (Saved queries, Exports, Cascade Service deletes, Audits)
+npx tsx scratch/test-week-9.ts
+
+# Run week 10 tests (Atlas search fallback, Redis cache, Rate limiters)
+npx tsx scratch/test-week-10.ts
+
+# Run typescript compilation across all monorepo apps and packages
+yarn check-types
 ```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-yarn exec turbo dev
-yarn exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-yarn exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-yarn exec turbo login
-yarn exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-yarn exec turbo link
-yarn exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
