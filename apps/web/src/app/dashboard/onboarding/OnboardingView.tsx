@@ -324,7 +324,7 @@ logger.info("ObservabilityOS integration successful!", {
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-3 shadow-lg shadow-indigo-500/5">
+            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-3 shadow-lg shadow-indigo-500/10">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Project ID</label>
                 <div className="text-sm font-mono text-slate-300 select-all">{project.id}</div>
@@ -373,7 +373,7 @@ logger.info("ObservabilityOS integration successful!", {
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-3.5 shadow-lg shadow-indigo-500/5">
+            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-3.5 shadow-lg shadow-indigo-500/10">
               <div className="flex items-center justify-between gap-4">
                 <code className="text-sm font-mono text-indigo-300 select-all">{installCmd}</code>
                 <button
@@ -419,7 +419,7 @@ logger.info("ObservabilityOS integration successful!", {
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 relative overflow-hidden shadow-lg shadow-indigo-500/5">
+            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 relative overflow-hidden shadow-lg shadow-indigo-500/10">
               <div className="absolute right-3 top-3">
                 <button
                   onClick={() => handleCopyText(sdkIntegrationSnippet, "code")}
@@ -469,7 +469,7 @@ logger.info("ObservabilityOS integration successful!", {
             </div>
 
             {/* Ingestion Polling Card */}
-            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-6 flex flex-col items-center justify-center min-h-[140px] text-center shadow-lg shadow-indigo-500/5">
+            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-6 flex flex-col items-center justify-center min-h-[140px] text-center shadow-lg shadow-indigo-500/10">
               {pollingStatus === "polling" && (
                 <div className="space-y-3">
                   <RefreshCw className="w-7 h-7 text-indigo-500 animate-spin mx-auto" />
@@ -559,7 +559,7 @@ logger.info("ObservabilityOS integration successful!", {
                 {/* Availability SLO preset card */}
                 <div className={`p-4 border rounded-xl transition-all duration-200 flex flex-col justify-between ${
                   enableAvailSlo 
-                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/5" 
+                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/10" 
                     : "bg-slate-900/40 border-slate-800 opacity-60"
                 }`}>
                   <div>
@@ -626,7 +626,7 @@ logger.info("ObservabilityOS integration successful!", {
                 {/* Latency SLO preset card */}
                 <div className={`p-4 border rounded-xl transition-all duration-200 flex flex-col justify-between ${
                   enableLatencySlo 
-                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/5" 
+                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/10" 
                     : "bg-slate-900/40 border-slate-800 opacity-60"
                 }`}>
                   <div>
@@ -754,7 +754,7 @@ logger.info("ObservabilityOS integration successful!", {
               </div>
             </div>
 
-            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-4 shadow-lg shadow-indigo-500/5 max-w-xl">
+            <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-4 space-y-4 shadow-lg shadow-indigo-500/10 max-w-xl">
               <div>
                 <label htmlFor="slackWebhookInput" className="block text-xs font-bold uppercase tracking-wider text-slate-550 mb-1.5">
                   Slack Incoming Webhook URL
