@@ -35,6 +35,7 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedInstall, setCopiedInstall] = useState(false);
+  const [copiedCurl, setCopiedCurl] = useState(false);
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl || "");
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState(project.discordWebhookUrl || "");
   const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(project.teamsWebhookUrl || "");
@@ -141,7 +142,7 @@ logger.info("ObservabilityOS integration successful!", {
     }
   }, [step, project.id, services.length]);
 
-  const handleCopyText = (text: string, type: "key" | "code" | "install") => {
+  const handleCopyText = (text: string, type: "key" | "code" | "install" | "curl") => {
     navigator.clipboard.writeText(text);
     if (type === "key") {
       setCopiedKey(true);
@@ -152,6 +153,9 @@ logger.info("ObservabilityOS integration successful!", {
     } else if (type === "install") {
       setCopiedInstall(true);
       setTimeout(() => setCopiedInstall(false), 2000);
+    } else if (type === "curl") {
+      setCopiedCurl(true);
+      setTimeout(() => setCopiedCurl(false), 2000);
     }
   };
 
@@ -487,7 +491,16 @@ logger.info("ObservabilityOS integration successful!", {
 
             {/* Quick curl instructions */}
             <div className="bg-slate-900/60 border border-slate-850 rounded-xl p-4">
-              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Or test instantly using cURL:</h4>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Or test instantly using cURL:</h4>
+                <button
+                  onClick={() => handleCopyText(`curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${project.apiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`, "curl")}
+                  className="p-1 rounded bg-slate-950 hover:bg-slate-800 border border-slate-900 hover:border-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  title="Copy command"
+                >
+                  {copiedCurl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                </button>
+              </div>
               <pre className="text-[9px] font-mono text-indigo-400 overflow-x-auto whitespace-pre-wrap select-all bg-slate-950 p-2.5 rounded border border-slate-900 break-all leading-normal">
 {`curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${project.apiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`}
               </pre>
