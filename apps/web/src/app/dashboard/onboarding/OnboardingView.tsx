@@ -306,7 +306,7 @@ logger.info("ObservabilityOS integration successful!", {
       </div>
 
       {/* Steps Cards */}
-      <div className="bg-slate-900 border border-slate-900 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
+      <div className="bg-slate-900 border border-slate-800/60 rounded-2xl p-6 relative overflow-hidden shadow-2xl">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
 
         {/* STEP 1: Project Identity */}
@@ -559,8 +559,8 @@ logger.info("ObservabilityOS integration successful!", {
                 {/* Availability SLO preset card */}
                 <div className={`p-4 border rounded-xl transition-all duration-200 flex flex-col justify-between ${
                   enableAvailSlo 
-                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/10" 
-                    : "bg-slate-900/40 border-slate-800 opacity-60"
+                    ? "bg-slate-950 border-indigo-500/30 shadow-lg shadow-indigo-500/10" 
+                    : "bg-slate-900/40 border-slate-800/60 opacity-60"
                 }`}>
                   <div>
                     <div className="flex items-start justify-between">
@@ -626,8 +626,8 @@ logger.info("ObservabilityOS integration successful!", {
                 {/* Latency SLO preset card */}
                 <div className={`p-4 border rounded-xl transition-all duration-200 flex flex-col justify-between ${
                   enableLatencySlo 
-                    ? "bg-slate-950/80 border-indigo-500/50 shadow-lg shadow-indigo-500/10" 
-                    : "bg-slate-900/40 border-slate-800 opacity-60"
+                    ? "bg-slate-950 border-indigo-500/30 shadow-lg shadow-indigo-500/10" 
+                    : "bg-slate-900/40 border-slate-800/60 opacity-60"
                 }`}>
                   <div>
                     <div className="flex items-start justify-between">
