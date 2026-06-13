@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { 
-  Search, 
-  Filter, 
+  Search as SearchIcon, 
   Clock, 
   Terminal, 
   ChevronDown, 
@@ -12,12 +11,24 @@ import {
   Check, 
   X, 
   RefreshCw,
-  AlertCircle,
   Database,
   Download,
   Bookmark,
   Trash2
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SerializedService {
   id: string;
@@ -212,10 +223,10 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
   };
 
   const levelStyles = {
-    error: "bg-rose-500/10 border-rose-500/20 text-rose-450",
-    warn: "bg-amber-500/10 border-amber-500/20 text-amber-450",
-    info: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
-    debug: "bg-slate-500/10 border-slate-500/20 text-slate-400",
+    error: "bg-rose-500/10 border-rose-500/20 text-rose-400" as const,
+    warn: "bg-amber-500/10 border-amber-500/20 text-amber-400" as const,
+    info: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" as const,
+    debug: "bg-slate-500/10 border-slate-500/20 text-slate-400" as const,
   };
 
   return (
@@ -237,35 +248,35 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
 
         {/* Export Action Buttons */}
         <div className="flex items-center gap-2 shrink-0 self-start md:self-center">
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => handleExport("csv")}
-            className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-805 hover:bg-slate-850 hover:border-slate-700 text-slate-300 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 mr-1.5" />
             Export CSV
-          </button>
-          <button
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={() => handleExport("json")}
-            className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-805 hover:bg-slate-850 hover:border-slate-700 text-slate-300 px-3.5 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5" />
+            <Download className="w-3.5 h-3.5 mr-1.5" />
             Export JSON
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Left Sidebar - Saved Searches */}
-        <div className="bg-slate-950 border border-slate-900 rounded-xl p-5 space-y-4 lg:sticky lg:top-6">
+        <div className="bg-slate-955 border border-slate-900 rounded-xl p-5 space-y-4 lg:sticky lg:top-6">
           <div className="flex items-center justify-between pb-3 border-b border-slate-900">
             <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Bookmark className="w-4 h-4 text-slate-550" />
+              <Bookmark className="w-4 h-4 text-slate-500" />
               Saved Searches
             </h3>
-            <span className="text-[10px] bg-slate-900 border border-slate-800 text-slate-400 px-2 py-0.5 rounded font-mono font-bold">
-              {savedQueries.length}
-            </span>
+            <Badge variant="secondary">{savedQueries.length}</Badge>
           </div>
 
           <div className="space-y-2 max-h-[300px] lg:max-h-[500px] overflow-y-auto pr-1">
@@ -284,7 +295,7 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                     <span className="font-semibold block truncate text-slate-200 group-hover:text-indigo-400 transition-colors">
                       {q.name}
                     </span>
-                    <span className="text-[9px] text-slate-550 font-mono block truncate">
+                    <span className="text-[9px] text-slate-500 font-mono block truncate">
                       {q.query ? `"${q.query}"` : "All logs"}
                     </span>
                   </div>
@@ -309,111 +320,117 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
             {/* Search Input Bar */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-555" />
-                <input
+                <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <Input
                   type="text"
                   placeholder="Search log messages (e.g. 'Database timeout', 'Failed transaction', trace ID)..."
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-200 placeholder:text-slate-700 rounded-lg py-2.5 pl-10 pr-4 text-sm focus:outline-none transition-colors"
+                  className="pl-10"
                 />
               </div>
               <div className="flex gap-2">
-                <button
+                <Button
                   id="search-trigger-btn"
                   type="submit"
                   disabled={isSearching}
-                  className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-5 py-2.5 text-sm font-semibold rounded-lg text-white transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
                 >
-                  {isSearching ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                  {isSearching ? <RefreshCw className="w-4 h-4 animate-spin mr-1" /> : <SearchIcon className="w-4 h-4 mr-1" />}
                   Search
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => setIsSaveModalOpen(true)}
-                  className="bg-slate-900 hover:bg-slate-850 border border-slate-800 px-4 py-2.5 text-xs font-semibold rounded-lg text-slate-350 hover:text-white transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   title="Save current search parameters"
                 >
-                  <Bookmark className="w-4 h-4" />
+                  <Bookmark className="w-4 h-4 mr-1.5" />
                   Save Search
-                </button>
+                </Button>
               </div>
             </div>
 
             {/* Filters Row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 pt-1">
               {/* Service */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Service</label>
-                <select
-                  value={serviceId}
-                  onChange={(e) => setServiceId(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 text-slate-300 py-2 px-3 rounded-lg text-xs focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                >
-                  <option value="all">All Services</option>
-                  {services.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.environment})
-                    </option>
-                  ))}
-                </select>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] text-slate-500">Service</Label>
+                <Select value={serviceId} onValueChange={(val) => setServiceId(val)}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue placeholder="All Services" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Services</SelectItem>
+                    {services.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name} ({s.environment})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Environment */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Environment</label>
-                <select
-                  value={environment}
-                  onChange={(e) => setEnvironment(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 text-slate-300 py-2 px-3 rounded-lg text-xs focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                >
-                  <option value="all">All Environments</option>
-                  <option value="prod">Production</option>
-                  <option value="staging">Staging</option>
-                  <option value="dev">Development</option>
-                </select>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] text-slate-500">Environment</Label>
+                <Select value={environment} onValueChange={(val) => setEnvironment(val)}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue placeholder="All Environments" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Environments</SelectItem>
+                    <SelectItem value="prod">Production</SelectItem>
+                    <SelectItem value="staging">Staging</SelectItem>
+                    <SelectItem value="dev">Development</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Log Level */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Log Level</label>
-                <select
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 text-slate-300 py-2 px-3 rounded-lg text-xs focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                >
-                  <option value="all">All Levels</option>
-                  <option value="info">INFO</option>
-                  <option value="warn">WARN</option>
-                  <option value="error">ERROR</option>
-                  <option value="debug">DEBUG</option>
-                </select>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] text-slate-500">Log Level</Label>
+                <Select value={level} onValueChange={(val) => setLevel(val)}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue placeholder="All Levels" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="info">INFO</SelectItem>
+                    <SelectItem value="warn">WARN</SelectItem>
+                    <SelectItem value="error">ERROR</SelectItem>
+                    <SelectItem value="debug">DEBUG</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Time Range */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">Time Range</label>
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 hover:border-slate-800 text-slate-300 py-2 px-3 rounded-lg text-xs focus:outline-none focus:border-indigo-500 transition-colors cursor-pointer"
-                >
-                  <option value="1h">Last Hour</option>
-                  <option value="24h">Last 24 Hours</option>
-                  <option value="7d">Last 7 Days</option>
-                </select>
+              <div className="space-y-1.5">
+                <Label className="text-[10px] text-slate-500">Time Range</Label>
+                <Select value={timeRange} onValueChange={(val) => setTimeRange(val)}>
+                  <SelectTrigger className="text-xs">
+                    <SelectValue placeholder="Last 24 Hours" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">Last Hour</SelectItem>
+                    <SelectItem value="24h">Last 24 Hours</SelectItem>
+                    <SelectItem value="7d">Last 7 Days</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Reset Filters */}
-              <div className="flex items-end">
-                <button
+              <div className="space-y-1.5">
+                <Label className="text-[10px] opacity-0 select-none block">Reset</Label>
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={handleReset}
-                  className="w-full border border-slate-800 hover:border-slate-700 bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-slate-200 py-2 px-3 rounded-lg text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 h-9 cursor-pointer"
+                  className="w-full text-xs font-semibold h-9"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <X className="w-3.5 h-3.5 mr-1.5" />
                   Reset Filters
-                </button>
+                </Button>
               </div>
             </div>
           </form>
@@ -423,7 +440,7 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
             {/* Table Header */}
             <div className="grid grid-cols-12 gap-4 bg-slate-900/60 border-b border-slate-900 px-6 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
               <div className="col-span-3 flex items-center gap-2">
-                <Clock className="w-3.5 h-3.5 text-slate-600" />
+                <Clock className="w-3.5 h-3.5 text-slate-650" />
                 Timestamp
               </div>
               <div className="col-span-1">Level</div>
@@ -466,9 +483,9 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                           {formattedDate}
                         </div>
                         <div className="col-span-1">
-                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold border uppercase tracking-wider ${levelStyles[log.level]}`}>
+                          <Badge variant={log.level === "error" ? "destructive" : log.level === "warn" ? "warning" : log.level === "info" ? "default" : "outline"} className="text-[9px] font-bold">
                             {log.level}
-                          </span>
+                          </Badge>
                         </div>
                         <div className="col-span-2 truncate text-slate-400 font-semibold">
                           {log.service ? `${log.service.name} (${log.service.environment})` : "unknown"}
@@ -485,11 +502,14 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                             {/* Copy & Trace */}
                             <div className="absolute right-3 top-3 flex items-center gap-2">
                               {log.traceId && (
-                                <span className="text-[10px] font-mono bg-slate-900 border border-slate-800 text-indigo-400 px-2 py-0.5 rounded">
+                                <Badge variant="outline" className="text-[10px] font-mono text-indigo-400">
                                   Trace ID: {log.traceId}
-                                </span>
+                                </Badge>
                               )}
-                              <button
+                              <Button
+                                variant="secondary"
+                                size="icon"
+                                className="h-7 w-7"
                                 onClick={() => handleCopyMetadata(log.id, {
                                   message: log.message,
                                   level: log.level,
@@ -498,7 +518,6 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                                   traceId: log.traceId,
                                   metadata: log.metadata,
                                 })}
-                                className="p-1.5 bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white rounded-md transition-colors cursor-pointer"
                                 title="Copy JSON Payload"
                               >
                                 {copiedLogId === log.id ? (
@@ -506,30 +525,30 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                                 ) : (
                                   <Copy className="w-3.5 h-3.5" />
                                 )}
-                              </button>
+                              </Button>
                             </div>
 
                             {/* Details header */}
-                            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-550 mb-2 border-b border-slate-900 pb-1.5">
+                            <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2 border-b border-slate-900 pb-1.5">
                               Log Details & Metadata
                             </div>
 
                             {/* Info grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans text-slate-400 mb-4 pt-1">
                               <div>
-                                <span className="font-semibold text-slate-500">Service:</span>{" "}
+                                <span className="font-semibold text-slate-500 font-sans">Service:</span>{" "}
                                 <span className="font-mono text-slate-350">{log.service ? `${log.service.name} [${log.service.environment}]` : "unknown"}</span>
                               </div>
                               <div>
-                                <span className="font-semibold text-slate-500">Log level:</span>{" "}
+                                <span className="font-semibold text-slate-500 font-sans">Log level:</span>{" "}
                                 <span className="font-mono text-slate-350 capitalize">{log.level}</span>
                               </div>
                               <div>
-                                <span className="font-semibold text-slate-500">Timestamp:</span>{" "}
+                                <span className="font-semibold text-slate-500 font-sans">Timestamp:</span>{" "}
                                 <span className="font-mono text-slate-350">{log.timestamp}</span>
                               </div>
                               <div>
-                                <span className="font-semibold text-slate-500">Trace ID:</span>{" "}
+                                <span className="font-semibold text-slate-500 font-sans">Trace ID:</span>{" "}
                                 <span className="font-mono text-slate-350">{log.traceId || "none"}</span>
                               </div>
                             </div>
@@ -554,60 +573,61 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
       </div>
 
       {/* Save Search Modal */}
-      {isSaveModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-805 rounded-2xl w-full max-w-md shadow-2xl p-6 relative flex flex-col">
-            <h3 className="text-lg font-bold text-white mb-1">Save Search Query</h3>
-            <p className="text-xs text-slate-400 mb-6">
+      <Dialog open={isSaveModalOpen} onOpenChange={setIsSaveModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Save Search Query</DialogTitle>
+            <DialogDescription>
               Save these query parameters for quick-access shortcuts.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
 
-            <form onSubmit={handleSaveQuery} className="space-y-4">
-              <div>
-                <label htmlFor="saveNameInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                  Saved Search Name
-                </label>
-                <input
+          <form onSubmit={handleSaveQuery}>
+            <div className="space-y-4 my-4">
+              <div className="space-y-2">
+                <Label htmlFor="saveNameInput">Saved Search Name</Label>
+                <Input
                   id="saveNameInput"
                   type="text"
                   required
                   value={saveName}
                   onChange={(e) => setSaveName(e.target.value)}
                   placeholder="e.g. Payment service error spikes"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors"
                 />
               </div>
 
               {/* Current params preview */}
-              <div className="bg-slate-950 border border-slate-900 p-3 rounded-lg text-[10px] space-y-1.5 font-mono text-slate-450">
+              <div className="bg-slate-950 border border-slate-900 p-3 rounded-lg text-[10px] space-y-1.5 font-mono text-slate-400">
                 <span className="block font-bold text-slate-500 uppercase pb-1 border-b border-slate-900">Current Query Filter Parameters</span>
-                {query.trim() && <div><span className="text-slate-600">Query:</span> "{query}"</div>}
-                <div><span className="text-slate-600">Level:</span> {level}</div>
-                <div><span className="text-slate-600">Service:</span> {serviceId === "all" ? "All" : services.find(s => s.id === serviceId)?.name}</div>
-                <div><span className="text-slate-600">Env:</span> {environment}</div>
-                <div><span className="text-slate-600">Time:</span> {timeRange}</div>
+                {query.trim() && <div><span className="text-slate-650">Query:</span> "{query}"</div>}
+                <div><span className="text-slate-650">Level:</span> {level}</div>
+                <div><span className="text-slate-650">Service:</span> {serviceId === "all" ? "All" : services.find(s => s.id === serviceId)?.name}</div>
+                <div><span className="text-slate-650">Env:</span> {environment}</div>
+                <div><span className="text-slate-650">Time:</span> {timeRange}</div>
               </div>
+            </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={() => setIsSaveModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingQuery || !saveName.trim()}
-                  className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-4 py-2 text-xs font-semibold rounded-lg text-white transition-colors cursor-pointer"
-                >
-                  {isSavingQuery ? "Saving..." : "Save Query"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSaveModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSavingQuery || !saveName.trim()}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
+              >
+                {isSavingQuery ? "Saving..." : "Save Query"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

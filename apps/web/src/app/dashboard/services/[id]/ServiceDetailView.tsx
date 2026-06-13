@@ -22,6 +22,18 @@ import {
   Percent,
   Info
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 interface ServiceProps {
   id: string;
@@ -629,276 +641,265 @@ export default function ServiceDetailView({
       </div>
 
       {/* Configure SLO Modal */}
-      {isSloModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl p-6 relative flex flex-col max-h-[90vh]">
-            <h3 className="text-lg font-bold text-white mb-1">Configure SLO targets</h3>
-            <p className="text-xs text-slate-400 mb-6">
+      <Dialog open={isSloModalOpen} onOpenChange={setIsSloModalOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Configure SLO targets</DialogTitle>
+            <DialogDescription>
               Establish performance and availability targets for this service.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto space-y-6 pr-1">
-              {/* List of active SLOs */}
-              <div className="space-y-3">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-550">Active SLO Targets ({sloStatus.length})</h4>
-                {sloStatus.length === 0 ? (
-                  <p className="text-xs text-slate-500 italic bg-slate-950/40 p-4 border border-dashed border-slate-800 rounded-lg text-center">
-                    No SLO targets currently defined.
-                  </p>
-                ) : (
-                  <div className="divide-y divide-slate-850 bg-slate-955 border border-slate-850 rounded-lg overflow-hidden">
-                    {sloStatus.map((slo) => (
-                      <div key={slo.name} className="flex items-center justify-between p-3 gap-4 text-xs">
-                        <div className="space-y-0.5">
-                          <span className="font-semibold text-slate-200">{slo.name}</span>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
-                            <span className="capitalize">{slo.type}</span>
-                            <span>Target: {slo.target}%</span>
-                            <span>Window: {slo.windowDays} days</span>
-                            {slo.type === "latency" && <span>Threshold: &lt;={slo.latencyThresholdMs}ms</span>}
-                          </div>
+          <div className="flex-1 overflow-y-auto space-y-6 pr-1 my-4">
+            {/* List of active SLOs */}
+            <div className="space-y-3">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Active SLO Targets ({sloStatus.length})</h4>
+              {sloStatus.length === 0 ? (
+                <p className="text-xs text-slate-500 italic bg-slate-950/40 p-4 border border-dashed border-slate-800 rounded-lg text-center font-sans">
+                  No SLO targets currently defined.
+                </p>
+              ) : (
+                <div className="divide-y divide-slate-850 bg-slate-955 border border-slate-850 rounded-lg overflow-hidden">
+                  {sloStatus.map((slo) => (
+                    <div key={slo.name} className="flex items-center justify-between p-3 gap-4 text-xs font-mono">
+                      <div className="space-y-0.5">
+                        <span className="font-semibold text-slate-200 font-sans">{slo.name}</span>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                          <span className="capitalize">{slo.type}</span>
+                          <span>Target: {slo.target}%</span>
+                          <span>Window: {slo.windowDays} days</span>
+                          {slo.type === "latency" && <span>Threshold: &lt;={slo.latencyThresholdMs}ms</span>}
                         </div>
-
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSlo(slo.name)}
-                          className="p-1.5 hover:bg-slate-900 text-slate-500 hover:text-rose-455 rounded transition-colors cursor-pointer"
-                          title="Delete Target"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
                       </div>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDeleteSlo(slo.name)}
+                        className="text-slate-500 hover:text-rose-400 cursor-pointer"
+                        title="Delete Target"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Add SLO Form */}
+            <form onSubmit={handleCreateSlo} className="border-t border-slate-800 pt-6 space-y-4">
+              <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Add / Edit SLO Target</h4>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Name */}
+                <div className="md:col-span-2 space-y-2">
+                  <Label htmlFor="sloNameInput">SLO Objective Name</Label>
+                  <Input
+                    id="sloNameInput"
+                    type="text"
+                    required
+                    value={sloName}
+                    onChange={(e) => setSloName(e.target.value)}
+                    placeholder="e.g. Core API Availability"
+                  />
+                </div>
+
+                {/* Type */}
+                <div className="space-y-2">
+                  <Label>Objective Type</Label>
+                  <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setSloType("availability")}
+                      className={`flex-1 py-1.5 rounded-md font-semibold text-center cursor-pointer transition-colors ${
+                        sloType === "availability" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      Availability
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSloType("latency")}
+                      className={`flex-1 py-1.5 rounded-md font-semibold text-center cursor-pointer transition-colors ${
+                        sloType === "latency" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      Latency
+                    </button>
+                  </div>
+                </div>
+
+                {/* Target % */}
+                <div className="space-y-2">
+                  <Label htmlFor="sloTargetInput">Target Reliability (%)</Label>
+                  <div className="relative">
+                    <Input
+                      id="sloTargetInput"
+                      type="number"
+                      required
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={sloTarget}
+                      onChange={(e) => setSloTarget(Math.min(100, Math.max(0, parseFloat(e.target.value) || 99.0)))}
+                      className="pr-8 font-mono"
+                    />
+                    <Percent className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                {/* Window Days */}
+                <div className="space-y-2">
+                  <Label>Rolling Window Period</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[7, 30].map((d) => (
+                      <Button
+                        key={d}
+                        type="button"
+                        variant={sloWindow === d ? "default" : "secondary"}
+                        size="sm"
+                        onClick={() => setSloWindow(d)}
+                        className="cursor-pointer"
+                      >
+                        {d} Days
+                      </Button>
                     ))}
+                  </div>
+                </div>
+
+                {/* Latency Threshold (Ms) */}
+                {sloType === "latency" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="sloLatencyInput">Latency Threshold (ms)</Label>
+                    <Input
+                      id="sloLatencyInput"
+                      type="number"
+                      required
+                      min="1"
+                      value={sloLatencyMs}
+                      onChange={(e) => setSloLatencyMs(Math.max(1, parseInt(e.target.value) || 500))}
+                      className="font-mono"
+                    />
                   </div>
                 )}
               </div>
 
-              {/* Add SLO Form */}
-              <form onSubmit={handleCreateSlo} className="border-t border-slate-800/80 pt-6 space-y-4">
-                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Add / Edit SLO Target</h4>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Name */}
-                  <div className="md:col-span-2">
-                    <label htmlFor="sloNameInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                      SLO Objective Name
-                    </label>
-                    <input
-                      id="sloNameInput"
-                      type="text"
-                      required
-                      value={sloName}
-                      onChange={(e) => setSloName(e.target.value)}
-                      placeholder="e.g. Core API Availability"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors"
-                    />
-                  </div>
-
-                  {/* Type */}
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                      Objective Type
-                    </label>
-                    <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-xs">
-                      <button
-                        type="button"
-                        onClick={() => setSloType("availability")}
-                        className={`flex-1 py-1.5 rounded-md font-semibold text-center cursor-pointer transition-colors ${
-                          sloType === "availability" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
-                        }`}
-                      >
-                        Availability
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSloType("latency")}
-                        className={`flex-1 py-1.5 rounded-md font-semibold text-center cursor-pointer transition-colors ${
-                          sloType === "latency" ? "bg-indigo-600 text-white" : "text-slate-500 hover:text-slate-300"
-                        }`}
-                      >
-                        Latency
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Target % */}
-                  <div>
-                    <label htmlFor="sloTargetInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                      Target Reliability (%)
-                    </label>
-                    <div className="relative">
-                      <input
-                        id="sloTargetInput"
-                        type="number"
-                        required
-                        step="0.01"
-                        min="0"
-                        max="100"
-                        value={sloTarget}
-                        onChange={(e) => setSloTarget(Math.min(100, Math.max(0, parseFloat(e.target.value) || 99.0)))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-3 pr-8 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                      />
-                      <Percent className="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
-                    </div>
-                  </div>
-
-                  {/* Window Days */}
-                  <div>
-                    <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                      Rolling Window Period
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[7, 30].map((d) => (
-                        <button
-                          key={d}
-                          type="button"
-                          onClick={() => setSloWindow(d)}
-                          className={`py-2 rounded-lg border text-xs font-semibold capitalize transition-all cursor-pointer ${
-                            sloWindow === d
-                              ? "bg-slate-950 border-indigo-500 text-indigo-400"
-                              : "bg-slate-950 border-slate-800 text-slate-500 hover:border-slate-700"
-                          }`}
-                        >
-                          {d} Days
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Latency Threshold (Ms) */}
-                  {sloType === "latency" && (
-                    <div>
-                      <label htmlFor="sloLatencyInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                        Latency Threshold (ms)
-                      </label>
-                      <input
-                        id="sloLatencyInput"
-                        type="number"
-                        required
-                        min="1"
-                        value={sloLatencyMs}
-                        onChange={(e) => setSloLatencyMs(Math.max(1, parseInt(e.target.value) || 500))}
-                        className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                      />
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex justify-end pt-2">
-                  <button
-                    type="submit"
-                    disabled={isSubmittingSlo}
-                    className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-4 py-2 text-xs font-semibold rounded-lg text-white transition-colors cursor-pointer flex items-center gap-1.5 shadow"
-                  >
-                    <Plus className="w-4 h-4" />
-                    {isSubmittingSlo ? "Saving..." : "Save Objective Target"}
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-slate-800/80 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setIsSloModalOpen(false)}
-                className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
-              >
-                Close Configuration
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Service Settings Modal */}
-      {isSettingsModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-xl shadow-2xl p-6 relative flex flex-col max-h-[90vh]">
-            <h3 className="text-lg font-bold text-white mb-1">Service Settings</h3>
-            <p className="text-xs text-slate-400 mb-6">
-              Configure runbook links and custom troubleshooting steps for {service.name}.
-            </p>
-
-            <form onSubmit={handleSaveSettings} className="space-y-5 flex-1 overflow-y-auto pr-1">
-              {/* Runbook URL */}
-              <div>
-                <label htmlFor="runbookUrlInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                  Runbook URL
-                </label>
-                <input
-                  id="runbookUrlInput"
-                  type="url"
-                  value={runbookUrl}
-                  onChange={(e) => setRunbookUrl(e.target.value)}
-                  placeholder="https://wiki.company.com/runbooks/service-name"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors font-mono"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">
-                  External document link rendered directly inside incidents triggered by this service.
-                </p>
-              </div>
-
-              {/* Troubleshooting Steps */}
-              <div>
-                <label htmlFor="troubleshootingInput" className="block text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-1.5">
-                  Troubleshooting Checklist / Guidelines
-                </label>
-                <textarea
-                  id="troubleshootingInput"
-                  rows={6}
-                  value={troubleshootingSteps}
-                  onChange={(e) => setTroubleshootingSteps(e.target.value)}
-                  placeholder="1. Verify database connectivity&#10;2. Check memory utilization metrics&#10;3. Inspect dependency service health logs"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors resize-none font-sans leading-relaxed"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">
-                  Step-by-step checklist or reference instructions to guide developers when resolving incidents.
-                </p>
-              </div>
-              {/* Danger Zone */}
-              <div className="pt-4 border-t border-slate-805/80 space-y-3">
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-rose-500 flex items-center gap-1.5">
-                  <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
-                  Danger Zone
-                </span>
-                <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div className="space-y-0.5">
-                    <span className="block text-xs font-semibold text-rose-400">Delete Service</span>
-                    <span className="block text-[10px] text-slate-500 leading-relaxed font-sans">
-                      Permanently delete this service, its associated SLO targets, anomalies, log records, and comments. This action is irreversible.
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={isDeletingService}
-                    onClick={handleDeleteService}
-                    className="bg-rose-900/10 hover:bg-rose-600 border border-rose-900/30 hover:border-rose-550 text-rose-400 hover:text-white px-3.5 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer shrink-0"
-                  >
-                    {isDeletingService ? "Deleting..." : "Delete Service"}
-                  </button>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={() => setIsSettingsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-950 hover:bg-slate-850 border border-slate-800 text-slate-300 transition-colors cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
+              <div className="flex justify-end pt-2">
+                <Button
                   type="submit"
-                  disabled={isSavingSettings}
-                  className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 px-4 py-2 text-xs font-semibold rounded-lg text-white transition-colors cursor-pointer"
+                  disabled={isSubmittingSlo}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white cursor-pointer"
                 >
-                  {isSavingSettings ? "Saving..." : "Save Settings"}
-                </button>
+                  <Plus className="w-4 h-4" />
+                  {isSubmittingSlo ? "Saving..." : "Save Objective Target"}
+                </Button>
               </div>
             </form>
           </div>
-        </div>
-      )}
+
+          <DialogFooter className="border-t border-slate-800 pt-4">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => setIsSloModalOpen(false)}
+            >
+              Close Configuration
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Service Settings Modal */}
+      <Dialog open={isSettingsModalOpen} onOpenChange={setIsSettingsModalOpen}>
+        <DialogContent className="max-w-xl max-h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Service Settings</DialogTitle>
+            <DialogDescription>
+              Configure runbook links and custom troubleshooting steps for {service.name}.
+            </DialogDescription>
+          </DialogHeader>
+
+          <form onSubmit={handleSaveSettings} className="space-y-5 flex-1 overflow-y-auto pr-1 my-4">
+            {/* Runbook URL */}
+            <div className="space-y-2">
+              <Label htmlFor="runbookUrlInput">Runbook URL</Label>
+              <Input
+                id="runbookUrlInput"
+                type="url"
+                value={runbookUrl}
+                onChange={(e) => setRunbookUrl(e.target.value)}
+                placeholder="https://wiki.company.com/runbooks/service-name"
+                className="font-mono"
+              />
+              <p className="text-[10px] text-slate-500 mt-1 font-sans">
+                External document link rendered directly inside incidents triggered by this service.
+              </p>
+            </div>
+
+            {/* Troubleshooting Steps */}
+            <div className="space-y-2">
+              <Label htmlFor="troubleshootingInput">Troubleshooting Checklist / Guidelines</Label>
+              <textarea
+                id="troubleshootingInput"
+                rows={6}
+                value={troubleshootingSteps}
+                onChange={(e) => setTroubleshootingSteps(e.target.value)}
+                placeholder="1. Verify database connectivity&#10;2. Check memory utilization metrics&#10;3. Inspect dependency service health logs"
+                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors resize-none font-sans leading-relaxed"
+              />
+              <p className="text-[10px] text-slate-500 mt-1 font-sans">
+                Step-by-step checklist or reference instructions to guide developers when resolving incidents.
+              </p>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="pt-4 border-t border-slate-800 space-y-3">
+              <span className="block text-[10px] font-bold uppercase tracking-wider text-rose-500 flex items-center gap-1.5 font-sans">
+                <AlertTriangle className="w-3.5 h-3.5 text-rose-500" />
+                Danger Zone
+              </span>
+              <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-0.5">
+                  <span className="block text-xs font-semibold text-rose-400">Delete Service</span>
+                  <span className="block text-[10px] text-slate-500 leading-relaxed font-sans">
+                    Permanently delete this service, its associated SLO targets, anomalies, log records, and comments. This action is irreversible.
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  disabled={isDeletingService}
+                  onClick={handleDeleteService}
+                >
+                  {isDeletingService ? "Deleting..." : "Delete Service"}
+                </Button>
+              </div>
+            </div>
+
+            <DialogFooter className="border-t border-slate-800 pt-4">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsSettingsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSavingSettings}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
+              >
+                {isSavingSettings ? "Saving..." : "Save Settings"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

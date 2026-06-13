@@ -3,6 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, Check, Eye, EyeOff, Plus, Terminal, Activity, Server, Layers, Calendar, GitBranch, GitCommit } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface SerializedService {
   id: string;
@@ -63,7 +71,6 @@ function timeAgo(dateString: string | null) {
 }
 
 export default function ProjectDashboardView({ project, services, deployments = [] }: ProjectDashboardViewProps) {
-
   const router = useRouter();
   const [showKey, setShowKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -73,7 +80,6 @@ export default function ProjectDashboardView({ project, services, deployments = 
   const [environment, setEnvironment] = useState<"prod" | "staging" | "dev">("dev");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [sdkTab, setSdkTab] = useState<"basic" | "multi" | "deploy">("basic");
-
 
   const endpointUrl = typeof window !== "undefined"
     ? `${window.location.protocol}//${window.location.host}/api/ingest`
@@ -135,30 +141,33 @@ export default function ProjectDashboardView({ project, services, deployments = 
           </div>
 
           {/* Credentials Card */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
+          <Card className="relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Ingestion Configuration</h2>
-            
-            <div className="space-y-4">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">Ingestion Configuration</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               {/* Endpoint URL */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">Ingestion Endpoint</label>
+              <div className="space-y-2">
+                <Label>Ingestion Endpoint</Label>
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-330 select-all truncate">
+                  <div className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 select-all truncate">
                     {endpointUrl}
                   </div>
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="icon"
                     onClick={handleCopyUrl}
-                    className="p-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    className="shrink-0"
                   >
                     {copiedUrl ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* API Key */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 mb-1">API Ingestion Key</label>
+              <div className="space-y-2">
+                <Label>API Ingestion Key</Label>
                 <div className="flex items-center gap-2">
                   <div className="flex-1 bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-slate-300 select-all truncate flex items-center justify-between">
                     <span>
@@ -166,72 +175,51 @@ export default function ProjectDashboardView({ project, services, deployments = 
                     </span>
                     <button
                       onClick={() => setShowKey(!showKey)}
-                      className="text-slate-500 hover:text-slate-300 ml-2"
+                      className="text-slate-500 hover:text-slate-300 ml-2 cursor-pointer"
                     >
                       {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                     </button>
                   </div>
-                  <button
+                  <Button
+                    variant="secondary"
+                    size="icon"
                     onClick={handleCopyKey}
-                    className="p-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-400 hover:text-white transition-colors"
+                    className="shrink-0"
                   >
                     {copiedKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                  </button>
+                  </Button>
                 </div>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Quick Integration card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3 border-b border-slate-800/60 pb-2.5">
-              <div className="flex items-center gap-2 text-indigo-400">
-                <Terminal className="w-5 h-5" />
-                <h3 className="text-sm font-bold uppercase tracking-wider">SDK Setup</h3>
-              </div>
-              <div className="flex bg-slate-950 border border-slate-800 rounded-lg p-0.5 text-[10px]">
-                <button
-                  type="button"
-                  onClick={() => setSdkTab("basic")}
-                  className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                    sdkTab === "basic" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  Basic
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSdkTab("multi")}
-                  className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                    sdkTab === "multi" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  Multi
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSdkTab("deploy")}
-                  className={`px-2 py-1 rounded-md transition-colors cursor-pointer ${
-                    sdkTab === "deploy" ? "bg-indigo-600 text-white font-semibold" : "text-slate-400 hover:text-slate-200"
-                  }`}
-                >
-                  Git Deploy
-                </button>
-              </div>
+        <Card className="flex flex-col justify-between">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-slate-800/60">
+            <div className="flex items-center gap-2 text-indigo-400">
+              <Terminal className="w-5 h-5" />
+              <CardTitle className="text-sm font-bold uppercase tracking-wider">SDK Setup</CardTitle>
             </div>
-            
-            <p className="text-xs text-slate-400 leading-relaxed mb-4">
-              {sdkTab === "basic" 
-                ? "Install the SDK and configure a default service name to start routing logs:" 
-                : sdkTab === "multi"
-                ? "Override the service per log or instantiate separate loggers for different components:"
-                : "Notify ObservabilityOS of new releases to correlate errors with deployments:"}
-            </p>
+          </CardHeader>
+          <CardContent className="pt-4 flex-1 flex flex-col justify-between">
+            <Tabs value={sdkTab} onValueChange={(val) => setSdkTab(val as any)} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 mb-4">
+                <TabsTrigger value="basic">Basic</TabsTrigger>
+                <TabsTrigger value="multi">Multi</TabsTrigger>
+                <TabsTrigger value="deploy">Git Deploy</TabsTrigger>
+              </TabsList>
 
-            {sdkTab === "basic" && (
-              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
+              <p className="text-xs text-slate-400 leading-relaxed mb-4">
+                {sdkTab === "basic" 
+                  ? "Install the SDK and configure a default service name to start routing logs:" 
+                  : sdkTab === "multi"
+                  ? "Override the service per log or instantiate separate loggers for different components:"
+                  : "Notify ObservabilityOS of new releases to correlate errors with deployments:"}
+              </p>
+
+              <TabsContent value="basic" className="mt-0">
+                <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
 const logger = new Logger({
@@ -242,11 +230,11 @@ const logger = new Logger({
 });
 
 logger.info("Service started successfully");`}
-              </pre>
-            )}
+                </pre>
+              </TabsContent>
 
-            {sdkTab === "multi" && (
-              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
+              <TabsContent value="multi" className="mt-0">
+                <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`import { Logger } from "@repo/sdk";
 
 const logger = new Logger({
@@ -266,11 +254,11 @@ const authLogger = new Logger({
   apiKey: "${project.apiKey.slice(0, 10)}...",
   defaultService: "auth-service"
 });`}
-              </pre>
-            )}
+                </pre>
+              </TabsContent>
 
-            {sdkTab === "deploy" && (
-              <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
+              <TabsContent value="deploy" className="mt-0">
+                <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
 {`# Send release webhook in CI/CD pipeline:
 curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
   -H "Content-Type: application/json" \\
@@ -282,15 +270,16 @@ curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
     "commitMessage": "Release production v1.0",
     "branch": "main"
   }'`}
-              </pre>
-            )}
-          </div>
-          <span className="text-[10px] text-slate-500">
-            {sdkTab === "deploy"
-              ? "Ensure the commit SHA is passed when deploying."
-              : "For monorepo projects, run "}<code className="font-mono text-slate-400">{sdkTab === "deploy" ? "POST /api/webhooks/github" : "yarn add @repo/sdk"}</code>.
-          </span>
-        </div>
+                </pre>
+              </TabsContent>
+            </Tabs>
+            <span className="text-[10px] text-slate-500">
+              {sdkTab === "deploy"
+                ? "Ensure the commit SHA is passed when deploying."
+                : "For monorepo projects, run "}<code className="font-mono text-slate-400">{sdkTab === "deploy" ? "POST /api/webhooks/github" : "yarn add @repo/sdk"}</code>.
+            </span>
+          </CardContent>
+        </Card>
       </section>
 
       {/* Services List Section */}
@@ -299,36 +288,38 @@ curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
           <div className="flex items-center gap-3">
             <Server className="w-5 h-5 text-indigo-400" />
             <h2 className="text-lg font-bold text-white">Monitored Services</h2>
-            <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-xs text-slate-400 font-semibold">
-              {services.length}
-            </span>
+            <Badge variant="secondary">{services.length}</Badge>
           </div>
 
-          <button
+          <Button
             id="add_service_btn"
+            size="sm"
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white px-3 h-8.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
           >
             <Plus className="w-4 h-4" />
             Add Service
-          </button>
+          </Button>
         </div>
 
         {services.length === 0 ? (
-          <div className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-12 text-center max-w-2xl mx-auto">
-            <Layers className="w-10 h-10 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-sm font-bold text-slate-300 mb-1">No services registered</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed mb-6">
-              Services are automatically registered as logs are ingested, or you can register your service names manually beforehand.
-            </p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="inline-flex items-center gap-1.5 bg-slate-900 border border-slate-800 hover:bg-slate-850 text-slate-300 px-4 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-            >
-              <Plus className="w-4 h-4" />
-              Register Service Manually
-            </button>
-          </div>
+          <Card className="border-dashed py-12 text-center max-w-2xl mx-auto">
+            <CardContent className="flex flex-col items-center">
+              <Layers className="w-10 h-10 text-slate-600 mb-4" />
+              <h3 className="text-sm font-bold text-slate-300 mb-1">No services registered</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed mb-6">
+                Services are automatically registered as logs are ingested, or you can register your service names manually beforehand.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsModalOpen(true)}
+              >
+                <Plus className="w-4 h-4" />
+                Register Service Manually
+              </Button>
+            </CardContent>
+          </Card>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service) => {
@@ -337,121 +328,126 @@ curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
                   bg: "bg-emerald-500",
                   ping: "bg-emerald-400",
                   text: "text-emerald-400",
-                  label: "Healthy"
+                  label: "Healthy",
+                  badge: "success" as const
                 },
                 warning: {
                   bg: "bg-amber-500",
                   ping: "bg-amber-400",
                   text: "text-amber-400",
-                  label: "Warning"
+                  label: "Warning",
+                  badge: "warning" as const
                 },
                 incident: {
                   bg: "bg-rose-500",
                   ping: "bg-rose-400",
                   text: "text-rose-400",
-                  label: "Incident"
+                  label: "Incident",
+                  badge: "destructive" as const
                 }
               };
               const health = healthColors[service.healthStatus] || healthColors.healthy;
 
               return (
-                <div
+                <Card
                   key={service.id}
                   onClick={() => router.push(`/dashboard/services/${service.id}?projectId=${project.id}`)}
-                  className="bg-slate-900/50 border border-slate-900 hover:border-indigo-500/40 rounded-xl p-5 transition-all duration-200 cursor-pointer hover:bg-slate-900/80 group"
+                  className="bg-slate-900/50 border border-slate-900 hover:border-indigo-500/40 transition-all duration-200 cursor-pointer hover:bg-slate-900/80 group"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="relative flex h-2 w-2 shrink-0">
-                        <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health.ping}`} />
-                        <span className={`relative inline-flex rounded-full h-2 w-2 ${health.bg}`} />
-                      </span>
-                      <h3 className="text-sm font-bold text-white truncate max-w-[130px] group-hover:text-indigo-400 transition-colors">{service.name}</h3>
-                    </div>
-                    <span
-                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
-                        service.environment === "prod"
-                          ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
-                          : service.environment === "staging"
-                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                          : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                      }`}
-                    >
-                      {service.environment}
-                    </span>
-                  </div>
-
-                  {/* Metrics grid */}
-                  <div className="grid grid-cols-3 gap-2 border-t border-b border-slate-800/60 py-3 mb-3">
-                    <div className="text-center">
-                      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Uptime</span>
-                      <span className={`text-xs font-mono font-bold ${
-                        service.totalLogs === 0 
-                          ? "text-slate-400"
-                          : service.availability >= 99 
-                          ? "text-emerald-400" 
-                          : service.availability >= 95 
-                          ? "text-amber-400" 
-                          : "text-rose-400"
-                      }`}>
-                        {service.totalLogs === 0 ? "100.0%" : `${service.availability.toFixed(1)}%`}
-                      </span>
-                    </div>
-                    <div className="text-center border-l border-r border-slate-800/60">
-                      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Error Rate</span>
-                      <span className={`text-xs font-mono font-bold ${
-                        service.totalLogs === 0 
-                          ? "text-slate-400"
-                          : service.errorRate > 5 
-                          ? "text-rose-400" 
-                          : service.errorRate > 1 
-                          ? "text-amber-400" 
-                          : "text-emerald-400"
-                      }`}>
-                        {service.totalLogs === 0 ? "0.0%" : `${service.errorRate.toFixed(1)}%`}
-                      </span>
-                    </div>
-                    <div className="text-center">
-                      <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Avg Latency</span>
-                      <span className={`text-xs font-mono font-bold ${
-                        service.avgLatency === null 
-                          ? "text-slate-550" 
-                          : service.avgLatency > 500 
-                          ? "text-rose-400" 
-                          : service.avgLatency > 200 
-                          ? "text-amber-400" 
-                          : "text-emerald-400"
-                      }`}>
-                        {service.avgLatency === null ? "—" : `${service.avgLatency}ms`}
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2.5 text-xs text-slate-500">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <div className="flex items-center gap-1.5">
-                        <Calendar className="w-3.5 h-3.5" />
-                        <span>Created: {formatDate(service.createdAt)}</span>
+                  <CardContent className="p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="relative flex h-2 w-2 shrink-0">
+                          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${health.ping}`} />
+                          <span className={`relative inline-flex rounded-full h-2 w-2 ${health.bg}`} />
+                        </span>
+                        <h3 className="text-sm font-bold text-white truncate max-w-[130px] group-hover:text-indigo-400 transition-colors">{service.name}</h3>
                       </div>
-                      <span className="text-[10px] text-slate-650 font-mono">{service.totalLogs} logs</span>
+                      <Badge
+                        variant={
+                          service.environment === "prod"
+                            ? "destructive"
+                            : service.environment === "staging"
+                            ? "warning"
+                            : "success"
+                        }
+                      >
+                        {service.environment}
+                      </Badge>
                     </div>
 
-                    {service.totalLogs === 0 ? (
-                      <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium bg-slate-950/40 border border-slate-900/60 rounded px-2 py-1">
-                        <Activity className="w-3.5 h-3.5 text-slate-600" />
-                        <span>Awaiting incoming streams</span>
+                    {/* Metrics grid */}
+                    <div className="grid grid-cols-3 gap-2 border-t border-b border-slate-800/60 py-3 mb-3">
+                      <div className="text-center">
+                        <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Uptime</span>
+                        <span className={`text-xs font-mono font-bold ${
+                          service.totalLogs === 0 
+                            ? "text-slate-400"
+                            : service.availability >= 99 
+                            ? "text-emerald-400" 
+                            : service.availability >= 95 
+                            ? "text-amber-400" 
+                            : "text-rose-400"
+                        }`}>
+                          {service.totalLogs === 0 ? "100.0%" : `${service.availability.toFixed(1)}%`}
+                        </span>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/60 border border-slate-900 rounded px-2 py-1 justify-between">
+                      <div className="text-center border-l border-r border-slate-800/60">
+                        <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Error Rate</span>
+                        <span className={`text-xs font-mono font-bold ${
+                          service.totalLogs === 0 
+                            ? "text-slate-400"
+                            : service.errorRate > 5 
+                            ? "text-rose-400" 
+                            : service.errorRate > 1 
+                            ? "text-amber-400" 
+                            : "text-emerald-400"
+                        }`}>
+                          {service.totalLogs === 0 ? "0.0%" : `${service.errorRate.toFixed(1)}%`}
+                        </span>
+                      </div>
+                      <div className="text-center">
+                        <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-0.5">Avg Latency</span>
+                        <span className={`text-xs font-mono font-bold ${
+                          service.avgLatency === null 
+                            ? "text-slate-500" 
+                            : service.avgLatency > 500 
+                            ? "text-rose-400" 
+                            : service.avgLatency > 200 
+                            ? "text-amber-400" 
+                            : "text-emerald-400"
+                        }`}>
+                          {service.avgLatency === null ? "—" : `${service.avgLatency}ms`}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2.5 text-xs text-slate-500">
+                      <div className="flex items-center justify-between text-[11px]">
                         <div className="flex items-center gap-1.5">
-                          <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-                          <span className={health.text}>{health.label}</span>
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span>Created: {formatDate(service.createdAt)}</span>
                         </div>
-                        <span className="text-[10px] text-slate-500 font-normal">Active streams</span>
+                        <span className="text-[10px] text-slate-500 font-mono">{service.totalLogs} logs</span>
                       </div>
-                    )}
-                  </div>
-                </div>
+
+                      {service.totalLogs === 0 ? (
+                        <div className="flex items-center gap-2 text-slate-500 text-[11px] font-medium bg-slate-950/40 border border-slate-900/60 rounded px-2 py-1">
+                          <Activity className="w-3.5 h-3.5 text-slate-600" />
+                          <span>Awaiting incoming streams</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-[11px] font-semibold bg-slate-950/60 border border-slate-900 rounded px-2 py-1 justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                            <span className={health.text}>{health.label}</span>
+                          </div>
+                          <span className="text-[10px] text-slate-500 font-normal">Active streams</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
@@ -464,36 +460,36 @@ curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
           <div className="flex items-center gap-3">
             <GitBranch className="w-5 h-5 text-indigo-400" />
             <h2 className="text-lg font-bold text-white">Recent Releases & Deployments</h2>
-            <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-xs text-slate-400 font-semibold">
-              {deployments.length}
-            </span>
+            <Badge variant="secondary">{deployments.length}</Badge>
           </div>
         </div>
 
         {deployments.length === 0 ? (
-          <div className="bg-slate-900/40 border border-dashed border-slate-800 rounded-2xl p-12 text-center max-w-2xl mx-auto">
-            <GitCommit className="w-10 h-10 text-slate-600 mx-auto mb-4" />
-            <h3 className="text-sm font-bold text-slate-300 mb-1">No tracked deployments</h3>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-              Log code deployments in your CI/CD pipeline to immediately correlate error spikes and latency regressions with code changes.
-            </p>
-          </div>
+          <Card className="border-dashed py-12 text-center max-w-2xl mx-auto">
+            <CardContent className="flex flex-col items-center">
+              <GitCommit className="w-10 h-10 text-slate-600 mb-4" />
+              <h3 className="text-sm font-bold text-slate-300 mb-1">No tracked deployments</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                Log code deployments in your CI/CD pipeline to immediately correlate error spikes and latency regressions with code changes.
+              </p>
+            </CardContent>
+          </Card>
         ) : (
-          <div className="bg-slate-900/20 border border-slate-905 rounded-xl overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="border-b border-slate-900 bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
-                    <th className="py-3 px-4">Release Commit / Branch</th>
-                    <th className="py-3 px-4">Service</th>
-                    <th className="py-3 px-4">Environment</th>
-                    <th className="py-3 px-4 text-right">Deployed At</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-900 bg-slate-950/20">
+          <Card className="border-slate-800">
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-slate-900 bg-slate-950 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+                    <TableHead className="py-3 px-4">Release Commit / Branch</TableHead>
+                    <TableHead className="py-3 px-4">Service</TableHead>
+                    <TableHead className="py-3 px-4">Environment</TableHead>
+                    <TableHead className="py-3 px-4 text-right">Deployed At</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {deployments.map((deploy) => (
-                    <tr key={deploy.id} className="hover:bg-slate-900/30 transition-colors">
-                      <td className="py-3.5 px-4 font-sans">
+                    <TableRow key={deploy.id}>
+                      <TableCell className="py-3.5 px-4 font-sans">
                         <div className="flex flex-col gap-0.5 max-w-xs md:max-w-md lg:max-w-xl">
                           <span className="font-semibold text-slate-200 truncate">{deploy.commitMessage}</span>
                           <div className="flex items-center gap-2 text-[10px] text-slate-500 font-mono">
@@ -506,110 +502,105 @@ curl -X POST "${endpointUrl.replace('/api/ingest', '/api/webhooks/github')}" \\
                             </span>
                           </div>
                         </div>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono font-semibold text-slate-300">
+                      </TableCell>
+                      <TableCell className="py-3.5 px-4 font-mono font-semibold text-slate-300">
                         {deploy.serviceName}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                      </TableCell>
+                      <TableCell className="py-3.5 px-4">
+                        <Badge
+                          variant={
                             deploy.environment === "prod"
-                              ? "bg-rose-500/10 border-rose-500/20 text-rose-450"
+                              ? "destructive"
                               : deploy.environment === "staging"
-                              ? "bg-amber-500/10 border-amber-500/20 text-amber-450"
-                              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-450"
-                          }`}
+                              ? "warning"
+                              : "success"
+                          }
                         >
                           {deploy.environment}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-right text-slate-450 font-medium">
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-3.5 px-4 text-right text-slate-400 font-medium">
                         <div className="flex flex-col items-end font-sans">
                           <span>{timeAgo(deploy.deployedAt)}</span>
                           <span className="text-[10px] text-slate-500 font-normal">
                             {deploy.deployedAt ? new Date(deploy.deployedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ""}
                           </span>
                         </div>
-                      </td>
-                    </tr>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         )}
       </section>
 
       {/* Register Service Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-md shadow-2xl p-6 relative">
-            <h3 className="text-lg font-bold text-white mb-1">Register Service</h3>
-            <p className="text-xs text-slate-400 mb-6">
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Register Service</DialogTitle>
+            <DialogDescription>
               Establish a new target service environment for your log streams.
-            </p>
+            </DialogDescription>
+          </DialogHeader>
 
-            <form onSubmit={handleCreateService}>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="serviceName" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Service Name
-                  </label>
-                  <input
-                    id="serviceName"
-                    type="text"
-                    required
-                    value={serviceName}
-                    onChange={(e) => setServiceName(e.target.value)}
-                    placeholder="e.g. payment-gateway"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-                    Environment
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    {["dev", "staging", "prod"].map((env) => (
-                      <button
-                        key={env}
-                        type="button"
-                        onClick={() => setEnvironment(env as any)}
-                        className={`py-2 rounded-lg border text-xs font-semibold capitalize transition-all cursor-pointer ${
-                          environment === env
-                            ? "bg-indigo-600 border-indigo-500 text-white"
-                            : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
-                        }`}
-                      >
-                        {env}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+          <form onSubmit={handleCreateService}>
+            <div className="space-y-4 my-4">
+              <div className="space-y-2">
+                <Label htmlFor="serviceName">Service Name</Label>
+                <Input
+                  id="serviceName"
+                  type="text"
+                  required
+                  value={serviceName}
+                  onChange={(e) => setServiceName(e.target.value)}
+                  placeholder="e.g. payment-gateway"
+                />
               </div>
 
-              <div className="mt-6 flex justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  id="create_service_submit"
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="px-4 py-2 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 text-white transition-colors flex items-center gap-1.5"
-                >
-                  {isSubmitting ? "Registering..." : "Register Service"}
-                </button>
+              <div className="space-y-2">
+                <Label>Environment</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  {["dev", "staging", "prod"].map((env) => (
+                    <Button
+                      key={env}
+                      type="button"
+                      variant={environment === env ? "default" : "secondary"}
+                      size="sm"
+                      onClick={() => setEnvironment(env as any)}
+                      className="capitalize"
+                    >
+                      {env}
+                    </Button>
+                  ))}
+                </div>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                id="create_service_submit"
+                type="submit"
+                size="sm"
+                disabled={isSubmitting}
+                className="bg-indigo-600 hover:bg-indigo-500 text-white"
+              >
+                {isSubmitting ? "Registering..." : "Register Service"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

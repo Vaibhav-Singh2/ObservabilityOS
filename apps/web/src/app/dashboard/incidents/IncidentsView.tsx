@@ -13,6 +13,17 @@ import {
   Activity, 
   RefreshCw 
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SerializedService {
   id: string;
@@ -151,25 +162,27 @@ export default function IncidentsView({ project, services, initialIncidents }: I
 
         <div className="flex items-center gap-3">
           {openCount > 0 ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-rose-400 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/25">
-              <AlertCircle className="w-4 h-4 text-rose-400" />
+            <Badge variant="destructive" className="px-3 py-1.5 text-xs font-bold">
+              <AlertCircle className="w-4 h-4 mr-1.5 text-rose-450" />
               {openCount} Active {openCount === 1 ? "Incident" : "Incidents"}
-            </span>
+            </Badge>
           ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+            <Badge variant="success" className="px-3 py-1.5 text-xs font-bold">
+              <CheckCircle2 className="w-4 h-4 mr-1.5 text-emerald-450" />
               All Systems Operational
-            </span>
+            </Badge>
           )}
 
-          <button
+          <Button
+            variant="secondary"
+            size="icon"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            className="flex items-center justify-center p-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 hover:text-white hover:bg-slate-850 hover:border-slate-700 transition-colors disabled:opacity-50 cursor-pointer"
+            className="shrink-0"
             title="Refresh Incidents"
           >
             <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -178,12 +191,12 @@ export default function IncidentsView({ project, services, initialIncidents }: I
         {/* Search */}
         <div className="relative flex-1">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
-          <input
+          <Input
             type="text"
             placeholder="Search incidents by symptom or title..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-250 placeholder:text-slate-600 rounded-lg py-2 pl-10 pr-4 text-sm focus:outline-none transition-colors"
+            className="pl-10"
           />
         </div>
 
@@ -192,61 +205,65 @@ export default function IncidentsView({ project, services, initialIncidents }: I
           {/* Service filter */}
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <select
-              value={serviceFilter}
-              onChange={(e) => setServiceFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-850 hover:border-slate-700 text-slate-350 py-1.5 px-3 rounded-lg text-xs focus:outline-none focus:border-indigo-500 transition-colors"
-            >
-              <option value="all">All Services</option>
-              {Array.from(new Set(services.map((s) => s.name))).map((serviceName) => (
-                <option key={serviceName} value={serviceName}>
-                  {serviceName}
-                </option>
-              ))}
-            </select>
+            <Select value={serviceFilter} onValueChange={(val) => setServiceFilter(val)}>
+              <SelectTrigger className="w-40 text-xs">
+                <SelectValue placeholder="All Services" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Services</SelectItem>
+                {Array.from(new Set(services.map((s) => s.name))).map((serviceName) => (
+                  <SelectItem key={serviceName} value={serviceName}>
+                    {serviceName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Status filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-slate-950 border border-slate-850 hover:border-slate-700 text-slate-350 py-1.5 px-3 rounded-lg text-xs focus:outline-none focus:border-indigo-500 transition-colors"
-          >
-            <option value="all">All Statuses</option>
-            <option value="open">Open</option>
-            <option value="investigating">Investigating</option>
-            <option value="resolved">Resolved</option>
-          </select>
+          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
+            <SelectTrigger className="w-36 text-xs">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="open">Open</SelectItem>
+              <SelectItem value="investigating">Investigating</SelectItem>
+              <SelectItem value="resolved">Resolved</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       {/* Incidents List */}
       {filteredIncidents.length === 0 ? (
-        <div className="relative overflow-hidden rounded-2xl border border-slate-900 bg-slate-950/40 p-12 text-center flex flex-col items-center justify-center min-h-[300px]">
+        <Card className="relative overflow-hidden border-dashed py-12 text-center flex flex-col items-center justify-center min-h-[300px]">
           <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none" />
-          <div className="w-12 h-12 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-center mb-4 text-slate-500 shadow-inner">
-            <CheckCircle2 className="w-6 h-6 text-indigo-500/60" />
-          </div>
-          <h3 className="text-base font-bold text-white mb-1.5">No Incidents Found</h3>
-          <p className="text-slate-500 text-sm max-w-sm">
-            Everything looks completely quiet. There are no active anomalies or incident reports matches your filter configuration.
-          </p>
-        </div>
+          <CardContent className="flex flex-col items-center">
+            <div className="w-12 h-12 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-center mb-4 text-slate-500 shadow-inner">
+              <CheckCircle2 className="w-6 h-6 text-indigo-500/60" />
+            </div>
+            <h3 className="text-base font-bold text-white mb-1.5">No Incidents Found</h3>
+            <p className="text-slate-500 text-sm max-w-sm">
+              Everything looks completely quiet. There are no active anomalies or incident reports matching your filter configuration.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4">
           {filteredIncidents.map((inc) => {
-            const timeAgo = new Date(inc.createdAt).toLocaleString();
-            const statusClass = 
+            const dateVal = new Date(inc.createdAt).toLocaleString();
+            const badgeVariant = 
               inc.status === "open"
-                ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                ? ("destructive" as const)
                 : inc.status === "investigating"
-                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+                ? ("warning" as const)
+                : ("success" as const);
 
             return (
-              <div
+              <Card
                 key={inc.id}
-                className="group relative rounded-xl border border-slate-900 bg-slate-950 hover:border-slate-800/80 transition-all duration-200 p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-6 hover:shadow-xl hover:shadow-indigo-950/20"
+                className="group relative rounded-xl border border-slate-905 bg-slate-950 hover:border-slate-800/80 transition-all duration-200"
               >
                 {/* Visual Accent for Open Incidents */}
                 {inc.status !== "resolved" && (
@@ -255,59 +272,67 @@ export default function IncidentsView({ project, services, initialIncidents }: I
                   }`} />
                 )}
 
-                <div className="space-y-3 flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2.5">
-                    {/* Status Pill */}
-                    <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${statusClass}`}>
-                      {inc.status}
-                    </span>
+                <CardContent className="p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-6">
+                  <div className="space-y-3 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {/* Status Pill */}
+                      <Badge variant={badgeVariant} className="capitalize">
+                        {inc.status}
+                      </Badge>
 
-                    {/* Service & Env Pill */}
-                    <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
-                      {inc.service ? `${inc.service.name} • ${inc.service.environment.toUpperCase()}` : "unknown service"}
-                    </span>
+                      {/* Service & Env Pill */}
+                      <Badge variant="outline">
+                        {inc.service ? `${inc.service.name} • ${inc.service.environment.toUpperCase()}` : "unknown service"}
+                      </Badge>
 
-                    {/* AI Tag */}
-                    <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-400 px-2 py-0.5 rounded bg-indigo-500/5 border border-indigo-500/15">
-                      <Sparkles className="w-2.5 h-2.5" />
-                      AI Summary ({Math.round(inc.confidence * 100)}%)
-                    </span>
-                  </div>
+                      {/* AI Tag */}
+                      <Badge variant="secondary" className="text-indigo-400 border border-indigo-500/15 flex items-center gap-1">
+                        <Sparkles className="w-2.5 h-2.5" />
+                        AI Summary ({Math.round(inc.confidence * 100)}%)
+                      </Badge>
+                    </div>
 
-                  {/* Incident Title */}
-                  <h3 className="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
-                    {inc.title}
-                  </h3>
+                    {/* Incident Title */}
+                    <h3 className="text-base font-bold text-white group-hover:text-indigo-400 transition-colors truncate">
+                      {inc.title}
+                    </h3>
 
-                  {/* Summary Snippet */}
-                  <p className="text-slate-400 text-sm line-clamp-2 leading-relaxed">
-                    {inc.summary}
-                  </p>
+                    {/* Summary Snippet */}
+                    <p className="text-slate-400 text-sm line-clamp-2 leading-relaxed">
+                      {inc.summary}
+                    </p>
 
-                  <div className="flex items-center gap-4 pt-1.5 text-xs text-slate-500">
-                    <span className="flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5" />
-                      Detected {timeAgo}
-                    </span>
-                    {inc.ttr && (
-                      <span className="flex items-center gap-1.5 text-emerald-500/80">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/80" />
-                        Resolved in {Math.round(inc.ttr / 1000 / 60)}m
+                    <div className="flex items-center gap-4 pt-1.5 text-xs text-slate-500">
+                      <span className="flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5" />
+                        Detected {dateVal}
                       </span>
-                    )}
+                      {inc.ttr && (
+                        <span className="flex items-center gap-1.5 text-emerald-500/80">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500/80" />
+                          Resolved in {Math.round(inc.ttr / 1000 / 60)}m
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex items-center self-end md:self-center shrink-0">
-                  <NextLink
-                    href={`/dashboard/incidents/${inc.id}?projectId=${project.id}`}
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white px-3.5 py-2 rounded-lg bg-slate-900 border border-slate-800 hover:bg-slate-850 hover:border-slate-700 transition-all cursor-pointer"
-                  >
-                    Investigate
-                    <ArrowRight className="w-3.5 h-3.5 text-indigo-500 group-hover:translate-x-0.5 transition-transform" />
-                  </NextLink>
-                </div>
-              </div>
+                  <div className="flex items-center self-end md:self-center shrink-0">
+                    <Button
+                      asChild
+                      variant="secondary"
+                      size="sm"
+                    >
+                      <NextLink
+                        href={`/dashboard/incidents/${inc.id}?projectId=${project.id}`}
+                        className="flex items-center gap-1.5"
+                      >
+                        Investigate
+                        <ArrowRight className="w-3.5 h-3.5 text-indigo-500 group-hover:translate-x-0.5 transition-transform" />
+                      </NextLink>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

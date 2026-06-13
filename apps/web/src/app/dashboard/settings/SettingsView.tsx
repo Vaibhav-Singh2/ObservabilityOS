@@ -14,6 +14,12 @@ import {
   Volume2,
   RefreshCw
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface SettingsViewProps {
   project: {
@@ -54,6 +60,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
   useEffect(() => {
     fetchAuditLogs();
   }, [project.id]);
+
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl);
   const [discordWebhookUrl, setDiscordWebhookUrl] = useState(project.discordWebhookUrl || "");
   const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(project.teamsWebhookUrl || "");
@@ -129,31 +136,25 @@ export default function SettingsView({ project }: SettingsViewProps) {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Project Profile Section */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
+        <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-800/60 pb-2.5">
-            General Settings
-          </h2>
-          
-          <div className="space-y-4 max-w-xl">
-            <div>
-              <label htmlFor="projectName" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Project Name
-              </label>
-              <input
+          <CardHeader>
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">General Settings</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 max-w-xl">
+            <div className="space-y-2">
+              <Label htmlFor="projectName">Project Name</Label>
+              <Input
                 id="projectName"
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors"
               />
             </div>
 
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                API Ingestion Key
-              </label>
+            <div className="space-y-2">
+              <Label>API Ingestion Key</Label>
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-slate-950 border border-slate-850 rounded-lg px-3 py-2 text-xs font-mono text-slate-350 select-all truncate flex items-center justify-between">
                   <span>
@@ -162,50 +163,49 @@ export default function SettingsView({ project }: SettingsViewProps) {
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
-                    className="text-slate-500 hover:text-slate-300 ml-2"
+                    className="text-slate-500 hover:text-slate-300 ml-2 cursor-pointer"
                   >
                     {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="icon"
                   onClick={handleCopyKey}
-                  className="p-2 bg-slate-950 border border-slate-850 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  className="shrink-0"
                 >
                   {copiedKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                </button>
+                </Button>
               </div>
               <p className="text-[10px] text-slate-500 mt-1.5">
                 Use this API key in your customer SDK to route log streams into this project environment.
               </p>
             </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
         {/* Incident Alert Threshold Settings */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
+        <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-          <div className="flex items-center gap-2 mb-4 border-b border-slate-800/60 pb-2.5">
+          <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4">
             <Volume2 className="w-4 h-4 text-indigo-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
               Anomaly & Alert Thresholds
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
             {/* Minimum Error Count */}
-            <div>
-              <label htmlFor="minErrorCount" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Min Error Trigger Limit
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="minErrorCount">Min Error Trigger Limit</Label>
+              <Input
                 id="minErrorCount"
                 type="number"
                 required
                 min="1"
                 value={minErrorCount}
                 onChange={(e) => setMinErrorCount(Math.max(1, parseInt(e.target.value) || 1))}
-                className="w-full bg-slate-950 border border-slate-855 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono"
+                className="font-mono"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
                 Minimum number of error logs in a 5-minute sliding window required to evaluate for anomalies. Avoids alerting on single noise occurrences.
@@ -213,11 +213,9 @@ export default function SettingsView({ project }: SettingsViewProps) {
             </div>
 
             {/* Z-Score Sensitivity */}
-            <div>
-              <label htmlFor="zScoreThreshold" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Statistical Sensitivity (Z-Score)
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="zScoreThreshold">Statistical Sensitivity (Z-Score)</Label>
+              <Input
                 id="zScoreThreshold"
                 type="number"
                 required
@@ -225,36 +223,35 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 step="0.1"
                 value={zScoreThreshold}
                 onChange={(e) => setZScoreThreshold(Math.max(1.0, parseFloat(e.target.value) || 1.0))}
-                className="w-full bg-slate-950 border border-slate-855 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono"
+                className="font-mono"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
                 Standard deviations above the historical baseline required to trigger an alert. 
                 <span className="block mt-0.5 text-slate-400">Recommended: 3.0 (higher = less sensitive, lower = more sensitive).</span>
               </p>
             </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
         {/* Integration settings */}
-        <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
+        <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 border-b border-slate-800/60 pb-2.5">
-            Notification Channel Webhooks
-          </h2>
-          
-          <div className="space-y-6 max-w-xl">
+          <CardHeader>
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
+              Notification Channel Webhooks
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6 max-w-xl">
             {/* Slack */}
-            <div>
-              <label htmlFor="slackWebhook" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Slack Incoming Webhook URL
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="slackWebhook">Slack Incoming Webhook URL</Label>
+              <Input
                 id="slackWebhook"
                 type="url"
                 value={slackWebhookUrl}
                 onChange={(e) => setSlackWebhookUrl(e.target.value)}
-                placeholder="e.g. https://hooks.slack.com/services/T000/B000/XXXX"
-                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+                placeholder="https://hooks.slack.com/services/T000/B000/XXXX"
+                className="font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
                 Pushes rich diagnostic cards to your Slack channel on incidents and SLO budget status transitions.
@@ -262,17 +259,15 @@ export default function SettingsView({ project }: SettingsViewProps) {
             </div>
 
             {/* Discord */}
-            <div>
-              <label htmlFor="discordWebhook" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Discord Incoming Webhook URL
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="discordWebhook">Discord Incoming Webhook URL</Label>
+              <Input
                 id="discordWebhook"
                 type="url"
                 value={discordWebhookUrl}
                 onChange={(e) => setDiscordWebhookUrl(e.target.value)}
-                placeholder="e.g. https://discord.com/api/webhooks/XXXX"
-                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+                placeholder="https://discord.com/api/webhooks/XXXX"
+                className="font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
                 Pushes embeds to Discord channel webhooks on anomalies and SLO budget changes.
@@ -280,133 +275,138 @@ export default function SettingsView({ project }: SettingsViewProps) {
             </div>
 
             {/* Microsoft Teams */}
-            <div>
-              <label htmlFor="teamsWebhook" className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
-                Microsoft Teams Webhook URL
-              </label>
-              <input
+            <div className="space-y-2">
+              <Label htmlFor="teamsWebhook">Microsoft Teams Webhook URL</Label>
+              <Input
                 id="teamsWebhook"
                 type="url"
                 value={teamsWebhookUrl}
                 onChange={(e) => setTeamsWebhookUrl(e.target.value)}
-                placeholder="e.g. https://outlook.office.com/webhook/XXXX"
-                className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 text-slate-100 rounded-lg px-3 py-2 text-sm focus:outline-none transition-colors font-mono placeholder:text-slate-700"
+                placeholder="https://outlook.office.com/webhook/XXXX"
+                className="font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
                 Pushes Office 365 Connector cards to Microsoft Teams channel on alerts.
               </p>
             </div>
-          </div>
-        </section>
+          </CardContent>
+        </Card>
 
         {/* Feedback / Save Actions */}
         <div className="flex items-center justify-between pt-2">
           <div>
             {saveStatus === "success" && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                <Check className="w-4 h-4" />
+              <Badge variant="success" className="px-3 py-1.5 text-xs font-semibold">
+                <Check className="w-4 h-4 mr-1.5" />
                 Settings saved successfully
-              </span>
+              </Badge>
             )}
             {saveStatus === "error" && (
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-400 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/20">
-                <AlertTriangle className="w-4 h-4" />
+              <Badge variant="destructive" className="px-3 py-1.5 text-xs font-semibold">
+                <AlertTriangle className="w-4 h-4 mr-1.5" />
                 {errorMessage}
-              </span>
+              </Badge>
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors cursor-pointer"
+            className="bg-indigo-600 hover:bg-indigo-500 text-white"
           >
-            <Save className="w-4 h-4" />
+            <Save className="w-4 h-4 mr-1.5" />
             {isSubmitting ? "Saving changes..." : "Save Settings"}
-          </button>
+          </Button>
         </div>
       </form>
 
       {/* System & Project Audit Logs Section */}
-      <section className="bg-slate-900 border border-slate-805 rounded-2xl p-6 relative overflow-hidden">
+      <Card className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-        <div className="flex items-center justify-between mb-4 border-b border-slate-800/60 pb-2.5">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-slate-800/60">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-indigo-400" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
               System & Configuration Audit Logs
-            </h2>
+            </CardTitle>
           </div>
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={fetchAuditLogs}
-            className="p-1.5 hover:bg-slate-950 text-slate-500 hover:text-slate-300 rounded transition-colors cursor-pointer"
+            className="text-slate-500 hover:text-slate-300"
             title="Refresh logs"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {isLoadingAudit ? (
-          <div className="text-center py-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
-            <RefreshCw className="w-4 h-4 animate-spin text-indigo-500" />
-            Loading system audit logs...
-          </div>
-        ) : auditLogs.length === 0 ? (
-          <p className="text-xs text-slate-600 italic py-4 text-center">
-            No configuration changes or SRE actions recorded yet.
-          </p>
-        ) : (
-          <div className="border border-slate-850 rounded-lg overflow-hidden bg-slate-950/60 text-xs font-mono">
-            <div className="grid grid-cols-12 gap-3 bg-slate-900/60 border-b border-slate-850 px-4 py-2 font-bold uppercase tracking-wider text-slate-500 text-[10px]">
-              <div className="col-span-3">Timestamp</div>
-              <div className="col-span-2">User</div>
-              <div className="col-span-3">Action</div>
-              <div className="col-span-4">Details</div>
+          </Button>
+        </CardHeader>
+        <CardContent className="pt-4">
+          {isLoadingAudit ? (
+            <div className="text-center py-6 flex items-center justify-center gap-2 text-slate-500 text-xs">
+              <RefreshCw className="w-4 h-4 animate-spin text-indigo-500" />
+              Loading system audit logs...
             </div>
-            <div className="divide-y divide-slate-850 max-h-[300px] overflow-y-auto pr-1">
-              {auditLogs.map((log) => {
-                const dateStr = new Date(log.createdAt).toLocaleString();
-                let details = "";
-                if (log.action === "service.delete") {
-                  details = `Service deleted: "${log.targetId}" (${log.metadata?.environment})`;
-                } else if (log.action === "slo.create") {
-                  details = `SLO created: "${log.targetId}" (Target: ${log.metadata?.target}%)`;
-                } else if (log.action === "slo.update") {
-                  details = `SLO updated: "${log.targetId}" (Target: ${log.metadata?.target}%)`;
-                } else if (log.action === "slo.delete") {
-                  details = `SLO deleted: "${log.targetId}"`;
-                } else if (log.action === "webhook.update") {
-                  const changes = [];
-                  if (log.metadata?.slackChanged) changes.push("Slack");
-                  if (log.metadata?.discordChanged) changes.push("Discord");
-                  if (log.metadata?.teamsChanged) changes.push("Teams");
-                  details = `Webhooks updated: ${changes.join(", ") || "none"}`;
-                } else {
-                  details = `Action on ${log.targetEntity}: ${log.targetId || ""}`;
-                }
+          ) : auditLogs.length === 0 ? (
+            <p className="text-xs text-slate-650 italic py-4 text-center">
+              No configuration changes or SRE actions recorded yet.
+            </p>
+          ) : (
+            <div className="border border-slate-850 rounded-lg overflow-hidden bg-slate-950/60">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-slate-850 bg-slate-900/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <TableHead className="w-3/12 py-2 px-4">Timestamp</TableHead>
+                    <TableHead className="w-2/12 py-2 px-4">User</TableHead>
+                    <TableHead className="w-3/12 py-2 px-4">Action</TableHead>
+                    <TableHead className="w-4/12 py-2 px-4">Details</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody className="text-xs font-mono">
+                  {auditLogs.map((log) => {
+                    const dateStr = new Date(log.createdAt).toLocaleString();
+                    let details = "";
+                    if (log.action === "service.delete") {
+                      details = `Service deleted: "${log.targetId}" (${log.metadata?.environment})`;
+                    } else if (log.action === "slo.create") {
+                      details = `SLO created: "${log.targetId}" (Target: ${log.metadata?.target}%)`;
+                    } else if (log.action === "slo.update") {
+                      details = `SLO updated: "${log.targetId}" (Target: ${log.metadata?.target}%)`;
+                    } else if (log.action === "slo.delete") {
+                      details = `SLO deleted: "${log.targetId}"`;
+                    } else if (log.action === "webhook.update") {
+                      const changes = [];
+                      if (log.metadata?.slackChanged) changes.push("Slack");
+                      if (log.metadata?.discordChanged) changes.push("Discord");
+                      if (log.metadata?.teamsChanged) changes.push("Teams");
+                      details = `Webhooks updated: ${changes.join(", ") || "none"}`;
+                    } else {
+                      details = `Action on ${log.targetEntity}: ${log.targetId || ""}`;
+                    }
 
-                return (
-                  <div key={log.id} className="grid grid-cols-12 gap-3 px-4 py-2.5 items-center hover:bg-slate-900/30 transition-colors text-slate-350">
-                    <div className="col-span-3 text-slate-500 truncate">{dateStr}</div>
-                    <div className="col-span-2 text-slate-300 font-semibold truncate">
-                      {log.user?.username || "System"}
-                    </div>
-                    <div className="col-span-3">
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-bold border border-indigo-500/20 bg-indigo-500/5 text-indigo-400 uppercase tracking-wider font-mono">
-                        {log.action}
-                      </span>
-                    </div>
-                    <div className="col-span-4 text-slate-200 truncate" title={details}>
-                      {details}
-                    </div>
-                  </div>
-                );
-              })}
+                    return (
+                      <TableRow key={log.id} className="hover:bg-slate-900/30 transition-colors text-slate-350">
+                        <TableCell className="py-2.5 px-4 text-slate-500 truncate">{dateStr}</TableCell>
+                        <TableCell className="py-2.5 px-4 text-slate-300 font-semibold truncate">
+                          {log.user?.username || "System"}
+                        </TableCell>
+                        <TableCell className="py-2.5 px-4">
+                          <Badge variant="outline" className="text-[9px] font-bold border-indigo-500/20 bg-indigo-500/5 text-indigo-400 uppercase tracking-wider font-mono">
+                            {log.action}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-2.5 px-4 text-slate-200 truncate max-w-[200px]" title={details}>
+                          {details}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
             </div>
-          </div>
-        )}
-      </section>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

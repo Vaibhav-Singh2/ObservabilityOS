@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Layout, Zap, Terminal, Activity } from "lucide-react";
+import { Plus, Activity } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function ZeroStateView() {
   const router = useRouter();
@@ -52,36 +56,35 @@ export default function ZeroStateView() {
       </div>
 
       {/* Creation card */}
-      <div className="bg-slate-900 border border-slate-900 rounded-2xl p-8 w-full shadow-2xl relative overflow-hidden">
+      <Card className="w-full relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <CardContent className="p-8">
+          <form onSubmit={handleCreate} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="zeroProjectName">Project Name</Label>
+              <Input
+                id="zeroProjectName"
+                type="text"
+                required
+                value={projectName}
+                onChange={(e) => setProjectName(e.target.value)}
+                placeholder="e.g. Acme Backend Production"
+                className="px-4 py-3"
+              />
+            </div>
 
-        <form onSubmit={handleCreate} className="space-y-6">
-          <div>
-            <label htmlFor="zeroProjectName" className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Project Name
-            </label>
-            <input
-              id="zeroProjectName"
-              type="text"
-              required
-              value={projectName}
-              onChange={(e) => setProjectName(e.target.value)}
-              placeholder="e.g. Acme Backend Production"
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-slate-700 focus:outline-none focus:border-indigo-500 transition-colors"
-            />
-          </div>
-
-          <button
-            id="zero_create_project_btn"
-            type="submit"
-            disabled={isSubmitting}
-            className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white font-semibold h-11 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-600/10 hover:shadow-indigo-500/20"
-          >
-            <Plus className="w-4 h-4" />
-            {isSubmitting ? "Creating Project..." : "Create Project & Generate API Key"}
-          </button>
-        </form>
-      </div>
+            <Button
+              id="zero_create_project_btn"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white font-semibold h-11 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-600/10 hover:shadow-indigo-500/20"
+            >
+              <Plus className="w-4 h-4" />
+              {isSubmitting ? "Creating Project..." : "Create Project & Generate API Key"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Onboarding steps preview */}
       <div className="mt-12 grid grid-cols-3 gap-6 text-center text-xs text-slate-500 w-full max-w-lg">
