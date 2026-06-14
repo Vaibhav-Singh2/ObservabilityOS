@@ -297,7 +297,7 @@ export default function BillingView({ project }: BillingViewProps) {
               </li>
               <li className="flex items-center gap-2.5 text-slate-600 line-through">
                 <Check className="w-4 h-4 shrink-0" />
-                <span>Slack instant alert cards</span>
+                <span>Multi-channel alerts (Slack, Discord, Teams)</span>
               </li>
               <li className="flex items-center gap-2.5 text-slate-600 line-through">
                 <Check className="w-4 h-4 shrink-0" />
@@ -366,7 +366,7 @@ export default function BillingView({ project }: BillingViewProps) {
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Instant Slack diagnostics webhook alerts</span>
+                <span>Instant alerts (Slack, Discord, MS Teams)</span>
               </li>
               <li className="flex items-center gap-2.5 text-indigo-400">
                 <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
