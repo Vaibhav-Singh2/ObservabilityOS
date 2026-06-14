@@ -57,14 +57,18 @@ export default function DashboardShell({
       >
         {/* Brand */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-900">
-          <div className="flex items-center gap-2.5">
+          <Link
+            id="brand_logo_link"
+            href="/"
+            className="flex items-center gap-2.5 hover:opacity-85 transition-opacity"
+          >
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <Activity className="w-4 h-4 text-white" />
             </div>
             <span className="font-semibold text-base tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
               ObservabilityOS
             </span>
-          </div>
+          </Link>
           {/* Close button on mobile */}
           <button
             onClick={() => setSidebarOpen(false)}

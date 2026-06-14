@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { Github, Activity, Shield, Terminal, Zap } from "lucide-react";
+import jwt from "jsonwebtoken";
 
 export const metadata = {
   title: "ObservabilityOS — AI-Native DevOps Intelligence Platform",
@@ -7,7 +9,23 @@ export const metadata = {
     "Transform raw logs into structured AI post-mortems, detect anomalies instantly, and solve incidents 10x faster.",
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("session")?.value;
+  let isLoggedIn = false;
+
+  if (token) {
+    const jwtSecret = process.env.JWT_SECRET;
+    if (jwtSecret) {
+      try {
+        jwt.verify(token, jwtSecret);
+        isLoggedIn = true;
+      } catch (e) {
+        // Invalid token
+      }
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white font-sans overflow-hidden">
       {/* Background gradients for premium aesthetic */}
@@ -27,14 +45,24 @@ export default function LandingPage() {
           </div>
 
           <div>
-            <a
-              id="header_login_btn"
-              href="/api/auth/github"
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 h-9 rounded-lg text-sm font-medium transition-all duration-200"
-            >
-              <Github className="w-4 h-4" />
-              Sign In
-            </a>
+            {isLoggedIn ? (
+              <Link
+                id="header_dashboard_btn"
+                href="/dashboard"
+                className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 h-9 rounded-lg text-sm font-medium transition-all duration-200 shadow-md shadow-indigo-600/20"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <a
+                id="header_login_btn"
+                href="/api/auth/github"
+                className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 px-4 h-9 rounded-lg text-sm font-medium transition-all duration-200"
+              >
+                <Github className="w-4 h-4" />
+                Sign In
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -62,20 +90,31 @@ export default function LandingPage() {
           <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-8 backdrop-blur-sm max-w-md w-full shadow-2xl relative">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-2xl pointer-events-none" />
             <h2 className="text-xl font-bold text-slate-200 mb-2">
-              Get Started Free
+              {isLoggedIn ? "Welcome Back" : "Get Started Free"}
             </h2>
             <p className="text-sm text-slate-400 mb-6">
-              Connect your GitHub account to set up your first project and
-              receive your ingestion keys.
+              {isLoggedIn
+                ? "You are logged in. Access your project dashboard to view logs, metrics, and incident reports."
+                : "Connect your GitHub account to set up your first project and receive your ingestion keys."}
             </p>
-            <a
-              id="landing_github_oauth_btn"
-              href="/api/auth/github"
-              className="w-full inline-flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-950 font-semibold h-12 rounded-xl transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-white/5"
-            >
-              <Github className="w-5 h-5" />
-              Sign up with GitHub
-            </a>
+            {isLoggedIn ? (
+              <Link
+                id="landing_dashboard_btn"
+                href="/dashboard"
+                className="w-full inline-flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-950 font-semibold h-12 rounded-xl transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-white/5"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <a
+                id="landing_github_oauth_btn"
+                href="/api/auth/github"
+                className="w-full inline-flex items-center justify-center gap-3 bg-white hover:bg-slate-100 text-slate-950 font-semibold h-12 rounded-xl transition-all duration-200 hover:-translate-y-0.5 shadow-lg shadow-white/5"
+              >
+                <Github className="w-5 h-5" />
+                Sign up with GitHub
+              </a>
+            )}
             <div className="mt-4 text-[11px] text-slate-500 flex justify-center gap-4">
               <span className="flex items-center gap-1">
                 <Shield className="w-3 h-3 text-emerald-500" /> Secure OAuth
@@ -156,3 +195,4 @@ export default function LandingPage() {
     </div>
   );
 }
+
