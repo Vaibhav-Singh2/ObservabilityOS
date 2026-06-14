@@ -25,27 +25,27 @@ export async function checkRateLimit(
 
   try {
     const pipeline = redis.pipeline();
+    pipeline.zadd(key, now, identifier);
     pipeline.zremrangebyscore(key, "-inf", clearBefore);
     pipeline.zcard(key);
+    pipeline.expire(key, Math.ceil((windowMs * 2) / 1000));
     const results = await pipeline.exec();
 
     if (!results) {
-      return { allowed: true, count: 0 };
+      return { allowed: true, count: 1 };
     }
 
-    const [, cardResult] = results[1];
-    const count = typeof cardResult === "number" ? cardResult : 0;
+    // Index mapping: 0=zadd, 1=zremrange, 2=zcard, 3=expire
+    const cardResult = results[2][1];
+    const count = typeof cardResult === "number" ? cardResult : 1;
 
-    if (count >= limit) {
-      return { allowed: false, count };
+    if (count > limit) {
+      // Exceeded! Remove our token so it doesn't bloat the sliding window
+      await redis.zrem(key, identifier);
+      return { allowed: false, count: count - 1 };
     }
 
-    const addPipeline = redis.pipeline();
-    addPipeline.zadd(key, now, identifier);
-    addPipeline.expire(key, Math.ceil((windowMs * 2) / 1000));
-    await addPipeline.exec();
-
-    return { allowed: true, count: count + 1 };
+    return { allowed: true, count };
   } catch (err) {
     console.warn("Error running sliding-window rate limit, fail-open:", err);
     return { allowed: true, count: 0 };

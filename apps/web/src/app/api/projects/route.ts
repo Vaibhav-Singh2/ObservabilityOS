@@ -1,25 +1,11 @@
+import { getAuthenticatedUser } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project, User } from "@repo/db";
 import jwt from "jsonwebtoken";
-import crypto from "crypto";
+import { generateApiKey, hashApiKey } from "@/lib/crypto";
 
-async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  if (!token) return null;
 
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) return null;
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
-    await connectToDatabase();
-    return await User.findById(decoded.userId);
-  } catch {
-    return null;
-  }
-}
 
 export async function GET() {
   try {
@@ -67,14 +53,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const apiKey = `obs_sk_${crypto.randomBytes(24).toString("hex")}`;
+    const plainApiKey = generateApiKey();
+    const hashedApiKey = hashApiKey(plainApiKey);
+
     const project = await Project.create({
       ownerId: user._id,
       name: name.trim(),
-      apiKey,
+      apiKey: hashedApiKey,
     });
 
-    return NextResponse.json({ project }, { status: 201 });
+    return NextResponse.json({ project, plainApiKey }, { status: 201 });
   } catch (error) {
     console.error("Projects POST Error:", error);
     return NextResponse.json(

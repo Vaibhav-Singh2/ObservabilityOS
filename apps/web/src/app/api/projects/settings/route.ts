@@ -1,3 +1,4 @@
+import { getAuthenticatedUser } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project, User } from "@repo/db";
@@ -20,22 +21,7 @@ const settingsUpdateSchema = z.object({
     .min(1.0, "Z-Score threshold must be at least 1.0"),
 });
 
-async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  if (!token) return null;
 
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) return null;
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
-    await connectToDatabase();
-    return await User.findById(decoded.userId);
-  } catch {
-    return null;
-  }
-}
 
 export async function PATCH(request: Request) {
   try {

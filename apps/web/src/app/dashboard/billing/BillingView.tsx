@@ -128,14 +128,20 @@ export default function BillingView({ project }: BillingViewProps) {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
+  const [currentPlan, setCurrentPlan] = useState(project.plan);
+  const [currentSubStatus, setCurrentSubStatus] = useState(project.subscriptionStatus);
+  const [currentBillingProvider, setCurrentBillingProvider] = useState(project.billingProvider);
+  const [isVerifyingUpgrade, setIsVerifyingUpgrade] = useState(false);
+
   useEffect(() => {
     const status = searchParams.get("checkout_status");
     const gatewayParam = searchParams.get("gateway");
     if (status === "success") {
       Promise.resolve().then(() => {
         setSuccessMsg(
-          `Congratulations! Your subscription upgrade via ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"} was processed successfully.`,
+          `Upgrading plan... Verifying payment with ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"}...`,
         );
+        setIsVerifyingUpgrade(true);
       });
       router.replace(`/dashboard/billing?projectId=${project.id}`);
     } else if (status === "cancel") {
@@ -147,6 +153,47 @@ export default function BillingView({ project }: BillingViewProps) {
       router.replace(`/dashboard/billing?projectId=${project.id}`);
     }
   }, [searchParams, project.id, router]);
+
+  useEffect(() => {
+    if (!isVerifyingUpgrade) return;
+
+    let intervalId: NodeJS.Timeout;
+
+    const pollStatus = async () => {
+      try {
+        const res = await fetch("/api/projects");
+        if (res.ok) {
+          const { projects } = await res.json();
+          const activeProj = projects.find((p: any) => p._id === project.id);
+          if (activeProj && activeProj.plan === "pro") {
+            setCurrentPlan("pro");
+            setCurrentSubStatus("active");
+            setCurrentBillingProvider(activeProj.billingProvider);
+            setIsVerifyingUpgrade(false);
+            setSuccessMsg("Upgrade verified successfully! Welcome to Pro Tier.");
+            router.refresh();
+          }
+        }
+      } catch (err) {
+        console.error("Billing status check failed:", err);
+      }
+    };
+
+    // Poll every 2 seconds
+    intervalId = setInterval(pollStatus, 2000);
+
+    // Stop after 2 minutes (safeguard)
+    const timeoutId = setTimeout(() => {
+      clearInterval(intervalId);
+      setIsVerifyingUpgrade(false);
+      setErrorMsg("Billing verification timed out. If you made a payment, it will activate shortly once processed.");
+    }, 120000);
+
+    return () => {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+    };
+  }, [isVerifyingUpgrade, project.id, router]);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -253,6 +300,9 @@ export default function BillingView({ project }: BillingViewProps) {
       setSuccessMsg(
         `Plan successfully changed to ${targetPlan.toUpperCase()} via Dev Override.`,
       );
+      setCurrentPlan(targetPlan);
+      setCurrentSubStatus(targetPlan === "pro" ? "active" : "none");
+      setCurrentBillingProvider(targetPlan === "pro" ? "manual" : "none");
       router.refresh();
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Dev override failed");
@@ -277,8 +327,8 @@ export default function BillingView({ project }: BillingViewProps) {
 
   /** Map backend plan name to our UI plan id */
   const currentPlanId = (): string => {
-    if (project.plan === "pro") return "starter";
-    return project.plan; // "free" | "team" | "scale"
+    if (currentPlan === "pro") return "starter";
+    return currentPlan; // "free" | "team" | "scale"
   };
 
   const isCurrentPlan = (plan: Plan) => plan.id === currentPlanId();
@@ -289,9 +339,9 @@ export default function BillingView({ project }: BillingViewProps) {
   };
 
   const currentDisplayName = () => {
-    if (project.plan === "pro") return "Starter";
-    if (project.plan === "free") return "Free Tier";
-    return project.plan.charAt(0).toUpperCase() + project.plan.slice(1);
+    if (currentPlan === "pro") return "Starter";
+    if (currentPlan === "free") return "Free Tier";
+    return currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
   };
 
   return (
@@ -337,7 +387,7 @@ export default function BillingView({ project }: BillingViewProps) {
               <span className="text-lg text-slate-350">Current Plan:</span>
               <span
                 className={`text-2xl font-black uppercase tracking-wide ${
-                  project.plan !== "free"
+                  currentPlan !== "free"
                     ? "bg-linear-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent"
                     : "text-white"
                 }`}
@@ -346,28 +396,28 @@ export default function BillingView({ project }: BillingViewProps) {
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              {project.plan !== "free"
-                ? `Active subscription managed via ${project.billingProvider.toUpperCase()}`
+              {currentPlan !== "free"
+                ? `Active subscription managed via ${(currentBillingProvider || "").toUpperCase()}`
                 : "Limited to 1 service, 500MB logs/month & 7-day retention."}
             </p>
           </div>
 
           <span
             className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full self-start sm:self-center ${
-              project.subscriptionStatus === "active"
+              currentSubStatus === "active"
                 ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
                 : "text-slate-400 bg-slate-950 border border-slate-800"
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
-                project.subscriptionStatus === "active"
+                currentSubStatus === "active"
                   ? "bg-emerald-400 animate-pulse"
                   : "bg-slate-600"
               }`}
             />
             Status:{" "}
-            {project.subscriptionStatus === "active"
+            {currentSubStatus === "active"
               ? "Active"
               : "None / Unpaid"}
           </span>
@@ -575,14 +625,14 @@ export default function BillingView({ project }: BillingViewProps) {
         <div className="flex items-center gap-3">
           <button
             onClick={() =>
-              handleSandboxOverride(project.plan === "pro" ? "free" : "pro")
+              handleSandboxOverride(currentPlan === "pro" ? "free" : "pro")
             }
             disabled={isSandboxUpdating}
             className="px-4 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer"
           >
             {isSandboxUpdating
               ? "Updating..."
-              : project.plan === "pro"
+              : currentPlan === "pro"
                 ? "Simulate Free Downgrade"
                 : "Simulate Pro Upgrade"}
           </button>

@@ -210,42 +210,11 @@ export default function SettingsView({ project }: SettingsViewProps) {
 
             <div className="space-y-2">
               <Label>API Ingestion Key</Label>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-slate-950 border border-slate-850 rounded-lg px-3 py-2 text-xs font-mono text-slate-350 select-all truncate flex items-center justify-between">
-                  <span>
-                    {showKey
-                      ? project.apiKey
-                      : "••••••••••••••••••••••••••••••••••••••••••••••••"}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowKey(!showKey)}
-                    className="text-slate-500 hover:text-slate-300 ml-2 cursor-pointer"
-                  >
-                    {showKey ? (
-                      <EyeOff className="w-3.5 h-3.5" />
-                    ) : (
-                      <Eye className="w-3.5 h-3.5" />
-                    )}
-                  </button>
-                </div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  onClick={handleCopyKey}
-                  className="shrink-0"
-                >
-                  {copiedKey ? (
-                    <Check className="w-4 h-4 text-emerald-400" />
-                  ) : (
-                    <Copy className="w-4 h-4" />
-                  )}
-                </Button>
+              <div className="flex-1 bg-slate-950 border border-slate-850 rounded-lg px-3 py-2 text-xs font-mono text-slate-500 select-none truncate">
+                obs_sk_••••••••••••••••••••••••••••••••
               </div>
-              <p className="text-[10px] text-slate-500 mt-1.5">
-                Use this API key in your customer SDK to route log streams into
-                this project environment.
+              <p className="text-[10px] text-amber-500 mt-1.5 leading-relaxed">
+                ⚠️ For security, your API ingestion key is cryptographically hashed inside our database and cannot be revealed or copied again. If you have lost your key, please create a new project to generate a new credentials set.
               </p>
             </div>
           </CardContent>

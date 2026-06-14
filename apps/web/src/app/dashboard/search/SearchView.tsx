@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Search as SearchIcon,
   Clock,
@@ -91,6 +91,45 @@ export default function SearchView({
   const [isSearching, setIsSearching] = useState(false);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [copiedLogId, setCopiedLogId] = useState<string | null>(null);
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    if (!isLive) return;
+
+    const eventSource = new EventSource(`/api/logs/stream?projectId=${project.id}`);
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.event === "connected" || data.event === "heartbeat") {
+          return;
+        }
+
+        setLogs((prevLogs) => {
+          if (prevLogs.some((l) => l.id === data.id)) return prevLogs;
+          // Filter client-side based on currently selected filters in live view
+          if (level !== "all" && data.level !== level) return prevLogs;
+          if (serviceId !== "all" && data.service?.id !== serviceId) return prevLogs;
+          if (environment !== "all" && data.service?.environment !== environment) return prevLogs;
+          if (query.trim() && !data.message.toLowerCase().includes(query.toLowerCase())) return prevLogs;
+
+          return [data, ...prevLogs.slice(0, 99)];
+        });
+      } catch (err) {
+        console.error("Error parsing streaming log data:", err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error("EventSource failed:", err);
+      eventSource.close();
+      setIsLive(false);
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [isLive, project.id, level, serviceId, environment, query]);
 
   // Saved searches states
   const [savedQueries, setSavedQueries] =
@@ -101,6 +140,7 @@ export default function SearchView({
 
   const handleSearch = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    setIsLive(false); // Stop live streaming on manual query search
     setIsSearching(true);
     setExpandedLogId(null);
 
@@ -358,6 +398,24 @@ export default function SearchView({
                     <SearchIcon className="w-4 h-4 mr-1" />
                   )}
                   Search
+                </Button>
+                <Button
+                  type="button"
+                  variant={isLive ? "default" : "outline"}
+                  onClick={() => setIsLive(!isLive)}
+                  className={`flex-1 sm:flex-initial font-bold transition-all relative ${
+                    isLive
+                      ? "bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500"
+                      : "text-slate-350 hover:text-white"
+                  }`}
+                  title={isLive ? "Pause Live Feed" : "Start Live Feed"}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full mr-2 shrink-0 ${
+                      isLive ? "bg-white animate-pulse" : "bg-emerald-500"
+                    }`}
+                  />
+                  {isLive ? "Live Streaming..." : "Go Live"}
                 </Button>
                 <Button
                   type="button"

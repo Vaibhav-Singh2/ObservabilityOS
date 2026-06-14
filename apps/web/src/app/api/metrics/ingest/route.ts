@@ -4,6 +4,8 @@ import { z } from "zod";
 import { Types } from "mongoose";
 import { delCache } from "@/lib/redis";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { hashApiKey } from "@/lib/crypto";
+import { triggerAnomalyCheck } from "@/lib/anomaly";
 
 // Validation schema for single metric item
 const metricItemSchema = z.object({
@@ -45,7 +47,8 @@ export async function POST(request: Request) {
     await connectToDatabase();
 
     // 3. Find Project (Tenant Isolation)
-    const project = await Project.findOne({ apiKey });
+    const hashedApiKey = hashApiKey(apiKey);
+    const project = await Project.findOne({ apiKey: hashedApiKey });
     if (!project) {
       return NextResponse.json(
         {
@@ -155,6 +158,34 @@ export async function POST(request: Request) {
       await delCache(`metrics:query:${projectIdStr}:${serviceIdStr}:1h`);
       await delCache(`metrics:query:${projectIdStr}:${serviceIdStr}:24h`);
       await delCache(`metrics:query:${projectIdStr}:${serviceIdStr}:7d`);
+    }
+
+    // Trigger Anomaly Detection asynchronously for each unique service+environment in the metrics batch
+    const uniqueServiceEnvs = new Map<
+      string,
+      { serviceId: Types.ObjectId; environment: "prod" | "staging" | "dev" }
+    >();
+    for (const item of metricsToInsert) {
+      if (item.serviceId) {
+        const key = `${item.serviceId.toString()}-${item.environment}`;
+        uniqueServiceEnvs.set(key, {
+          serviceId: item.serviceId as Types.ObjectId,
+          environment: item.environment as "prod" | "staging" | "dev",
+        });
+      }
+    }
+
+    for (const { serviceId, environment } of uniqueServiceEnvs.values()) {
+      triggerAnomalyCheck(
+        projectIdStr,
+        serviceId.toString(),
+        environment,
+      ).catch((err) => {
+        console.error(
+          `[Metrics Ingest Route] Failed to trigger anomaly check for service ${serviceId}:`,
+          err,
+        );
+      });
     }
 
     return NextResponse.json({

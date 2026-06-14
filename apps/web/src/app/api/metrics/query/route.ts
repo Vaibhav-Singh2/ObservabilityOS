@@ -1,3 +1,4 @@
+import { getAuthenticatedUser } from "@/lib/auth";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Metric, User } from "@repo/db";
@@ -12,22 +13,7 @@ interface MetricDataPoint {
   latency: number;
 }
 
-async function getAuthenticatedUser() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-  if (!token) return null;
 
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) return null;
-
-  try {
-    const decoded = jwt.verify(token, jwtSecret) as jwt.JwtPayload & { userId: string };
-    await connectToDatabase();
-    return await User.findById(decoded.userId);
-  } catch {
-    return null;
-  }
-}
 
 export async function GET(request: Request) {
   try {

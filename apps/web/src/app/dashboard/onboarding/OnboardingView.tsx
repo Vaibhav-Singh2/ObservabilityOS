@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Rocket,
   Terminal,
@@ -41,6 +41,10 @@ interface OnboardingViewProps {
 
 export default function OnboardingView({ project }: OnboardingViewProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const plainApiKey = searchParams.get("apiKey");
+  const displayApiKey = plainApiKey || "obs_sk_••••••••••••••••";
+
   const [step, setStep] = useState(1);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
@@ -101,7 +105,7 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
   const sdkIntegrationSnippet = `import { Logger } from "@repo/sdk";
 
 const logger = new Logger({
-  apiKey: "${project.apiKey}",
+  apiKey: "${displayApiKey}",
   endpoint: "${endpointUrl}",
   defaultService: "main-api",
   defaultEnvironment: "staging"
@@ -388,12 +392,12 @@ logger.info("ObservabilityOS integration successful!", {
                   <Label>Your API Ingestion Key</Label>
                   <div className="flex items-center gap-2">
                     <div className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-sm font-mono text-indigo-300 select-all truncate">
-                      {project.apiKey}
+                      {displayApiKey}
                     </div>
                     <Button
                       variant="secondary"
                       size="icon"
-                      onClick={() => handleCopyText(project.apiKey, "key")}
+                      onClick={() => handleCopyText(displayApiKey, "key")}
                     >
                       {copiedKey ? (
                         <Check className="w-4 h-4 text-emerald-400" />
@@ -402,6 +406,11 @@ logger.info("ObservabilityOS integration successful!", {
                       )}
                     </Button>
                   </div>
+                  {!plainApiKey && (
+                    <p className="text-[10px] text-amber-500 leading-relaxed mt-1">
+                      ⚠️ API key is secured and cannot be retrieved. If you did not save it, please create a new project.
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -605,7 +614,7 @@ logger.info("ObservabilityOS integration successful!", {
                     className="h-6 w-6"
                     onClick={() =>
                       handleCopyText(
-                        `curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${project.apiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`,
+                        `curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${displayApiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`,
                         "curl",
                       )
                     }
@@ -618,7 +627,7 @@ logger.info("ObservabilityOS integration successful!", {
                   </Button>
                 </div>
                 <pre className="text-xs font-mono text-indigo-400 overflow-x-auto whitespace-pre-wrap select-all bg-slate-950 p-2 rounded border border-slate-900 break-all leading-normal">
-                  {`curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${project.apiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`}
+                  {`curl -X POST "${endpointUrl}" -H "Content-Type: application/json" -H "x-api-key: ${displayApiKey}" -d '{"service": "main-api", "environment": "staging", "level": "info", "message": "First test log shipped successfully!"}'`}
                 </pre>
               </div>
 

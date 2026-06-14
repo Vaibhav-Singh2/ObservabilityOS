@@ -5,6 +5,7 @@ import {
   Deploy,
   Incident,
   Project,
+  Metric,
 } from "@repo/db";
 import { generateIncidentAnalysis, LogContext, DeployContext } from "@repo/ai";
 import { Types } from "mongoose";
@@ -116,64 +117,153 @@ export async function processAnomalyDetection(
     timestamp: { $gte: new Date(sixtyFiveMinsAgo), $lte: now },
   }).select("timestamp message level metadata traceId");
 
-  if (errorLogs.length === 0) {
-    return; // No errors, no anomaly
-  }
+  // Fetch metrics for this service in the last 65 minutes
+  const metrics = await Metric.find({
+    projectId: new Types.ObjectId(projectId),
+    serviceId: new Types.ObjectId(serviceId),
+    environment,
+    timestamp: { $gte: new Date(sixtyFiveMinsAgo), $lte: now },
+  });
 
-  // 2. Count current window errors
-  const currentCount = errorLogs.filter(
-    (l) => l.timestamp.getTime() >= currentWindowStart,
-  ).length;
+  // Cooldown check: Is there already an incident created for this service in the last 5 minutes?
+  const cooldownIncident = await Incident.findOne({
+    serviceId: new Types.ObjectId(serviceId),
+    createdAt: { $gte: new Date(nowMs - 5 * 60 * 1000) }, // last 5 minutes
+  });
 
-  // Anomaly baseline: require at least minErrorCount errors in the current 5 min window to trigger.
-  // This avoids spamming alerts on isolated occurrences.
-  if (currentCount < minErrorCount) {
+  if (cooldownIncident) {
+    console.log(
+      `[Anomaly Engine] Rate limit: Cooldown of 5 minutes active for service ${serviceId}. Skipping LLM incident analysis.`
+    );
+    // If there is an active cooldown but it has an open/investigating incident, we can append current logs to it if they exist
+    if (cooldownIncident.status === "open" || cooldownIncident.status === "investigating") {
+      const currentWindowLogs = errorLogs.filter(
+        (l) => l.timestamp.getTime() >= currentWindowStart,
+      );
+      if (currentWindowLogs.length > 0) {
+        const existingLogIds = cooldownIncident.relatedLogs.map((id) => id.toString());
+        const newLogIds = currentWindowLogs.map((l) => l._id.toString());
+        const mergedLogIds = Array.from(
+          new Set([...existingLogIds, ...newLogIds]),
+        ).map((id) => new Types.ObjectId(id));
+
+        cooldownIncident.relatedLogs = mergedLogIds;
+        await cooldownIncident.save();
+      }
+    }
     return;
   }
 
-  // 3. Segment historical data into 12 blocks of 5 minutes
-  const historicalCounts: number[] = [];
-  for (let i = 0; i < 12; i++) {
-    const start = nowMs - (i + 2) * 5 * 60 * 1000;
-    const end = nowMs - (i + 1) * 5 * 60 * 1000;
-    const count = errorLogs.filter(
-      (l) => l.timestamp.getTime() >= start && l.timestamp.getTime() < end,
-    ).length;
-    historicalCounts.push(count);
+  // 2. Count current window errors
+  const currentErrorCount = errorLogs.filter(
+    (l) => l.timestamp.getTime() >= currentWindowStart,
+  ).length;
+
+  let errorAnomaly = false;
+  let errorZScore = 0;
+  let errorMean = 0;
+
+  if (currentErrorCount >= minErrorCount) {
+    const historicalCounts: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const start = nowMs - (i + 2) * 5 * 60 * 1000;
+      const end = nowMs - (i + 1) * 5 * 60 * 1000;
+      const count = errorLogs.filter(
+        (l) => l.timestamp.getTime() >= start && l.timestamp.getTime() < end,
+      ).length;
+      historicalCounts.push(count);
+    }
+    const sum = historicalCounts.reduce((a, b) => a + b, 0);
+    errorMean = sum / historicalCounts.length;
+    const variance =
+      historicalCounts.reduce((a, b) => a + Math.pow(b - errorMean, 2), 0) /
+      historicalCounts.length;
+    const stdDev = Math.sqrt(variance);
+
+    if (stdDev === 0) {
+      if (currentErrorCount >= minErrorCount) {
+        errorAnomaly = true;
+        errorZScore = 5.0;
+      }
+    } else {
+      errorZScore = (currentErrorCount - errorMean) / stdDev;
+      if (errorZScore >= zScoreThreshold) {
+        errorAnomaly = true;
+      }
+    }
   }
 
-  // 4. Calculate Z-score
-  const sum = historicalCounts.reduce((a, b) => a + b, 0);
-  const mean = sum / historicalCounts.length;
-  const variance =
-    historicalCounts.reduce((a, b) => a + Math.pow(b - mean, 2), 0) /
-    historicalCounts.length;
-  const stdDev = Math.sqrt(variance);
+  // Helper function for metric Z-score calculation
+  const calculateMetricZ = (key: "cpuUsage" | "latencyMs") => {
+    const currentWindowMetrics = metrics.filter(
+      (m) => m.timestamp.getTime() >= currentWindowStart
+    );
 
-  let zScore = 0;
-  let isAnomalous = false;
+    if (currentWindowMetrics.length === 0) {
+      return { zScore: 0, currentAvg: 0, historicalMean: 0, isAnomalous: false };
+    }
 
-  if (stdDev === 0) {
-    // If historical baseline is completely quiet (stdDev = 0) and we suddenly get >= minErrorCount errors
-    if (currentCount >= minErrorCount) {
-      isAnomalous = true;
-      zScore = 5.0; // High default Z-Score for spike from 0 baseline
+    const currentAvg =
+      currentWindowMetrics.reduce((sum, m) => sum + (m[key] as number), 0) /
+      currentWindowMetrics.length;
+
+    const historicalAvgs: number[] = [];
+    for (let i = 0; i < 12; i++) {
+      const start = nowMs - (i + 2) * 5 * 60 * 1000;
+      const end = nowMs - (i + 1) * 5 * 60 * 1000;
+      const blockMetrics = metrics.filter(
+        (m) => m.timestamp.getTime() >= start && m.timestamp.getTime() < end
+      );
+      if (blockMetrics.length > 0) {
+        const avg = blockMetrics.reduce((sum, m) => sum + (m[key] as number), 0) / blockMetrics.length;
+        historicalAvgs.push(avg);
+      } else {
+        historicalAvgs.push(0);
+      }
     }
-  } else {
-    zScore = (currentCount - mean) / stdDev;
-    if (zScore >= zScoreThreshold) {
-      isAnomalous = true;
+
+    const sum = historicalAvgs.reduce((a, b) => a + b, 0);
+    const mean = sum / historicalAvgs.length;
+    const variance =
+      historicalAvgs.reduce((a, b) => a + Math.pow(b - mean, 2), 0) /
+      historicalAvgs.length;
+    const stdDev = Math.sqrt(variance);
+
+    let zScore = 0;
+    let isAnomalous = false;
+
+    if (stdDev === 0) {
+      if (currentAvg > 0) {
+        zScore = 5.0;
+        isAnomalous = true;
+      }
+    } else {
+      zScore = (currentAvg - mean) / stdDev;
+      if (zScore >= zScoreThreshold) {
+        isAnomalous = true;
+      }
     }
-  }
+
+    return { zScore, currentAvg, historicalMean: mean, isAnomalous };
+  };
+
+  const cpuResult = calculateMetricZ("cpuUsage");
+  const latencyResult = calculateMetricZ("latencyMs");
+
+  const isCpuAnomalous = cpuResult.isAnomalous;
+  const isLatencyAnomalous = latencyResult.isAnomalous;
+
+  const isAnomalous = errorAnomaly || isCpuAnomalous || isLatencyAnomalous;
 
   if (!isAnomalous) {
     return; // No anomaly detected
   }
 
   console.log(
-    `[Anomaly Detected] Project: ${projectId}, Service: ${serviceId}, Env: ${environment}. Z-Score: ${zScore.toFixed(
-      2,
-    )} (Errors: ${currentCount}, Historical Avg: ${mean.toFixed(2)})`,
+    `[Anomaly Detected] Project: ${projectId}, Service: ${serviceId}, Env: ${environment}. ` +
+    `Error Spike: ${errorAnomaly} (Z-Score: ${errorZScore.toFixed(2)}, Errors: ${currentErrorCount}), ` +
+    `CPU Spike: ${isCpuAnomalous} (Z-Score: ${cpuResult.zScore.toFixed(2)}, CPU: ${cpuResult.currentAvg.toFixed(1)}%), ` +
+    `Latency Spike: ${isLatencyAnomalous} (Z-Score: ${latencyResult.zScore.toFixed(2)}, Latency: ${latencyResult.currentAvg.toFixed(1)}ms)`
   );
 
   // 5. Deduplication check: Is there already an open/investigating incident created recently?
@@ -240,11 +330,23 @@ export async function processAnomalyDetection(
   // 7. Invoke AI reasoning pipeline
   let analysis;
   try {
+    // Construct a metric anomaly summary description
+    let anomalyMetricDesc = "";
+    if (errorAnomaly) {
+      anomalyMetricDesc += `Error Count: Z-Score ${errorZScore.toFixed(2)}, Current error count: ${currentErrorCount} (baseline average: ${errorMean.toFixed(2)}). `;
+    }
+    if (isCpuAnomalous) {
+      anomalyMetricDesc += `CPU Usage: Z-Score ${cpuResult.zScore.toFixed(2)}, Current avg: ${cpuResult.currentAvg.toFixed(1)}% (baseline average: ${cpuResult.historicalMean.toFixed(1)}%). `;
+    }
+    if (isLatencyAnomalous) {
+      anomalyMetricDesc += `Latency: Z-Score ${latencyResult.zScore.toFixed(2)}, Current avg: ${latencyResult.currentAvg.toFixed(1)}ms (baseline average: ${latencyResult.historicalMean.toFixed(1)}ms). `;
+    }
+
     analysis = await generateIncidentAnalysis({
       serviceName,
       environment,
       detectedAt: now.toISOString(),
-      anomalyMetric: `Z-Score: ${zScore.toFixed(2)}, Current error count: ${currentCount} (baseline average: ${mean.toFixed(2)})`,
+      anomalyMetric: anomalyMetricDesc || `Metric deviation detected`,
       logs: logContexts,
       deploys: deployContexts,
     });
@@ -253,15 +355,39 @@ export async function processAnomalyDetection(
       "[Anomaly Engine] LLM Incident reasoning failed, creating baseline fallback...",
       err,
     );
+
+    let fallbackTitle = `High error volume in ${serviceName}`;
+    let fallbackSummary = `The service "${serviceName}" encountered an unexpected error spike in 5 minutes.`;
+    let fallbackRootCause = `Exception rate exceeded normal baseline threshold.`;
+    let fallbackSuggestedFix = [
+      "Inspect recent error logs for service exceptions.",
+      "Verify server availability.",
+    ];
+
+    if (isCpuAnomalous && !errorAnomaly) {
+      fallbackTitle = `CPU spike detected in ${serviceName}`;
+      fallbackSummary = `The service "${serviceName}" encountered an unexpected CPU usage spike of ${cpuResult.currentAvg.toFixed(1)}% (baseline: ${cpuResult.historicalMean.toFixed(1)}%).`;
+      fallbackRootCause = `CPU utilization exceeded normal baseline threshold.`;
+      fallbackSuggestedFix = [
+        "Check database connection scaling and heavy queries.",
+        "Verify if there is a memory leak or CPU leak in the application.",
+      ];
+    } else if (isLatencyAnomalous && !errorAnomaly) {
+      fallbackTitle = `Latency spike detected in ${serviceName}`;
+      fallbackSummary = `The service "${serviceName}" encountered an unexpected latency spike of ${latencyResult.currentAvg.toFixed(1)}ms (baseline: ${latencyResult.historicalMean.toFixed(1)}ms).`;
+      fallbackRootCause = `Service response times exceeded normal baseline threshold.`;
+      fallbackSuggestedFix = [
+        "Check downstream dependency status and third-party API performance.",
+        "Verify database read/write latency metrics.",
+      ];
+    }
+
     analysis = {
-      title: `High error volume in ${serviceName}`,
-      summary: `The service "${serviceName}" encountered an unexpected error spike of ${currentCount} issues in 5 minutes.`,
-      rootCause: `Exception rate exceeded normal baseline threshold.`,
+      title: fallbackTitle,
+      summary: fallbackSummary,
+      rootCause: fallbackRootCause,
       impact: `Affected service operations in ${environment} environment.`,
-      suggestedFix: [
-        "Inspect recent error logs for service exceptions.",
-        "Verify server availability.",
-      ],
+      suggestedFix: fallbackSuggestedFix,
       confidence: 0.5,
     };
   }

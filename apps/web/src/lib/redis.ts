@@ -72,3 +72,19 @@ export async function delCache(key: string): Promise<void> {
     console.warn(`Redis delCache failed for key ${key}:`, err);
   }
 }
+
+export function createNewRedisClient(): Redis | null {
+  const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
+  try {
+    const client = new Redis(REDIS_URL, {
+      maxRetriesPerRequest: null,
+    });
+    client.on("error", (err) => {
+      console.warn("New Redis client connection error:", err.message);
+    });
+    return client;
+  } catch (e) {
+    console.error("Failed to create new Redis client:", e);
+    return null;
+  }
+}

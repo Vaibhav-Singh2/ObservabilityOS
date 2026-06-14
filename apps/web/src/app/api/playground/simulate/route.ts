@@ -12,7 +12,7 @@ import {
 import jwt from "jsonwebtoken";
 import { z } from "zod";
 import { processAnomalyDetection } from "@/lib/anomaly";
-import { delCache } from "@/lib/redis";
+import { delCache, getRedisClient } from "@/lib/redis";
 
 const simulateSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
@@ -251,6 +251,30 @@ export async function POST(request: Request) {
     }));
 
     await Log.insertMany(logsToInsert);
+
+    // Publish to Redis Pub/Sub for real-time streaming
+    const redisClient = getRedisClient();
+    if (redisClient) {
+      logsToInsert.forEach((log) => {
+        const channel = `project:${project._id.toString()}:logs`;
+        const publishPayload = {
+          id: (log as any)._id?.toString() || Math.random().toString(),
+          timestamp: log.timestamp.toISOString(),
+          level: log.level,
+          message: log.message,
+          traceId: log.traceId || null,
+          metadata: log.metadata || {},
+          service: {
+            id: service._id.toString(),
+            name: service.name,
+            environment: log.environment
+          }
+        };
+        redisClient.publish(channel, JSON.stringify(publishPayload)).catch((err) => {
+          console.warn(`Failed to publish log to Redis channel ${channel}:`, err);
+        });
+      });
+    }
 
     // 8. Clear Cache
     await delCache(`dashboard:project:${project._id.toString()}`);

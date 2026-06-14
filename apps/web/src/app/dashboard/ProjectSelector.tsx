@@ -61,10 +61,10 @@ export default function ProjectSelector({ projects }: ProjectSelectorProps) {
         body: JSON.stringify({ name: newProjectName.trim() }),
       });
       if (res.ok) {
-        const { project } = await res.json();
+        const { project, plainApiKey } = await res.json();
         setNewProjectName("");
         setIsModalOpen(false);
-        router.push(`/dashboard?projectId=${project._id}`);
+        router.push(`/dashboard/onboarding?projectId=${project._id}&apiKey=${plainApiKey}`);
         router.refresh();
       } else {
         const err = await res.json();

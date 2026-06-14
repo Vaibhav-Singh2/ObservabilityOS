@@ -25,9 +25,9 @@ export default function ZeroStateView() {
         body: JSON.stringify({ name: projectName.trim() }),
       });
       if (res.ok) {
-        const { project } = await res.json();
+        const { project, plainApiKey } = await res.json();
         setProjectName("");
-        router.push(`/dashboard/onboarding?projectId=${project._id}`);
+        router.push(`/dashboard/onboarding?projectId=${project._id}&apiKey=${plainApiKey}`);
         router.refresh();
       } else {
         const err = await res.json();

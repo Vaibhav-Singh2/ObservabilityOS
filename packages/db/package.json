@@ -13,7 +13,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "check-types": "tsc --noEmit"
+    "check-types": "tsc --noEmit",
+    "migrate": "tsc && node dist/migrate.js"
   },
   "dependencies": {
     "mongoose": "^8.11.0"

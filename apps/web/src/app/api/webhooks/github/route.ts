@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Deploy } from "@repo/db";
 import { z } from "zod";
 import { delCache } from "@/lib/redis";
+import { hashApiKey } from "@/lib/crypto";
 
 const deployPayloadSchema = z.object({
   service: z.string().min(1, "Service name is required"),
@@ -32,7 +33,8 @@ export async function POST(request: Request) {
     await connectToDatabase();
 
     // 3. Find Project (Tenant Isolation)
-    const project = await Project.findOne({ apiKey });
+    const hashedApiKey = hashApiKey(apiKey);
+    const project = await Project.findOne({ apiKey: hashedApiKey });
     if (!project) {
       return NextResponse.json(
         {
