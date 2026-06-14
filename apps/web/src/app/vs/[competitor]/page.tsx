@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Activity, Check, X, ArrowRight, Github, ExternalLink, Shield, Sparkles, Terminal, AlertTriangle } from "lucide-react";
+import { Activity, Check, X, Github, Sparkles, Terminal } from "lucide-react";
 import type { Metadata } from "next";
 
 interface CompetitorData {
@@ -25,14 +25,18 @@ const COMPETITORS: Record<string, CompetitorData> = {
   datadog: {
     name: "Datadog",
     key: "datadog",
-    tagline: "Stop paying massive, unpredictable bills per host and host metric.",
-    description: "Datadog is a great legacy observability suite, but its complex pricing models, seat-based metrics, and high billing surprise factors make it highly restrictive for fast-moving startups. ObservabilityOS offers a flat $29/mo plan with AI-powered root-cause answers instead of raw graphs.",
+    tagline:
+      "Stop paying massive, unpredictable bills per host and host metric.",
+    description:
+      "Datadog is a great legacy observability suite, but its complex pricing models, seat-based metrics, and high billing surprise factors make it highly restrictive for fast-moving startups. ObservabilityOS offers a flat $29/mo plan with AI-powered root-cause answers instead of raw graphs.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt: "Days of YAML configuration and agent installation",
     pricing: "Flat $29/mo (No seat/host limits)",
-    pricingAlt: "Complex matrix per host, metric, and logs custom retention rules",
+    pricingAlt:
+      "Complex matrix per host, metric, and logs custom retention rules",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
-    aiFeaturesAlt: "Basic anomaly detection dashboards without plain-text explanations",
+    aiFeaturesAlt:
+      "Basic anomaly detection dashboards without plain-text explanations",
     piiProtection: "Local SDK scrubbing (scrubber.ts)",
     piiProtectionAlt: "Sent blindly to cloud servers (compliance hazard)",
     otlp: "Native HTTP OTLP JSON ingest endpoint",
@@ -40,14 +44,16 @@ const COMPETITORS: Record<string, CompetitorData> = {
     highlights: [
       "Eliminate unpredictable bills: Pay $29/mo instead of fluctuating $1,000+ monthly fees.",
       "Instant explanations: Instead of manual timeline graphs correlation, get a written summary of what commit broke production.",
-      "100% compliant data pipelines: Sensitive client data is automatically redacted on your own machine before leaving the local sandbox."
-    ]
+      "100% compliant data pipelines: Sensitive client data is automatically redacted on your own machine before leaving the local sandbox.",
+    ],
   },
   "new-relic": {
     name: "New Relic",
     key: "new-relic",
-    tagline: "Get clear billing and actual AI-driven answers instead of graph grids.",
-    description: "New Relic charges heavily per developer seat, making it expensive to share telemetry data across your engineering team. ObservabilityOS encourages developer collaboration with flat subscription models and structured Slack post-mortems.",
+    tagline:
+      "Get clear billing and actual AI-driven answers instead of graph grids.",
+    description:
+      "New Relic charges heavily per developer seat, making it expensive to share telemetry data across your engineering team. ObservabilityOS encourages developer collaboration with flat subscription models and structured Slack post-mortems.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt: "Proprietary agents setup and configuration debugging",
     pricing: "Flat $29/mo (No seat/host limits)",
@@ -61,18 +67,22 @@ const COMPETITORS: Record<string, CompetitorData> = {
     highlights: [
       "No developer tax: Add your entire product team to ObservabilityOS without paying per user seat.",
       "Zero-noise alerting: Standard deviation rolling Z-scores filter out noisy metrics, saving your engineers from alert fatigue.",
-      "Open telemetry compliance: Standard OTLP protocol support lets you migrate your collectors in minutes."
-    ]
+      "Open telemetry compliance: Standard OTLP protocol support lets you migrate your collectors in minutes.",
+    ],
   },
   grafana: {
     name: "Grafana",
     key: "grafana",
-    tagline: "Replace complex dashboard tweaking with automated system intelligence.",
-    description: "Grafana is the industry standard for custom charts, but building, maintaining, and debugging those dashboard grids takes hours of development time. ObservabilityOS generates microservice layouts and charts automatically from log schema types.",
+    tagline:
+      "Replace complex dashboard tweaking with automated system intelligence.",
+    description:
+      "Grafana is the industry standard for custom charts, but building, maintaining, and debugging those dashboard grids takes hours of development time. ObservabilityOS generates microservice layouts and charts automatically from log schema types.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
-    setupTimeAlt: "Configuring Prometheus, Promtail, Loki, and custom dashboards",
+    setupTimeAlt:
+      "Configuring Prometheus, Promtail, Loki, and custom dashboards",
     pricing: "Flat $29/mo (No seat/host limits)",
-    pricingAlt: "Free open-source but high hosting/maintenance costs; Cloud gets expensive quickly",
+    pricingAlt:
+      "Free open-source but high hosting/maintenance costs; Cloud gets expensive quickly",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
     aiFeaturesAlt: "None (Manual dashboard timeline review required)",
     piiProtection: "Local SDK scrubbing (scrubber.ts)",
@@ -82,16 +92,19 @@ const COMPETITORS: Record<string, CompetitorData> = {
     highlights: [
       "No dashboard maintenance: Autogenerated system layouts replace manual queries and YAML configs.",
       "Understand what broke: Don't spend hours searching through log spikes; read the root cause in plain English.",
-      "Local security defaults: Safe data scrubbing prevents logging client credentials into Mongoose/Atlas clusters."
-    ]
+      "Local security defaults: Safe data scrubbing prevents logging client credentials into Mongoose/Atlas clusters.",
+    ],
   },
   sentry: {
     name: "Sentry",
     key: "sentry",
-    tagline: "Log analytics and AI incident correlation combined in one platform.",
-    description: "Sentry is excellent for frontend stack stack-traces, but lacks complete system-wide log analytics and OpenTelemetry structure. ObservabilityOS acts as both a system log database and an incident correlator.",
+    tagline:
+      "Log analytics and AI incident correlation combined in one platform.",
+    description:
+      "Sentry is excellent for frontend stack stack-traces, but lacks complete system-wide log analytics and OpenTelemetry structure. ObservabilityOS acts as both a system log database and an incident correlator.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
-    setupTimeAlt: "Different configurations for backend log engines and client traces",
+    setupTimeAlt:
+      "Different configurations for backend log engines and client traces",
     pricing: "Flat $29/mo (No seat/host limits)",
     pricingAlt: "Charged per error event and transaction volume scales",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
@@ -103,18 +116,20 @@ const COMPETITORS: Record<string, CompetitorData> = {
     highlights: [
       "Unified log data: Query all your server output lines, API metrics, and trace telemetry from a single interface.",
       "GitHub commit integration: Instantly maps deployment commit diffs to the errors they introduced.",
-      "Flat cost safety: Fixed cost prevents unexpected log spikes from producing massive, surprise monthly bills."
-    ]
+      "Flat cost safety: Fixed cost prevents unexpected log spikes from producing massive, surprise monthly bills.",
+    ],
   },
   "better-stack": {
     name: "Better Stack",
     key: "better-stack",
     tagline: "AI-powered post-mortems that explain the why, not just the when.",
-    description: "Better Stack offers fast log queries and basic Uptime checking. However, they lack AI-native diagnostics to automatically pinpoint developer commit failures. ObservabilityOS couples log search with GPT-4 and Claude summaries.",
+    description:
+      "Better Stack offers fast log queries and basic Uptime checking. However, they lack AI-native diagnostics to automatically pinpoint developer commit failures. ObservabilityOS couples log search with GPT-4 and Claude summaries.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt: "Custom fluentd configurations and vector routing setups",
     pricing: "Flat $29/mo (No seat/host limits)",
-    pricingAlt: "Tier-based pricing that restricts team seats and query history length",
+    pricingAlt:
+      "Tier-based pricing that restricts team seats and query history length",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
     aiFeaturesAlt: "None (Provides raw logs but no automated explanations)",
     piiProtection: "Local SDK scrubbing (scrubber.ts)",
@@ -124,9 +139,9 @@ const COMPETITORS: Record<string, CompetitorData> = {
     highlights: [
       "AI Diagnostic power: Lower MTTR from hours to under 30 seconds with automated root-cause reports.",
       "Local SDK safety: Redact secrets before they hit your external cloud database pipelines.",
-      "Predictable startup budget: Support developer side-projects and enterprise workloads without usage-based billing traps."
-    ]
-  }
+      "Predictable startup budget: Support developer side-projects and enterprise workloads without usage-based billing traps.",
+    ],
+  },
 };
 
 export async function generateStaticParams() {
@@ -141,17 +156,20 @@ interface PageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const comp = COMPETITORS[resolvedParams.competitor];
-  
+
   if (!comp) {
     return { title: "Not Found" };
   }
 
   const title = `ObservabilityOS vs ${comp.name} — AI-Native Telemetry Comparison`;
   const description = `Compare ObservabilityOS and ${comp.name}. Learn why engineering teams choose ObservabilityOS for flat-rate pricing, local PII scrubbing, and AI root cause analysis.`;
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
 
   return {
     title,
@@ -169,7 +187,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: "summary_large_image",
       title,
       description,
-    }
+    },
   };
 }
 
@@ -181,30 +199,31 @@ export default async function CompetitorPage({ params }: PageProps) {
     notFound();
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "name": `ObservabilityOS vs ${comp.name}`,
-    "description": comp.description,
-    "url": `${baseUrl}/vs/${comp.key}`,
-    "breadcrumb": {
+    name: `ObservabilityOS vs ${comp.name}`,
+    description: comp.description,
+    url: `${baseUrl}/vs/${comp.key}`,
+    breadcrumb: {
       "@type": "BreadcrumbList",
-      "itemListElement": [
+      itemListElement: [
         {
           "@type": "ListItem",
-          "position": 1,
-          "name": "Home",
-          "item": baseUrl
+          position: 1,
+          name: "Home",
+          item: baseUrl,
         },
         {
           "@type": "ListItem",
-          "position": 2,
-          "name": `Compare ${comp.name}`,
-          "item": `${baseUrl}/vs/${comp.key}`
-        }
-      ]
-    }
+          position: 2,
+          name: `Compare ${comp.name}`,
+          item: `${baseUrl}/vs/${comp.key}`,
+        },
+      ],
+    },
   };
 
   return (
@@ -213,7 +232,7 @@ export default async function CompetitorPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webPageSchema) }}
       />
-      
+
       {/* Background patterns */}
       <div className="absolute top-0 left-1/4 w-120 h-120 bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-1/4 right-1/4 w-120 h-120 bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
@@ -221,7 +240,10 @@ export default async function CompetitorPage({ params }: PageProps) {
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/75 border-b border-slate-900/80">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+          >
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center">
               <Activity className="w-4 h-4 text-white" />
             </div>
@@ -279,41 +301,60 @@ export default async function CompetitorPage({ params }: PageProps) {
               </thead>
               <tbody className="divide-y divide-slate-900 text-slate-350">
                 <tr>
-                  <td className="p-5 font-semibold text-slate-200">Billing Setup</td>
-                  <td className="p-5 text-indigo-400 font-semibold">{comp.pricing}</td>
+                  <td className="p-5 font-semibold text-slate-200">
+                    Billing Setup
+                  </td>
+                  <td className="p-5 text-indigo-400 font-semibold">
+                    {comp.pricing}
+                  </td>
                   <td className="p-5 text-slate-500">{comp.pricingAlt}</td>
                 </tr>
                 <tr>
-                  <td className="p-5 font-semibold text-slate-200">Setup Complexity</td>
+                  <td className="p-5 font-semibold text-slate-200">
+                    Setup Complexity
+                  </td>
                   <td className="p-5 text-emerald-400 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {comp.setupTime}
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />{" "}
+                    {comp.setupTime}
                   </td>
                   <td className="p-5 text-slate-500 flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500 shrink-0" /> {comp.setupTimeAlt}
+                    <X className="w-4 h-4 text-red-500 shrink-0" />{" "}
+                    {comp.setupTimeAlt}
                   </td>
                 </tr>
                 <tr>
-                  <td className="p-5 font-semibold text-slate-200">AI incident root cause</td>
+                  <td className="p-5 font-semibold text-slate-200">
+                    AI incident root cause
+                  </td>
                   <td className="p-5 text-emerald-400 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {comp.aiFeatures}
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />{" "}
+                    {comp.aiFeatures}
                   </td>
                   <td className="p-5 text-slate-500 flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500 shrink-0" /> {comp.aiFeaturesAlt}
+                    <X className="w-4 h-4 text-red-500 shrink-0" />{" "}
+                    {comp.aiFeaturesAlt}
                   </td>
                 </tr>
                 <tr>
-                  <td className="p-5 font-semibold text-slate-200">PII Data Scrubbing</td>
+                  <td className="p-5 font-semibold text-slate-200">
+                    PII Data Scrubbing
+                  </td>
                   <td className="p-5 text-emerald-400 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {comp.piiProtection}
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />{" "}
+                    {comp.piiProtection}
                   </td>
                   <td className="p-5 text-slate-500 flex items-center gap-2">
-                    <X className="w-4 h-4 text-red-500 shrink-0" /> {comp.piiProtectionAlt}
+                    <X className="w-4 h-4 text-red-500 shrink-0" />{" "}
+                    {comp.piiProtectionAlt}
                   </td>
                 </tr>
                 <tr>
-                  <td className="p-5 font-semibold text-slate-200">OpenTelemetry compliance</td>
+                  <td className="p-5 font-semibold text-slate-200">
+                    OpenTelemetry compliance
+                  </td>
                   <td className="p-5 text-emerald-400 flex items-center gap-2">
-                    <Check className="w-4 h-4 text-emerald-400 shrink-0" /> {comp.otlp}
+                    <Check className="w-4 h-4 text-emerald-400 shrink-0" />{" "}
+                    {comp.otlp}
                   </td>
                   <td className="p-5 text-slate-500">{comp.otlpAlt}</td>
                 </tr>
@@ -333,12 +374,17 @@ export default async function CompetitorPage({ params }: PageProps) {
               const title = parts[0];
               const desc = parts.slice(1).join(":");
               return (
-                <div key={idx} className="bg-slate-900/30 border border-slate-900 p-6 rounded-2xl">
+                <div
+                  key={idx}
+                  className="bg-slate-900/30 border border-slate-900 p-6 rounded-2xl"
+                >
                   <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4 text-indigo-400">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <h3 className="font-bold text-slate-200 mb-2">{title}</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{desc}</p>
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    {desc}
+                  </p>
                 </div>
               );
             })}
@@ -352,7 +398,8 @@ export default async function CompetitorPage({ params }: PageProps) {
             Ready to experience AI-Native Observability?
           </h2>
           <p className="text-slate-400 text-sm max-w-xl mx-auto mb-8 leading-relaxed">
-            Get started for free. Deploy our zero-dependency logger SDK or connect your OpenTelemetry pipeline in minutes.
+            Get started for free. Deploy our zero-dependency logger SDK or
+            connect your OpenTelemetry pipeline in minutes.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
             <Link
@@ -376,7 +423,8 @@ export default async function CompetitorPage({ params }: PageProps) {
       {/* Footer */}
       <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-600 font-mono">
         <div>
-          &copy; {new Date().getFullYear()} ObservabilityOS. All rights reserved. Open Source.
+          &copy; {new Date().getFullYear()} ObservabilityOS. All rights
+          reserved. Open Source.
         </div>
       </footer>
     </div>
