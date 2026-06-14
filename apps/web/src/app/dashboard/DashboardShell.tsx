@@ -260,7 +260,7 @@ export default function DashboardShell({
       </aside>
 
       {/* Main Container */}
-      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex h-dvh min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="h-16 border-b border-slate-900 bg-slate-950 flex items-center justify-between px-4 md:px-8 shrink-0">
           <div className="flex items-center gap-3 md:gap-4">
@@ -287,7 +287,7 @@ export default function DashboardShell({
         </header>
 
         {/* Dashboard Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
+        <main className="relative min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 md:p-8">
           <div className="absolute top-0 right-0 w-100 h-100 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
           {children}
         </main>

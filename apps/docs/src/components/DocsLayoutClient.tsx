@@ -252,7 +252,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
   }, [children]);
 
   return (
-    <div className="flex h-screen max-h-screen flex-col overflow-hidden bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
       {/* Sticky Header */}
       <DocsHeader
         sidebarOpen={sidebarOpen}
@@ -260,7 +260,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
         onSearchOpen={() => setSearchOpen(true)}
       />
 
-      <div className="mx-auto flex h-[calc(100vh-4rem)] w-full max-w-[1440px] flex-1 overflow-hidden px-4 sm:px-6">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 overflow-hidden px-4 sm:px-6">
         {/* Navigation Sidebar */}
         <DocsSidebar 
           isOpen={sidebarOpen} 
@@ -268,7 +268,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
         />
 
         {/* Page Content Panel */}
-        <main className="flex h-full min-w-0 flex-1 flex-col overflow-y-auto scroll-smooth">
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain scroll-smooth">
           <div className="mx-auto w-full max-w-5xl px-1 py-10 md:px-10 md:py-14">
             {children}
           </div>

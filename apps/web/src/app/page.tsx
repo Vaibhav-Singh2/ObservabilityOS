@@ -192,11 +192,11 @@ export default async function LandingPage() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
-            <a href="#product" className="hover:text-slate-200 transition-colors">Product</a>
-            <a href="#features" className="hover:text-slate-200 transition-colors">Features</a>
-            <a href="#dx" className="hover:text-slate-200 transition-colors">Developer Experience</a>
-            <a href="#pricing" className="hover:text-slate-200 transition-colors">Pricing</a>
-            <a href="#faq" className="hover:text-slate-200 transition-colors">FAQ</a>
+            <Link href="#product" className="hover:text-slate-200 transition-colors">Product</Link>
+            <Link href="#features" className="hover:text-slate-200 transition-colors">Features</Link>
+            <Link href="#dx" className="hover:text-slate-200 transition-colors">Developer Experience</Link>
+            <Link href="#pricing" className="hover:text-slate-200 transition-colors">Pricing</Link>
+            <Link href="#faq" className="hover:text-slate-200 transition-colors">FAQ</Link>
             <a 
               href="http://localhost:3001" 
               target="_blank" 
@@ -1163,11 +1163,11 @@ export default async function LandingPage() {
             <div className="space-y-3.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Product</h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><a href="#product" className="hover:text-slate-350 transition-colors">Interactive Demo</a></li>
-                <li><a href="#features" className="hover:text-slate-350 transition-colors">Features Grid</a></li>
-                <li><a href="#pricing" className="hover:text-slate-350 transition-colors">Predictable Pricing</a></li>
+                <li><Link href="#product" className="hover:text-slate-350 transition-colors">Interactive Demo</Link></li>
+                <li><Link href="#features" className="hover:text-slate-350 transition-colors">Features Grid</Link></li>
+                <li><Link href="#pricing" className="hover:text-slate-350 transition-colors">Predictable Pricing</Link></li>
                 <li><a href="http://localhost:3001" target="_blank" rel="noopener noreferrer" className="hover:text-slate-350 transition-colors">Documentation</a></li>
-                <li><a href="#faq" className="hover:text-slate-350 transition-colors">Technical FAQs</a></li>
+                <li><Link href="#faq" className="hover:text-slate-350 transition-colors">Technical FAQs</Link></li>
               </ul>
             </div>
 
@@ -1198,8 +1198,8 @@ export default async function LandingPage() {
             <div className="space-y-3.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Company</h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><a href="#" className="hover:text-slate-350 transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-slate-350 transition-colors">Terms of Service</a></li>
+                <li><Link href="#" className="hover:text-slate-350 transition-colors">Privacy Policy</Link></li>
+                <li><Link href="#" className="hover:text-slate-350 transition-colors">Terms of Service</Link></li>
                 <li><a href="mailto:support@observabilityos.com" className="hover:text-slate-350 transition-colors">Support Email</a></li>
                 <li><a href="mailto:contact@observabilityos.com" className="hover:text-slate-350 transition-colors">Contact Sales</a></li>
               </ul>
