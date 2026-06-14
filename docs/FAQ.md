@@ -1,0 +1,55 @@
+# Frequently Asked Questions — ObservabilityOS
+
+This document provides answers to common technical, product, and architectural questions about ObservabilityOS.
+
+---
+
+## 🔌 1. Technical & Integration FAQs
+
+### Q: Is ObservabilityOS compatible with OpenTelemetry?
+**Yes.** ObservabilityOS is fully compliant with OpenTelemetry standards. You can configure your existing OpenTelemetry collector agent pipelines to forward JSON payloads directly to our `/api/ingest` HTTP REST routes.
+
+### Q: Do you support languages other than Node.js, Express, and Next.js?
+**Yes.** While we provide a zero-dependency npm SDK for JavaScript/TypeScript environments, you can monitor Python, Go, Rust, Java, or Ruby apps by deploying our Docker sidecar agent. The sidecar mounts your container log files, scrubs them locally, and ships them to our Ingestion API.
+
+### Q: How does deploy event tracking work?
+We register deploy webhooks from GitHub, GitLab, or Vercel. When a new release deployment completes, we save the event (commit message, author, branch, SHA) in MongoDB. When a latency or error spike is flagged, we overlay the deployment event on your metric timeline to check if the new commit caused the regression.
+
+---
+
+## 🛡️ 2. Security & AI Privacy FAQs
+
+### Q: Is my sensitive log data sent to external AI providers?
+**No.** To comply with data privacy policies, we redact sensitive variables locally in the Winston SDK and API gateway before storage. Only metadata schemas, anonymous error types, and deployment contexts are fed to our Claude/GPT-4 prompt templates to diagnose root causes. Your raw client logs never leave your server borders.
+
+### Q: What PII is scrubbed by default?
+Our scrubber (`scrubber.ts`) checks text fields and nested JSON key arrays using RegExp patterns. It redacts:
+* Email addresses
+* JWT session tokens
+* Credit card numbers
+* Database connection URIs
+* HTTP Authorization headers
+
+---
+
+## 🗄️ 3. Database & Cache FAQs
+
+### Q: Why does the codebase fall back to regex search queries locally?
+In production environments, we query logs using MongoDB Atlas Search indexes (`$search`), which are powered by Lucene. Since local standalone MongoDB instances (running via Docker Compose) do not support Atlas Search, the API includes a regex fallback query pipeline to allow local testing.
+
+### Q: How does Redis cache invalidation work?
+We store service metric aggregates in Redis under `cache:project:<id>:metrics` with a default TTL of 60 seconds. Whenever a new log ingestion anomaly is detected or project settings change, we programmatically call a cache invalidate routine, flushing stale keys to keep dashboard stats synchronized.
+
+---
+
+## 💳 4. Billing & Sandbox FAQs
+
+### Q: Does the sandbox manual billing override modify Stripe settings?
+**No.** The sandbox manual billing route (`POST /api/billing/manual`) bypasses Stripe and Razorpay processors completely. It directly mutates the database's `plan` schema value to `pro` or `free` for offline developer testing.
+
+---
+
+## 🔗 Related Documents
+* 🛡️ **[SECURITY.md](SECURITY.md)**: Scrubber code details.
+* 🗄️ **[DATABASE.md](DATABASE.md)**: MongoDB schemas and index definitions.
+* 🛠️ **[DEVELOPMENT.md](DEVELOPMENT.md)**: Sandbox billing override commands.
