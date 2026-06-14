@@ -1,0 +1,27 @@
+ObservabilityOS Source Available License Agreement v1.0
+
+This License Agreement (the "Agreement") is between you and ObservabilityOS ("Licensor"). By downloading, installing, using, or distributing this software, you agree to be bound by these terms.
+
+1. Grant of License
+
+Licensor hereby grants you a non-exclusive, royalty-free, worldwide, non-transferable license to use, copy, modify, and distribute this software, subject to the conditions and limitations set forth below.
+
+2. Limitations and Restrictions
+
+You may not:
+
+a. Provide the software, or any modified version thereof, as a hosted, managed, or Software-as-a-Service (SaaS) offering to third parties where the primary value is the utility of the software itself.
+b. Circumvent, disable, or modify any license key mechanisms, user authentication, or security control functionality built into the software.
+c. Remove, alter, or obscure any copyright, trademark, or licensing notices contained within the software.
+
+3. Commercial Licensing
+
+If your intended use is prohibited by Section 2 (such as offering a commercial managed service), you must obtain a separate, written commercial license from Licensor. Please refer to COMMERCIAL_LICENSE.md or contact sales@observabilityos.com.
+
+4. Intellectual Property & Contributions
+
+All title, ownership rights, and intellectual property rights in the software remain with Licensor. Any contributions made to the project are subject to the Contributor License Agreement (CLA) outlined in the contributing guidelines.
+
+5. Disclaimer of Warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

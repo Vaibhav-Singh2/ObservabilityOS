@@ -1,6 +1,6 @@
 # ObservabilityOS
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: Source Available](https://img.shields.io/badge/License-Source_Available-orange.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-v5-blue.svg)]()
 [![Next.js](https://img.shields.io/badge/Next.js-v16.2-black.svg)]()
@@ -33,7 +33,7 @@ ObservabilityOS is structured as a **Turborepo monorepo workspace**:
 ├── packages
 │   ├── db                    # Shared Mongoose/MongoDB connection & schemas
 │   ├── ai                    # Prompt builders & narrative LLM wrappers
-│   ├── sdk                   # Zero-dependency TypeScript logger SDK
+│   ├── sdk                   # Zero-dependency TypeScript logger SDK (MIT Licensed)
 │   ├── typescript-config     # Shared base TSConfig options
 │   └── ui                    # Standardized Radix-based shadcn/ui components
 ├── docs                      # Open-source developer guides and specifications
@@ -142,4 +142,9 @@ We welcome contributions from the community! Please read our **[CONTRIBUTING.md]
 
 ## 📜 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+ObservabilityOS is licensed under a hybrid licensing model:
+
+*   **Core Application & Packages**: Licensed under the **ObservabilityOS Source Available License** (see [LICENSE](LICENSE)). This allows free personal, internal development, and non-SaaS production use, but prohibits offering the platform as a commercial SaaS or managed service.
+*   **Logger SDK (`packages/sdk`)**: Licensed under the highly permissive **MIT License** (see [packages/sdk/LICENSE](packages/sdk/LICENSE)) to allow frictionless integration into any proprietary codebase.
+
+For commercial licenses, custom terms, or SaaS rights, please read [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) or contact sales@observabilityos.com.

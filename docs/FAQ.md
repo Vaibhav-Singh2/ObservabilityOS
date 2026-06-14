@@ -49,7 +49,28 @@ We store service metric aggregates in Redis under `cache:project:<id>:metrics` w
 
 ---
 
+## 📜 5. Licensing & Commercial Restrictions FAQs
+
+### Q: Why did ObservabilityOS choose a source-available license?
+We wanted to ensure that the code remains fully open and accessible for developers to view, learn from, self-host, and contribute, while protecting our startup from large hosting providers and competitors who might rebrand, monetize, or sell hosted versions of our platform without contributing back.
+
+### Q: Can I self-host ObservabilityOS for internal company projects?
+**Yes.** You can fully self-host ObservabilityOS for internal development, staging, production monitoring, and personal side projects. This is permitted under the default source-available license as long as you are not offering the platform itself as a service to third parties.
+
+### Q: Can my company build proprietary products that integrate with the SDK?
+**Yes.** The SDK package (`packages/sdk`) is licensed under the permissive **MIT License**. This ensures you can integrate it into your apps, libraries, and microservices without copyleft concerns.
+
+### Q: What is considered a "commercial SaaS or managed service" violation?
+You violate the license if you package ObservabilityOS (or modified versions of it) and sell access to the telemetry platform itself as a service to external customers (e.g., offering a hosted dashboard, ingestion endpoints, or root-cause diagnostics as a paid subscription).
+
+### Q: How do I obtain commercial rights or enterprise support?
+If you want to bypass the SaaS restrictions, obtain enterprise SLA support, or request custom branding options, please refer to the [COMMERCIAL_LICENSE.md](../COMMERCIAL_LICENSE.md) file or contact sales@observabilityos.com.
+
+---
+
 ## 🔗 Related Documents
+* 📜 **[LICENSE](../LICENSE)**: ObservabilityOS Source Available License.
+* 💳 **[COMMERCIAL_LICENSE.md](../COMMERCIAL_LICENSE.md)**: Commercial licensing options.
 * 🛡️ **[SECURITY.md](SECURITY.md)**: Scrubber code details.
 * 🗄️ **[DATABASE.md](DATABASE.md)**: MongoDB schemas and index definitions.
 * 🛠️ **[DEVELOPMENT.md](DEVELOPMENT.md)**: Sandbox billing override commands.

@@ -82,3 +82,13 @@ To ensure PRs are reviewed and merged quickly:
 2. **Link Issues**: Reference any related GitHub issue numbers.
 3. **Maintain Lint Compliance**: PR pipelines will run lint checks and build tasks. If the pipeline fails, address the warnings before requesting a review.
 4. **Review Cycle**: At least one core maintainer must review and approve the PR before it is merged. Address feedback by pushing additional commits directly to your feature branch.
+
+---
+
+## ⚖️ Licensing & Contributor License Agreement (CLA)
+
+By contributing to ObservabilityOS, you agree that your contributions will be licensed under:
+1. The project's default **ObservabilityOS Source Available License** for the core packages/apps.
+2. The **MIT License** for the SDK package (`packages/sdk`).
+
+Additionally, you grant ObservabilityOS the right to dual-license your contributions under commercial terms or alternative licenses (such as proprietary enterprise licenses) to support the ongoing development of the platform. By submitting a Pull Request, you certify that you have the right to grant these permissions under the Developer Certificate of Origin (DCO).
