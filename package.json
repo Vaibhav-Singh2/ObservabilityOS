@@ -1,5 +1,5 @@
 {
-  "name": "ObservabilityOS",
+  "name": "observability-os",
   "private": true,
   "scripts": {
     "build": "turbo run build",

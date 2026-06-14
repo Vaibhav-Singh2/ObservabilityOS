@@ -3,7 +3,18 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Activity, LayoutDashboard, AlertOctagon, Search, Settings, LogOut, Menu, X, CreditCard } from "lucide-react";
+import {
+  Activity,
+  LayoutDashboard,
+  AlertOctagon,
+  Search,
+  Settings,
+  LogOut,
+  Menu,
+  X,
+  CreditCard,
+  Terminal,
+} from "lucide-react";
 import ProjectSelector from "./ProjectSelector";
 
 interface DashboardShellProps {
@@ -16,7 +27,11 @@ interface DashboardShellProps {
   children: React.ReactNode;
 }
 
-export default function DashboardShell({ user, projects, children }: DashboardShellProps) {
+export default function DashboardShell({
+  user,
+  projects,
+  children,
+}: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -26,18 +41,20 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
     <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
       {/* Sidebar Overlay for Mobile */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside
+        className={`
         fixed inset-y-0 left-0 z-50 w-64 border-r border-slate-900 bg-slate-950 flex flex-col shrink-0 transition-transform duration-300 ease-in-out
         md:translate-x-0 md:static md:flex
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-      `}>
+      `}
+      >
         {/* Brand */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-900">
           <div className="flex items-center gap-2.5">
@@ -49,7 +66,7 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
             </span>
           </div>
           {/* Close button on mobile */}
-          <button 
+          <button
             onClick={() => setSidebarOpen(false)}
             className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 border border-slate-900 hover:border-slate-800 cursor-pointer"
           >
@@ -64,8 +81,8 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
             href="/dashboard"
             onClick={() => setSidebarOpen(false)}
             className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              pathname === "/dashboard" 
-                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+              pathname === "/dashboard"
+                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                 : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
             }`}
           >
@@ -77,11 +94,15 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
             <>
               <Link
                 id="nav_incidents"
-                href={activeProjectId ? `/dashboard/incidents?projectId=${activeProjectId}` : "/dashboard/incidents"}
+                href={
+                  activeProjectId
+                    ? `/dashboard/incidents?projectId=${activeProjectId}`
+                    : "/dashboard/incidents"
+                }
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/incidents") 
-                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                  pathname.startsWith("/dashboard/incidents")
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                 }`}
               >
@@ -91,11 +112,15 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
 
               <Link
                 id="nav_search"
-                href={activeProjectId ? `/dashboard/search?projectId=${activeProjectId}` : "/dashboard/search"}
+                href={
+                  activeProjectId
+                    ? `/dashboard/search?projectId=${activeProjectId}`
+                    : "/dashboard/search"
+                }
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/search") 
-                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                  pathname.startsWith("/dashboard/search")
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                 }`}
               >
@@ -104,12 +129,34 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
               </Link>
 
               <Link
-                id="nav_billing"
-                href={activeProjectId ? `/dashboard/billing?projectId=${activeProjectId}` : "/dashboard/billing"}
+                id="nav_playground"
+                href={
+                  activeProjectId
+                    ? `/dashboard/playground?projectId=${activeProjectId}`
+                    : "/dashboard/playground"
+                }
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/billing") 
-                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                  pathname.startsWith("/dashboard/playground")
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
+                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+                }`}
+              >
+                <Terminal className="w-4 h-4 text-indigo-400" />
+                Playground
+              </Link>
+
+              <Link
+                id="nav_billing"
+                href={
+                  activeProjectId
+                    ? `/dashboard/billing?projectId=${activeProjectId}`
+                    : "/dashboard/billing"
+                }
+                onClick={() => setSidebarOpen(false)}
+                className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname.startsWith("/dashboard/billing")
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                 }`}
               >
@@ -119,11 +166,15 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
 
               <Link
                 id="nav_settings"
-                href={activeProjectId ? `/dashboard/settings?projectId=${activeProjectId}` : "/dashboard/settings"}
+                href={
+                  activeProjectId
+                    ? `/dashboard/settings?projectId=${activeProjectId}`
+                    : "/dashboard/settings"
+                }
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                  pathname.startsWith("/dashboard/settings") 
-                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold" 
+                  pathname.startsWith("/dashboard/settings")
+                    ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-900"
                 }`}
               >
@@ -140,6 +191,10 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
               <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
                 <Search className="w-4 h-4 text-slate-700" />
                 Log Search
+              </div>
+              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
+                <Terminal className="w-4 h-4 text-slate-700" />
+                Playground
               </div>
               <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
                 <CreditCard className="w-4 h-4 text-slate-700" />
@@ -168,8 +223,12 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-slate-200 truncate">{user.username}</p>
-              <p className="text-xs text-slate-500 truncate">{user.email || "No public email"}</p>
+              <p className="text-sm font-semibold text-slate-200 truncate">
+                {user.username}
+              </p>
+              <p className="text-xs text-slate-500 truncate">
+                {user.email || "No public email"}
+              </p>
             </div>
           </div>
 
@@ -198,7 +257,9 @@ export default function DashboardShell({ user, projects, children }: DashboardSh
             >
               <Menu className="w-5 h-5" />
             </button>
-            <span className="hidden sm:inline text-xs text-slate-500 uppercase tracking-widest font-bold">Active Project</span>
+            <span className="hidden sm:inline text-xs text-slate-500 uppercase tracking-widest font-bold">
+              Active Project
+            </span>
             <ProjectSelector projects={projects} />
           </div>
 
