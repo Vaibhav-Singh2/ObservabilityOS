@@ -66,7 +66,7 @@ export async function GET(request: Request) {
         const keepAliveInterval = setInterval(() => {
           try {
             controller.enqueue(`data: ${JSON.stringify({ event: "heartbeat" })}\n\n`);
-          } catch (err) {
+          } catch {
             clearInterval(keepAliveInterval);
           }
         }, 15000);

@@ -157,14 +157,14 @@ export default function BillingView({ project }: BillingViewProps) {
   useEffect(() => {
     if (!isVerifyingUpgrade) return;
 
-    let intervalId: NodeJS.Timeout;
-
     const pollStatus = async () => {
       try {
         const res = await fetch("/api/projects");
         if (res.ok) {
           const { projects } = await res.json();
-          const activeProj = projects.find((p: any) => p._id === project.id);
+          const activeProj = projects.find(
+            (p: { _id: string; plan: string; billingProvider: string }) => p._id === project.id
+          );
           if (activeProj && activeProj.plan === "pro") {
             setCurrentPlan("pro");
             setCurrentSubStatus("active");
@@ -180,7 +180,7 @@ export default function BillingView({ project }: BillingViewProps) {
     };
 
     // Poll every 2 seconds
-    intervalId = setInterval(pollStatus, 2000);
+    const intervalId = setInterval(pollStatus, 2000);
 
     // Stop after 2 minutes (safeguard)
     const timeoutId = setTimeout(() => {

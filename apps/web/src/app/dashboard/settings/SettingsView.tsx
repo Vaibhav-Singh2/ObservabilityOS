@@ -6,9 +6,6 @@ import {
   Settings,
   Save,
   Check,
-  Copy,
-  Eye,
-  EyeOff,
   AlertTriangle,
   Terminal,
   Volume2,
@@ -118,18 +115,10 @@ export default function SettingsView({ project }: SettingsViewProps) {
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showKey, setShowKey] = useState(false);
-  const [copiedKey, setCopiedKey] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
     "idle",
   );
   const [errorMessage, setErrorMessage] = useState("");
-
-  const handleCopyKey = () => {
-    navigator.clipboard.writeText(project.apiKey);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

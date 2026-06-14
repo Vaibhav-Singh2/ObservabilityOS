@@ -1,8 +1,6 @@
 import { getAuthenticatedUser } from "@/lib/auth";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { connectToDatabase, Project, Log, User } from "@repo/db";
-import jwt from "jsonwebtoken";
+import { Project, Log } from "@repo/db";
 import { Types } from "mongoose";
 
 

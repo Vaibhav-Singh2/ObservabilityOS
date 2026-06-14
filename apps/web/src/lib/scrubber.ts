@@ -27,25 +27,26 @@ export function scrubText(text: string): string {
   scrubbed = scrubbed.replace(JWT_REGEX, "[JWT_REDACTED]");
   scrubbed = scrubbed.replace(CREDIT_CARD_REGEX, "[CARD_REDACTED]");
   scrubbed = scrubbed.replace(AUTH_HEADER_REGEX, "$1[TOKEN_REDACTED]");
-  scrubbed = scrubbed.replace(DB_URI_REGEX, (match, protocol) => {
+  scrubbed = scrubbed.replace(DB_URI_REGEX, (match) => {
     // Replace username:password with username:[PASSWORD_REDACTED]
     return match.replace(/:([^@]+)@/, ":[PASSWORD_REDACTED]@");
   });
   return scrubbed;
 }
 
-export function scrubObject(obj: any): any {
+export function scrubObject(obj: unknown): unknown {
   if (obj === null || obj === undefined) return obj;
 
   if (Array.isArray(obj)) {
-    return obj.map(item => scrubObject(item));
+    return (obj as unknown[]).map(item => scrubObject(item));
   }
 
   if (typeof obj === "object") {
-    const scrubbedObj: Record<string, any> = {};
-    for (const key of Object.keys(obj)) {
+    const rawObj = obj as Record<string, unknown>;
+    const scrubbedObj: Record<string, unknown> = {};
+    for (const key of Object.keys(rawObj)) {
       const lowerKey = key.toLowerCase();
-      const val = obj[key];
+      const val = rawObj[key];
 
       if (SENSITIVE_KEYS.has(lowerKey)) {
         scrubbedObj[key] = "[REDACTED]";

@@ -1,8 +1,8 @@
 import { getAuthenticatedUser } from "@/lib/auth";
-import { cookies } from "next/headers";
+
 import { NextResponse } from "next/server";
-import { connectToDatabase, Project, Service, User, Incident, Deploy, Log, Comment, Metric } from "@repo/db";
-import jwt from "jsonwebtoken";
+import { Project, Service, Incident, Deploy, Log, Comment, Metric } from "@repo/db";
+
 import { logAuditEvent } from "@/lib/audit";
 import { delCache } from "@/lib/redis";
 

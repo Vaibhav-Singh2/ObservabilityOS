@@ -1,15 +1,15 @@
 import { getAuthenticatedUser } from "@/lib/auth";
-import { cookies } from "next/headers";
+
 import { NextResponse } from "next/server";
 import {
-  connectToDatabase,
+
   Project,
   Incident,
   Log,
   Comment,
-  User,
+
 } from "@repo/db";
-import jwt from "jsonwebtoken";
+
 import {
   generatePostMortemMarkdown,
   PostMortemIncident,

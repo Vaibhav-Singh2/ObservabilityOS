@@ -149,7 +149,7 @@ export async function POST(request: Request) {
         const log = logsToInsert[index];
         const channel = `project:${project._id.toString()}:logs`;
         const publishPayload = {
-          id: (log as any)._id?.toString() || Math.random().toString(),
+          id: (log as { _id?: { toString(): string } })._id?.toString() || Math.random().toString(),
           timestamp: log.timestamp.toISOString(),
           level: log.level,
           message: log.message,
