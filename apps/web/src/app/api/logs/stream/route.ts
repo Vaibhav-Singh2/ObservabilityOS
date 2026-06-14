@@ -10,7 +10,10 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const projectId = searchParams.get("projectId");
     if (!projectId) {
-      return NextResponse.json({ error: "Missing projectId parameter" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Missing projectId parameter" },
+        { status: 400 },
+      );
     }
 
     await connectToDatabase();
@@ -37,12 +40,15 @@ export async function GET(request: Request) {
     const headers = new Headers({
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache, no-transform",
-      "Connection": "keep-alive",
+      Connection: "keep-alive",
     });
 
     const redisSub = createNewRedisClient();
     if (!redisSub) {
-      return NextResponse.json({ error: "Redis connection failed" }, { status: 500 });
+      return NextResponse.json(
+        { error: "Redis connection failed" },
+        { status: 500 },
+      );
     }
 
     const channel = `project:${projectId}:logs`;
@@ -50,7 +56,9 @@ export async function GET(request: Request) {
     const stream = new ReadableStream({
       async start(controller) {
         // Send initial connection event
-        controller.enqueue(`data: ${JSON.stringify({ event: "connected" })}\n\n`);
+        controller.enqueue(
+          `data: ${JSON.stringify({ event: "connected" })}\n\n`,
+        );
 
         // Subscribe to Redis channel
         await redisSub.subscribe(channel);
@@ -65,7 +73,9 @@ export async function GET(request: Request) {
         // Keep-alive heartbeat every 15 seconds to prevent timeout
         const keepAliveInterval = setInterval(() => {
           try {
-            controller.enqueue(`data: ${JSON.stringify({ event: "heartbeat" })}\n\n`);
+            controller.enqueue(
+              `data: ${JSON.stringify({ event: "heartbeat" })}\n\n`,
+            );
           } catch {
             clearInterval(keepAliveInterval);
           }
@@ -90,12 +100,15 @@ export async function GET(request: Request) {
         } catch (err) {
           console.error("Error in cancel cleanup:", err);
         }
-      }
+      },
     });
 
     return new Response(stream, { headers });
   } catch (err) {
     console.error("SSE stream error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 },
+    );
   }
 }

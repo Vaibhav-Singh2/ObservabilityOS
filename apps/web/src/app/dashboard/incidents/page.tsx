@@ -77,7 +77,11 @@ export default async function IncidentsPage({ searchParams }: PageProps) {
   }));
 
   const serializedIncidents = incidents.map((inc) => {
-    const serviceObj = inc.serviceId as unknown as { name: string; environment: string; _id: string };
+    const serviceObj = inc.serviceId as unknown as {
+      name: string;
+      environment: string;
+      _id: string;
+    };
     const deployObj = inc.deployId as unknown as {
       _id: { toString: () => string };
       commitSha: string;

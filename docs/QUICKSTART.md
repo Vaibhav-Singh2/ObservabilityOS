@@ -7,14 +7,17 @@ Get up and running with a local instance of **ObservabilityOS** and send your fi
 ## ⏱️ Step-by-Step Walkthrough
 
 ### Step 1: Boot Local Infrastructure
+
 ObservabilityOS requires **MongoDB** (data storage) and **Redis** (caching and rate limiting). Spin them up instantly using the pre-configured [docker-compose.yml](file:///d:/Projects/ObservabilityOS/docker-compose.yml):
 
 ```bash
 docker-compose up -d
 ```
-*Verify they are running by checking `docker ps`.*
+
+_Verify they are running by checking `docker ps`._
 
 ### Step 2: Install Workspace Dependencies
+
 Clone the repository, navigate to the root folder, and install the npm packages:
 
 ```bash
@@ -22,6 +25,7 @@ yarn install
 ```
 
 ### Step 3: Configure Environment Variables
+
 Create an `.env` file in the Next.js web application directory `apps/web/.env` with the following variables:
 
 ```env
@@ -44,6 +48,7 @@ GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### Step 4: Compile & Run
+
 Build the shared monorepo packages, then start the workspace development servers:
 
 ```bash
@@ -53,6 +58,7 @@ yarn build
 # Run Next.js dashboard and API handlers
 yarn dev
 ```
+
 Open **[http://localhost:3000](http://localhost:3000)** in your browser.
 
 ---
@@ -84,14 +90,15 @@ const logger = new Logger({
 logger.info("Checkout completed successfully", {
   metadata: {
     userId: "usr_99824",
-    amount: 129.50,
+    amount: 129.5,
     currency: "USD",
-    cartItems: 3
-  }
+    cartItems: 3,
+  },
 });
 ```
 
 Run the script:
+
 ```bash
 node test-ingest.js
 ```
@@ -101,6 +108,7 @@ Return to your **ObservabilityOS Dashboard** to view your log inside the log str
 ---
 
 ## 🔗 Related Documents
-* ⚙️ **[INSTALLATION.md](INSTALLATION.md)**: Deep dive on node variables, custom databases, and workspace dependencies.
-* 🏗️ **[ARCHITECTURE.md](ARCHITECTURE.md)**: Details on telemetry ingestion filters and Z-Score math.
-* 🔌 **[API.md](API.md)**: Complete request/response schemas for manual REST integration.
+
+- ⚙️ **[INSTALLATION.md](INSTALLATION.md)**: Deep dive on node variables, custom databases, and workspace dependencies.
+- 🏗️ **[ARCHITECTURE.md](ARCHITECTURE.md)**: Details on telemetry ingestion filters and Z-Score math.
+- 🔌 **[API.md](API.md)**: Complete request/response schemas for manual REST integration.

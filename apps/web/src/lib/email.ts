@@ -135,7 +135,11 @@ export async function buildAndSendEmailDigest(user: {
     // Structure incident contexts for AI reasoning
     const incidentDigestContexts: IncidentDigestContext[] = incidents.map(
       (inc) => {
-        const s = inc.serviceId as unknown as { name: string; environment: string; _id: string };
+        const s = inc.serviceId as unknown as {
+          name: string;
+          environment: string;
+          _id: string;
+        };
         return {
           title: inc.title,
           serviceName: s ? s.name : "unknown-service",

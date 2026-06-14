@@ -13,8 +13,6 @@ interface MetricDataPoint {
   latency: number;
 }
 
-
-
 export async function GET(request: Request) {
   try {
     const user = await getAuthenticatedUser();

@@ -9,23 +9,28 @@ This guide covers local code compilation, workspace script commands, test suites
 Follow these steps to run a local development workspace:
 
 1. **Verify Infrastructure**: Ensure Docker containers are running:
+
    ```bash
    docker ps
    ```
-   *Should show active instances of MongoDB (port 27017) and Redis (port 6379).*
+
+   _Should show active instances of MongoDB (port 27017) and Redis (port 6379)._
 
 2. **Clean build files**: If you encounter dependency cache issues, run:
+
    ```bash
    # Remove all built files, node_modules, and cache files
    yarn clean
    ```
 
 3. **Install dependencies**:
+
    ```bash
    yarn install
    ```
 
 4. **Build Packages**: Compile the shared monorepo packages (`packages/db`, `packages/ai`, `packages/sdk`, `packages/ui`):
+
    ```bash
    yarn build
    ```
@@ -34,7 +39,7 @@ Follow these steps to run a local development workspace:
    ```bash
    yarn dev
    ```
-   *Dev server binds to `http://localhost:3000`.*
+   _Dev server binds to `http://localhost:3000`._
 
 ---
 
@@ -51,7 +56,9 @@ npx tsx scratch/test-week-10.ts
 ```
 
 ### TypeScript Validation
+
 Run strict type checking across all monorepo directories:
+
 ```bash
 yarn check-types
 ```
@@ -62,17 +69,18 @@ yarn check-types
 
 The root `package.json` maps script operations across individual workspaces via Turborepo:
 
-* `yarn dev`: Launches Next.js hot-reload dev servers.
-* `yarn build`: Compiles all packages and Next.js static pages for production.
-* `yarn lint`: Runs ESLint analysis across applications.
-* `yarn lint:fix`: Automatically fixes ESLint styling warnings.
-* `yarn check-types`: Compiles code files without writing outputs to find syntax type mismatches.
+- `yarn dev`: Launches Next.js hot-reload dev servers.
+- `yarn build`: Compiles all packages and Next.js static pages for production.
+- `yarn lint`: Runs ESLint analysis across applications.
+- `yarn lint:fix`: Automatically fixes ESLint styling warnings.
+- `yarn check-types`: Compiles code files without writing outputs to find syntax type mismatches.
 
 ---
 
 ## 🐞 Debugging Telemetry & APIs
 
 ### 1. Local Ingestion Testing
+
 You can manually test local log ingestion endpoints without booting the Winston SDK by sending a cURL POST:
 
 ```bash
@@ -93,13 +101,18 @@ curl -X POST http://localhost:3000/api/ingest \
 ```
 
 ### 2. Sandbox Billing Toggles
-Our local environment includes a developer sandbox bypass card located on the Billing Management page. 
-* You can click **Simulate Pro Upgrade** or **Simulate Free Downgrade** to instantly trigger database plan overrides. 
-* This calls `POST /api/billing/manual`, bypassing external payment processor keys (Stripe/Razorpay) for frictionless offline testing.
+
+Our local environment includes a developer sandbox bypass card located on the Billing Management page.
+
+- You can click **Simulate Pro Upgrade** or **Simulate Free Downgrade** to instantly trigger database plan overrides.
+- This calls `POST /api/billing/manual`, bypassing external payment processor keys (Stripe/Razorpay) for frictionless offline testing.
 
 ### 3. Redis Invalidation Monitoring
+
 If your dashboard cache is out of sync, you can flush local cache entries manually using Redis-CLI:
+
 ```bash
 docker exec -it <redis-container-id> redis-cli flushall
 ```
+
 The codebase invalidates Redis cache keys dynamically upon new log ingestion anomalies or microservice state updates (refer to the cache schema details in **[DATABASE.md](DATABASE.md)**).

@@ -1,12 +1,18 @@
 import { getAuthenticatedUser } from "@/lib/auth";
 
 import { NextResponse } from "next/server";
-import { Project, Service, Incident, Deploy, Log, Comment, Metric } from "@repo/db";
+import {
+  Project,
+  Service,
+  Incident,
+  Deploy,
+  Log,
+  Comment,
+  Metric,
+} from "@repo/db";
 
 import { logAuditEvent } from "@/lib/audit";
 import { delCache } from "@/lib/redis";
-
-
 
 export async function GET(request: Request) {
   try {

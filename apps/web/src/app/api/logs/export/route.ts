@@ -8,8 +8,6 @@ import {
   ExportableLog,
 } from "@/lib/log-export";
 
-
-
 export async function GET(request: Request) {
   try {
     const user = await getAuthenticatedUser();
@@ -92,7 +90,9 @@ export async function GET(request: Request) {
         ];
 
         // Apply filters in match stage
-        const matchStage = (pipeline[1] as Record<string, Record<string, unknown>>).$match;
+        const matchStage = (
+          pipeline[1] as Record<string, Record<string, unknown>>
+        ).$match;
         if (level !== "all") {
           matchStage.level = level;
         }
@@ -107,7 +107,9 @@ export async function GET(request: Request) {
         pipeline.push({ $sort: { timestamp: -1 } });
         pipeline.push({ $limit: 1000 });
 
-        const aggResult = await Log.aggregate(pipeline as unknown as Parameters<typeof Log.aggregate>[0]);
+        const aggResult = await Log.aggregate(
+          pipeline as unknown as Parameters<typeof Log.aggregate>[0],
+        );
         logs = (await Log.populate(aggResult, {
           path: "serviceId",
           select: "name environment",
@@ -154,7 +156,11 @@ export async function GET(request: Request) {
     }
 
     const exportableLogs: ExportableLog[] = logs.map((l) => {
-      const s = l.serviceId as unknown as { name: string; environment: string; _id: string };
+      const s = l.serviceId as unknown as {
+        name: string;
+        environment: string;
+        _id: string;
+      };
       return {
         timestamp: l.timestamp.toISOString(),
         level: l.level,

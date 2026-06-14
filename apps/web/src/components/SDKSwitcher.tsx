@@ -25,7 +25,7 @@ obs.info("Payment processed successfully", {
   userId: "user_98234",
   amount: 49.00,
   gateway: "stripe"
-});`
+});`,
   },
   nextjs: {
     label: "Next.js",
@@ -44,7 +44,7 @@ export function register() {
     environment: process.env.NODE_ENV,
     scrubHeaders: ["authorization", "cookie"], // Auto-PII scrubbing
   });
-}`
+}`,
   },
   express: {
     label: "Express.js",
@@ -66,7 +66,7 @@ app.use(expressMiddleware({
 
 app.get("/api/session", (req, res) => {
   res.status(200).json({ ok: true });
-});`
+});`,
   },
   docker: {
     label: "Docker Sidecar",
@@ -87,8 +87,8 @@ services:
       - ENVIRONMENT=production
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /var/log/nginx:/var/log/app-logs:ro`
-  }
+      - /var/log/nginx:/var/log/app-logs:ro`,
+  },
 };
 
 type SDKKey = keyof typeof SDK_DATA;
@@ -121,7 +121,7 @@ export default function SDKSwitcher() {
                 "px-3 py-1.5 text-xs font-semibold rounded-md transition-all cursor-pointer whitespace-nowrap",
                 activeTab === key
                   ? "bg-indigo-600 text-white shadow-sm"
-                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/80"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-900/80",
               )}
             >
               {SDK_DATA[key].label}

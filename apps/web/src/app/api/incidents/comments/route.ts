@@ -5,8 +5,6 @@ import { Project, Incident, Comment } from "@repo/db";
 
 import { z } from "zod";
 
-
-
 const commentCreateSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
   incidentId: z.string().min(1, "incidentId is required"),

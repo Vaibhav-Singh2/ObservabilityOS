@@ -14,12 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -75,24 +70,27 @@ export default function SettingsView({ project }: SettingsViewProps) {
     setIsLoadingAudit(true);
   }
 
-  const fetchAuditLogs = useCallback(async (showLoading = true) => {
-    if (showLoading) {
-      setIsLoadingAudit(true);
-    }
-    try {
-      const res = await fetch(
-        `/api/projects/audit-logs?projectId=${project.id}`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setAuditLogs(data.auditLogs || []);
+  const fetchAuditLogs = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) {
+        setIsLoadingAudit(true);
       }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setIsLoadingAudit(false);
-    }
-  }, [project.id]);
+      try {
+        const res = await fetch(
+          `/api/projects/audit-logs?projectId=${project.id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setAuditLogs(data.auditLogs || []);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setIsLoadingAudit(false);
+      }
+    },
+    [project.id],
+  );
 
   useEffect(() => {
     Promise.resolve().then(() => {
@@ -203,7 +201,10 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 obs_sk_••••••••••••••••••••••••••••••••
               </div>
               <p className="text-[10px] text-amber-500 mt-1.5 leading-relaxed">
-                ⚠️ For security, your API ingestion key is cryptographically hashed inside our database and cannot be revealed or copied again. If you have lost your key, please create a new project to generate a new credentials set.
+                ⚠️ For security, your API ingestion key is cryptographically
+                hashed inside our database and cannot be revealed or copied
+                again. If you have lost your key, please create a new project to
+                generate a new credentials set.
               </p>
             </div>
           </CardContent>

@@ -10,7 +10,10 @@ import {
   Deploy,
 } from "@repo/db";
 import jwt from "jsonwebtoken";
-import ProjectDashboardView, { SerializedService, SerializedDeployment } from "./ProjectDashboardView";
+import ProjectDashboardView, {
+  SerializedService,
+  SerializedDeployment,
+} from "./ProjectDashboardView";
 import ZeroStateView from "./ZeroStateView";
 import { getCache, setCache } from "@/lib/redis";
 import { subDays } from "date-fns";
@@ -38,7 +41,9 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   let decoded: { userId: string } & jwt.JwtPayload;
   try {
-    decoded = jwt.verify(token, jwtSecret) as { userId: string } & jwt.JwtPayload;
+    decoded = jwt.verify(token, jwtSecret) as {
+      userId: string;
+    } & jwt.JwtPayload;
   } catch {
     redirect("/");
   }
@@ -174,7 +179,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     });
 
     serializedDeployments = recentDeploys.map((d) => {
-      const serviceObj = d.serviceId as unknown as { _id: { toString: () => string }; name: string } | null;
+      const serviceObj = d.serviceId as unknown as {
+        _id: { toString: () => string };
+        name: string;
+      } | null;
       const serviceName = serviceObj?.name || "unknown-service";
       const serviceIdStr = serviceObj?._id
         ? serviceObj._id.toString()

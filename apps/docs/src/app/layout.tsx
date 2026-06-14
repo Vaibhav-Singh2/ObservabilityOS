@@ -12,7 +12,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+const baseUrl =
+  process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
@@ -28,14 +29,15 @@ export const metadata: Metadata = {
     "AI incident response guide",
     "telemetry SDK API",
     "DevOps guides",
-    "ObservabilityOS docs"
+    "ObservabilityOS docs",
   ],
   alternates: {
     canonical: "./",
   },
   openGraph: {
     title: "ObservabilityOS Documentation",
-    description: "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
+    description:
+      "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
     url: baseUrl,
     siteName: "ObservabilityOS",
     locale: "en_US",
@@ -44,7 +46,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "ObservabilityOS Documentation",
-    description: "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
+    description:
+      "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
     creator: "@observabilityos",
   },
   robots: {

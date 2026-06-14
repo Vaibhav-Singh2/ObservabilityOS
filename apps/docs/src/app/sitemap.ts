@@ -2,8 +2,9 @@ import { MetadataRoute } from "next";
 import { getSidebarNav } from "@/lib/navigation";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
-  
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+
   const sidebarData = getSidebarNav();
   const flatSlugs: string[] = [];
   sidebarData.forEach((cat) => {
@@ -24,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,
-    }))
+    })),
   ];
 
   return sitemapEntries;

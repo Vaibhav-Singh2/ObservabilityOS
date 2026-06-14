@@ -5,8 +5,6 @@ import { Incident, Project } from "@repo/db";
 
 import { delCache } from "@/lib/redis";
 
-
-
 export async function GET(request: Request) {
   try {
     const user = await getAuthenticatedUser();

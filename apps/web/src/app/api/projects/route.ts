@@ -5,8 +5,6 @@ import { Project } from "@repo/db";
 
 import { generateApiKey, hashApiKey } from "@/lib/crypto";
 
-
-
 export async function GET() {
   try {
     const user = await getAuthenticatedUser();

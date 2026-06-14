@@ -33,7 +33,10 @@ async function initQueue() {
           port: parsed.port ? parseInt(parsed.port, 10) : 6379,
           username: parsed.username || undefined,
           password: parsed.password || undefined,
-          db: parsed.pathname && parsed.pathname !== "/" ? parseInt(parsed.pathname.substring(1), 10) : 0,
+          db:
+            parsed.pathname && parsed.pathname !== "/"
+              ? parseInt(parsed.pathname.substring(1), 10)
+              : 0,
           maxRetriesPerRequest: null,
         };
         connection = new IORedis(options);
@@ -147,15 +150,20 @@ export async function processAnomalyDetection(
 
   if (cooldownIncident) {
     console.log(
-      `[Anomaly Engine] Rate limit: Cooldown of 5 minutes active for service ${serviceId}. Skipping LLM incident analysis.`
+      `[Anomaly Engine] Rate limit: Cooldown of 5 minutes active for service ${serviceId}. Skipping LLM incident analysis.`,
     );
     // If there is an active cooldown but it has an open/investigating incident, we can append current logs to it if they exist
-    if (cooldownIncident.status === "open" || cooldownIncident.status === "investigating") {
+    if (
+      cooldownIncident.status === "open" ||
+      cooldownIncident.status === "investigating"
+    ) {
       const currentWindowLogs = errorLogs.filter(
         (l) => l.timestamp.getTime() >= currentWindowStart,
       );
       if (currentWindowLogs.length > 0) {
-        const existingLogIds = cooldownIncident.relatedLogs.map((id) => id.toString());
+        const existingLogIds = cooldownIncident.relatedLogs.map((id) =>
+          id.toString(),
+        );
         const newLogIds = currentWindowLogs.map((l) => l._id.toString());
         const mergedLogIds = Array.from(
           new Set([...existingLogIds, ...newLogIds]),
@@ -210,11 +218,16 @@ export async function processAnomalyDetection(
   // Helper function for metric Z-score calculation
   const calculateMetricZ = (key: "cpuUsage" | "latencyMs") => {
     const currentWindowMetrics = metrics.filter(
-      (m) => m.timestamp.getTime() >= currentWindowStart
+      (m) => m.timestamp.getTime() >= currentWindowStart,
     );
 
     if (currentWindowMetrics.length === 0) {
-      return { zScore: 0, currentAvg: 0, historicalMean: 0, isAnomalous: false };
+      return {
+        zScore: 0,
+        currentAvg: 0,
+        historicalMean: 0,
+        isAnomalous: false,
+      };
     }
 
     const currentAvg =
@@ -226,10 +239,12 @@ export async function processAnomalyDetection(
       const start = nowMs - (i + 2) * 5 * 60 * 1000;
       const end = nowMs - (i + 1) * 5 * 60 * 1000;
       const blockMetrics = metrics.filter(
-        (m) => m.timestamp.getTime() >= start && m.timestamp.getTime() < end
+        (m) => m.timestamp.getTime() >= start && m.timestamp.getTime() < end,
       );
       if (blockMetrics.length > 0) {
-        const avg = blockMetrics.reduce((sum, m) => sum + (m[key] as number), 0) / blockMetrics.length;
+        const avg =
+          blockMetrics.reduce((sum, m) => sum + (m[key] as number), 0) /
+          blockMetrics.length;
         historicalAvgs.push(avg);
       } else {
         historicalAvgs.push(0);
@@ -275,9 +290,9 @@ export async function processAnomalyDetection(
 
   console.log(
     `[Anomaly Detected] Project: ${projectId}, Service: ${serviceId}, Env: ${environment}. ` +
-    `Error Spike: ${errorAnomaly} (Z-Score: ${errorZScore.toFixed(2)}, Errors: ${currentErrorCount}), ` +
-    `CPU Spike: ${isCpuAnomalous} (Z-Score: ${cpuResult.zScore.toFixed(2)}, CPU: ${cpuResult.currentAvg.toFixed(1)}%), ` +
-    `Latency Spike: ${isLatencyAnomalous} (Z-Score: ${latencyResult.zScore.toFixed(2)}, Latency: ${latencyResult.currentAvg.toFixed(1)}ms)`
+      `Error Spike: ${errorAnomaly} (Z-Score: ${errorZScore.toFixed(2)}, Errors: ${currentErrorCount}), ` +
+      `CPU Spike: ${isCpuAnomalous} (Z-Score: ${cpuResult.zScore.toFixed(2)}, CPU: ${cpuResult.currentAvg.toFixed(1)}%), ` +
+      `Latency Spike: ${isLatencyAnomalous} (Z-Score: ${latencyResult.zScore.toFixed(2)}, Latency: ${latencyResult.currentAvg.toFixed(1)}ms)`,
   );
 
   // 5. Deduplication check: Is there already an open/investigating incident created recently?

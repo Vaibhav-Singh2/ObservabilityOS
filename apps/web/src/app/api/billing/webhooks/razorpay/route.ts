@@ -37,7 +37,10 @@ export async function POST(request: Request) {
     }
     event = JSON.parse(body);
   } catch (err) {
-    console.error(`[Razorpay Webhook] Error:`, err instanceof Error ? err.message : err);
+    console.error(
+      `[Razorpay Webhook] Error:`,
+      err instanceof Error ? err.message : err,
+    );
     return NextResponse.json(
       { error: "Signature verification failed" },
       { status: 400 },
@@ -45,7 +48,9 @@ export async function POST(request: Request) {
   }
 
   await connectToDatabase();
-  const payload = (event.payload?.subscription?.entity || event.payload || {}) as RazorpayPayload;
+  const payload = (event.payload?.subscription?.entity ||
+    event.payload ||
+    {}) as RazorpayPayload;
   const eventName = event.event;
 
   try {

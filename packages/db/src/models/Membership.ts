@@ -32,7 +32,7 @@ const MembershipSchema = new Schema<IMembership>(
       default: "member",
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // A user can only have one membership per project

@@ -13,13 +13,13 @@ Datadog shows you everything and explains nothing. **ObservabilityOS shows you w
 
 ## 🌟 Key Features
 
-* **Local PII Redaction (`scrubber.ts`)**: Automatically scrubs passwords, credentials, credit cards, JWTs, and Auth headers from metadata and text fields *before* telemetry leaves your app.
-* **Rolling Z-Score Anomaly Engine (`anomaly.ts`)**: Calculates rolling standard deviations on error rates, latency, and CPU usage. Adapts to weekly/daily traffic cycles to reduce pager noise by 98%.
-* **GitHub Deployment Correlation**: Correlates deploy events (branches, commit SHAs, authors) with metric and regression spikes within a 30-minute window.
-* **AI Incident Diagnostics**: Processes raw logs and deployment diffs to compile narrative post-mortems explaining "What happened", "Why", and "Suggested hotfix" in under 10 seconds.
-* **Multi-channel Alerts**: Delivers rich, markdown-styled incident alerts directly to Slack, Discord, and Microsoft Teams.
-* **Full-text Log Search**: Full-text log query console powered by a Lucene-based MongoDB Atlas Search index with a regex fallback for local development.
-* **Redis Aggregates Cache**: Speeds up dashboard aggregates and microservices registries through a high-performance Redis cache layer.
+- **Local PII Redaction (`scrubber.ts`)**: Automatically scrubs passwords, credentials, credit cards, JWTs, and Auth headers from metadata and text fields _before_ telemetry leaves your app.
+- **Rolling Z-Score Anomaly Engine (`anomaly.ts`)**: Calculates rolling standard deviations on error rates, latency, and CPU usage. Adapts to weekly/daily traffic cycles to reduce pager noise by 98%.
+- **GitHub Deployment Correlation**: Correlates deploy events (branches, commit SHAs, authors) with metric and regression spikes within a 30-minute window.
+- **AI Incident Diagnostics**: Processes raw logs and deployment diffs to compile narrative post-mortems explaining "What happened", "Why", and "Suggested hotfix" in under 10 seconds.
+- **Multi-channel Alerts**: Delivers rich, markdown-styled incident alerts directly to Slack, Discord, and Microsoft Teams.
+- **Full-text Log Search**: Full-text log query console powered by a Lucene-based MongoDB Atlas Search index with a regex fallback for local development.
+- **Redis Aggregates Cache**: Speeds up dashboard aggregates and microservices registries through a high-performance Redis cache layer.
 
 ---
 
@@ -45,26 +45,34 @@ ObservabilityOS is structured as a **Turborepo monorepo workspace**:
 ## 🚀 Quick Start (5-Minute Onboarding)
 
 ### 1. Prerequisites
+
 Ensure you have the following installed on your machine:
-* [Node.js](https://nodejs.org/) v18+
-* [Yarn](https://classic.yarnpkg.com/en/) v1.22+
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local database and cache nodes)
+
+- [Node.js](https://nodejs.org/) v18+
+- [Yarn](https://classic.yarnpkg.com/en/) v1.22+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local database and cache nodes)
 
 ### 2. Boot Infrastructure
+
 Spin up standalone MongoDB and Redis containers instantly:
+
 ```bash
 docker-compose up -d
 ```
 
 ### 3. Install & Build
+
 Install workspace dependencies and build the shared monorepo packages:
+
 ```bash
 yarn install
 yarn build
 ```
 
 ### 4. Configure Environment
+
 Create a configuration file in `apps/web/.env`:
+
 ```env
 MONGODB_URI=mongodb://localhost:27017/observability-os
 REDIS_URL=redis://localhost:6379
@@ -76,10 +84,13 @@ GEMINI_API_KEY=your_gemini_api_key
 ```
 
 ### 5. Launch Development Servers
+
 Run the dev server:
+
 ```bash
 yarn dev
 ```
+
 Open `http://localhost:3000` to access the ObservabilityOS console.
 
 ---
@@ -87,6 +98,7 @@ Open `http://localhost:3000` to access the ObservabilityOS console.
 ## 📦 Ingesting Telemetry
 
 ### Node.js / TypeScript SDK
+
 Install the `@repo/sdk` package and integrate it in one line:
 
 ```typescript
@@ -98,11 +110,13 @@ const logger = new Logger({
   defaultService: "billing-service",
   defaultEnvironment: "prod",
   batchSize: 10,
-  flushIntervalMs: 2000
+  flushIntervalMs: 2000,
 });
 
 // Logs are batched in memory and shipped asynchronously
-logger.info("Payment processed successfully", { metadata: { transactionId: "tx_98124" } });
+logger.info("Payment processed successfully", {
+  metadata: { transactionId: "tx_98124" },
+});
 logger.error("DB connection pool exhausted", { traceId: "tr_db_timeout_882" });
 ```
 
@@ -112,19 +126,19 @@ logger.error("DB connection pool exhausted", { traceId: "tr_db_timeout_882" });
 
 For in-depth guides and technical details, see the files in the `docs/` directory:
 
-* ⏱️ **[QUICKSTART.md](docs/QUICKSTART.md)**: Jump right into your first project setup.
-* ⚙️ **[INSTALLATION.md](docs/INSTALLATION.md)**: Requirements, environment configs, local and production run-times.
-* 🏗️ **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: Domain layers, ingestion pipelines, anomaly loops, and Mermaid diagrams.
-* 🔌 **[API.md](docs/API.md)**: REST API reference for Ingest, Metrics, and Saved Searches.
-* 🗄️ **[DATABASE.md](docs/DATABASE.md)**: MongoDB schemas, relationships, indexes, and Redis cache keys.
-* 🚀 **[DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Production configurations for Vercel, Railway, and Docker environments.
-* 🛡️ **[SECURITY.md](docs/SECURITY.md)**: OAuth scopes, rate-limiting, and recursive PII scrubbing algorithms.
-* 🛠️ **[DEVELOPMENT.md](docs/DEVELOPMENT.md)**: Codebase rules, testing framework, workspace tools, and testing commands.
-* 🤝 **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**: PR workflows, linting, and commit naming conventions.
-* ❓ **[FAQ.md](docs/FAQ.md)**: Solutions to common developer questions.
-* 🩹 **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**: Error codes, database connection timeouts, and memory buffer recoveries.
-* 🗺️ **[ROADMAP.md](docs/ROADMAP.md)**: Planned milestones.
-* 📜 **[CHANGELOG.md](docs/CHANGELOG.md)**: Release logs.
+- ⏱️ **[QUICKSTART.md](docs/QUICKSTART.md)**: Jump right into your first project setup.
+- ⚙️ **[INSTALLATION.md](docs/INSTALLATION.md)**: Requirements, environment configs, local and production run-times.
+- 🏗️ **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: Domain layers, ingestion pipelines, anomaly loops, and Mermaid diagrams.
+- 🔌 **[API.md](docs/API.md)**: REST API reference for Ingest, Metrics, and Saved Searches.
+- 🗄️ **[DATABASE.md](docs/DATABASE.md)**: MongoDB schemas, relationships, indexes, and Redis cache keys.
+- 🚀 **[DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Production configurations for Vercel, Railway, and Docker environments.
+- 🛡️ **[SECURITY.md](docs/SECURITY.md)**: OAuth scopes, rate-limiting, and recursive PII scrubbing algorithms.
+- 🛠️ **[DEVELOPMENT.md](docs/DEVELOPMENT.md)**: Codebase rules, testing framework, workspace tools, and testing commands.
+- 🤝 **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**: PR workflows, linting, and commit naming conventions.
+- ❓ **[FAQ.md](docs/FAQ.md)**: Solutions to common developer questions.
+- 🩹 **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**: Error codes, database connection timeouts, and memory buffer recoveries.
+- 🗺️ **[ROADMAP.md](docs/ROADMAP.md)**: Planned milestones.
+- 📜 **[CHANGELOG.md](docs/CHANGELOG.md)**: Release logs.
 
 ---
 
@@ -144,7 +158,7 @@ We welcome contributions from the community! Please read our **[CONTRIBUTING.md]
 
 ObservabilityOS is licensed under a hybrid licensing model:
 
-*   **Core Application & Packages**: Licensed under the **ObservabilityOS Source Available License** (see [LICENSE](LICENSE)). This allows free personal, internal development, and non-SaaS production use, but prohibits offering the platform as a commercial SaaS or managed service.
-*   **Logger SDK (`packages/sdk`)**: Licensed under the highly permissive **MIT License** (see [packages/sdk/LICENSE](packages/sdk/LICENSE)) to allow frictionless integration into any proprietary codebase.
+- **Core Application & Packages**: Licensed under the **ObservabilityOS Source Available License** (see [LICENSE](LICENSE)). This allows free personal, internal development, and non-SaaS production use, but prohibits offering the platform as a commercial SaaS or managed service.
+- **Logger SDK (`packages/sdk`)**: Licensed under the highly permissive **MIT License** (see [packages/sdk/LICENSE](packages/sdk/LICENSE)) to allow frictionless integration into any proprietary codebase.
 
 For commercial licenses, custom terms, or SaaS rights, please read [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) or contact sales@observabilityos.com.

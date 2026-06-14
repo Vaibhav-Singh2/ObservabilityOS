@@ -1,8 +1,9 @@
 import { MetadataRoute } from "next";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
-  
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+
   const routes = [
     "",
     "/vs/datadog",

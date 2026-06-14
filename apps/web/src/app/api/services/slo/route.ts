@@ -6,8 +6,6 @@ import { Project, Service } from "@repo/db";
 import { z } from "zod";
 import { logAuditEvent } from "@/lib/audit";
 
-
-
 const sloConfigSchema = z.object({
   projectId: z.string().min(1),
   serviceId: z.string().min(1),

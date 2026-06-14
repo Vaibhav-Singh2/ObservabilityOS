@@ -129,8 +129,12 @@ export default function BillingView({ project }: BillingViewProps) {
   const [successMsg, setSuccessMsg] = useState("");
 
   const [currentPlan, setCurrentPlan] = useState(project.plan);
-  const [currentSubStatus, setCurrentSubStatus] = useState(project.subscriptionStatus);
-  const [currentBillingProvider, setCurrentBillingProvider] = useState(project.billingProvider);
+  const [currentSubStatus, setCurrentSubStatus] = useState(
+    project.subscriptionStatus,
+  );
+  const [currentBillingProvider, setCurrentBillingProvider] = useState(
+    project.billingProvider,
+  );
   const [isVerifyingUpgrade, setIsVerifyingUpgrade] = useState(false);
 
   useEffect(() => {
@@ -163,14 +167,17 @@ export default function BillingView({ project }: BillingViewProps) {
         if (res.ok) {
           const { projects } = await res.json();
           const activeProj = projects.find(
-            (p: { _id: string; plan: string; billingProvider: string }) => p._id === project.id
+            (p: { _id: string; plan: string; billingProvider: string }) =>
+              p._id === project.id,
           );
           if (activeProj && activeProj.plan === "pro") {
             setCurrentPlan("pro");
             setCurrentSubStatus("active");
             setCurrentBillingProvider(activeProj.billingProvider);
             setIsVerifyingUpgrade(false);
-            setSuccessMsg("Upgrade verified successfully! Welcome to Pro Tier.");
+            setSuccessMsg(
+              "Upgrade verified successfully! Welcome to Pro Tier.",
+            );
             router.refresh();
           }
         }
@@ -186,7 +193,9 @@ export default function BillingView({ project }: BillingViewProps) {
     const timeoutId = setTimeout(() => {
       clearInterval(intervalId);
       setIsVerifyingUpgrade(false);
-      setErrorMsg("Billing verification timed out. If you made a payment, it will activate shortly once processed.");
+      setErrorMsg(
+        "Billing verification timed out. If you made a payment, it will activate shortly once processed.",
+      );
     }, 120000);
 
     return () => {
@@ -254,14 +263,20 @@ export default function BillingView({ project }: BillingViewProps) {
                 "Razorpay authorization approved! Reloading settings...",
               );
               setTimeout(() => {
-                router.push(`/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`);
+                router.push(
+                  `/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`,
+                );
               }, 1500);
             },
             prefill: { name: "", email: "" },
             theme: { color: "#4f46e5" },
           };
 
-          const rzp = new (window as unknown as { Razorpay: new (o: unknown) => { open: () => void } }).Razorpay(options);
+          const rzp = new (
+            window as unknown as {
+              Razorpay: new (o: unknown) => { open: () => void };
+            }
+          ).Razorpay(options);
           rzp.open();
           setIsSubmitting(false);
         }
@@ -269,7 +284,9 @@ export default function BillingView({ project }: BillingViewProps) {
     } catch (err) {
       console.error(err);
       setErrorMsg(
-        err instanceof Error ? err.message : "An unexpected error occurred during checkout",
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during checkout",
       );
       setIsSubmitting(false);
     }
@@ -416,10 +433,7 @@ export default function BillingView({ project }: BillingViewProps) {
                   : "bg-slate-600"
               }`}
             />
-            Status:{" "}
-            {currentSubStatus === "active"
-              ? "Active"
-              : "None / Unpaid"}
+            Status: {currentSubStatus === "active" ? "Active" : "None / Unpaid"}
           </span>
         </div>
       </div>

@@ -258,7 +258,9 @@ export async function POST(request: Request) {
       logsToInsert.forEach((log) => {
         const channel = `project:${project._id.toString()}:logs`;
         const publishPayload = {
-          id: (log as { _id?: { toString(): string } })._id?.toString() || Math.random().toString(),
+          id:
+            (log as { _id?: { toString(): string } })._id?.toString() ||
+            Math.random().toString(),
           timestamp: log.timestamp.toISOString(),
           level: log.level,
           message: log.message,
@@ -267,12 +269,17 @@ export async function POST(request: Request) {
           service: {
             id: service._id.toString(),
             name: service.name,
-            environment: log.environment
-          }
+            environment: log.environment,
+          },
         };
-        redisClient.publish(channel, JSON.stringify(publishPayload)).catch((err) => {
-          console.warn(`Failed to publish log to Redis channel ${channel}:`, err);
-        });
+        redisClient
+          .publish(channel, JSON.stringify(publishPayload))
+          .catch((err) => {
+            console.warn(
+              `Failed to publish log to Redis channel ${channel}:`,
+              err,
+            );
+          });
       });
     }
 

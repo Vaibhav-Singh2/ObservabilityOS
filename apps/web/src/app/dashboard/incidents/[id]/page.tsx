@@ -15,9 +15,7 @@ interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function IncidentDetailPage({
-  params,
-}: PageProps) {
+export default async function IncidentDetailPage({ params }: PageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
@@ -75,7 +73,13 @@ export default async function IncidentDetailPage({
   });
 
   // Serialize Mongoose objects
-  const serviceObj = incident.serviceId as unknown as { _id: { toString: () => string }; name: string; environment: string; runbookUrl?: string; troubleshootingSteps?: string };
+  const serviceObj = incident.serviceId as unknown as {
+    _id: { toString: () => string };
+    name: string;
+    environment: string;
+    runbookUrl?: string;
+    troubleshootingSteps?: string;
+  };
   const deployObj = incident.deployId as unknown as {
     _id: { toString: () => string };
     commitSha: string;
@@ -136,7 +140,11 @@ export default async function IncidentDetailPage({
     .sort({ createdAt: 1 });
 
   const serializedComments = comments.map((c) => {
-    const u = c.userId as unknown as { _id: { toString: () => string }; username: string; avatarUrl?: string };
+    const u = c.userId as unknown as {
+      _id: { toString: () => string };
+      username: string;
+      avatarUrl?: string;
+    };
     return {
       id: c._id.toString(),
       content: c.content,

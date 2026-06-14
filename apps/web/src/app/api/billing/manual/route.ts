@@ -10,8 +10,6 @@ const manualSchema = z.object({
   plan: z.enum(["free", "pro"]),
 });
 
-
-
 export async function POST(request: Request) {
   try {
     const user = await getAuthenticatedUser();

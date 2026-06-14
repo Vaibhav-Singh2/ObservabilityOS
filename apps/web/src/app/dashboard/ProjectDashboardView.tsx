@@ -105,7 +105,7 @@ export default function ProjectDashboardView({
   const isMounted = useSyncExternalStore(
     subscribe,
     () => true,
-    () => false
+    () => false,
   );
   const [showKey, setShowKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
@@ -265,7 +265,9 @@ export default function ProjectDashboardView({
           <CardContent className="pt-4 flex-1 flex flex-col justify-between">
             <Tabs
               value={sdkTab}
-              onValueChange={(val) => setSdkTab(val as "basic" | "multi" | "deploy")}
+              onValueChange={(val) =>
+                setSdkTab(val as "basic" | "multi" | "deploy")
+              }
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-3 mb-4">
@@ -694,7 +696,9 @@ curl -X POST "${endpointUrl.replace("/api/ingest", "/api/webhooks/github")}" \\
                       type="button"
                       variant={environment === env ? "default" : "secondary"}
                       size="sm"
-                      onClick={() => setEnvironment(env as "prod" | "staging" | "dev")}
+                      onClick={() =>
+                        setEnvironment(env as "prod" | "staging" | "dev")
+                      }
                       className="capitalize"
                     >
                       {env}

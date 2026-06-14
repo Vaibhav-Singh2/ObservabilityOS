@@ -58,7 +58,5 @@ export default async function PlaygroundPage({ searchParams }: PageProps) {
     apiKey: activeProject.apiKey,
   };
 
-  return (
-    <PlaygroundView project={serializedProject} />
-  );
+  return <PlaygroundView project={serializedProject} />;
 }

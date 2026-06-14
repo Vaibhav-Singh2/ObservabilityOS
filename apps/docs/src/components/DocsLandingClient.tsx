@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Rocket, 
-  Layers, 
-  Terminal, 
-  Milestone, 
-  Search, 
-  ArrowRight, 
+import {
+  Rocket,
+  Layers,
+  Terminal,
+  Milestone,
+  Search,
+  ArrowRight,
   ChevronRight,
   Activity,
-  ArrowUpRight
+  ArrowUpRight,
 } from "lucide-react";
 import DocsHeader from "./DocsHeader";
 import DocsSearch from "./DocsSearch";
@@ -21,7 +21,9 @@ interface DocsLandingClientProps {
   searchIndex: SearchDoc[];
 }
 
-export default function DocsLandingClient({ searchIndex }: DocsLandingClientProps) {
+export default function DocsLandingClient({
+  searchIndex,
+}: DocsLandingClientProps) {
   const [searchOpen, setSearchOpen] = useState(false);
 
   // Trigger search on Ctrl+K
@@ -39,65 +41,129 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
   const categories = [
     {
       title: "Getting Started",
-      description: "Set up your sandbox, install dependencies, and start shipping telemetry logs in minutes.",
+      description:
+        "Set up your sandbox, install dependencies, and start shipping telemetry logs in minutes.",
       icon: Rocket,
-      color: "from-blue-500/20 to-indigo-500/20 border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400",
+      color:
+        "from-blue-500/20 to-indigo-500/20 border-indigo-500/10 hover:border-indigo-500/30 text-indigo-400",
       links: [
-        { title: "Introduction", href: "/docs/introduction", desc: "Platform overview & capabilities" },
-        { title: "Quick Start", href: "/docs/quickstart", desc: "Ship your first telemetry log" },
-        { title: "Installation", href: "/docs/installation", desc: "Environment setups & requirements" },
-        { title: "Local Development", href: "/docs/development", desc: "Sandbox debugging & testing" },
-      ]
+        {
+          title: "Introduction",
+          href: "/docs/introduction",
+          desc: "Platform overview & capabilities",
+        },
+        {
+          title: "Quick Start",
+          href: "/docs/quickstart",
+          desc: "Ship your first telemetry log",
+        },
+        {
+          title: "Installation",
+          href: "/docs/installation",
+          desc: "Environment setups & requirements",
+        },
+        {
+          title: "Local Development",
+          href: "/docs/development",
+          desc: "Sandbox debugging & testing",
+        },
+      ],
     },
     {
       title: "Core Architecture",
-      description: "Deep dive into the monorepo topology, log ingestion flow, and anomaly detection loops.",
+      description:
+        "Deep dive into the monorepo topology, log ingestion flow, and anomaly detection loops.",
       icon: Layers,
-      color: "from-purple-500/20 to-fuchsia-500/20 border-purple-500/10 hover:border-purple-500/30 text-purple-400",
+      color:
+        "from-purple-500/20 to-fuchsia-500/20 border-purple-500/10 hover:border-purple-500/30 text-purple-400",
       links: [
-        { title: "System Architecture", href: "/docs/architecture", desc: "Monorepo topology & pipelines" },
-        { title: "Database Schemas", href: "/docs/database", desc: "MongoDB Mongoose & Redis cache" },
-        { title: "Security Policy", href: "/docs/security", desc: "Encryption & PII scrubbing rules" },
-      ]
+        {
+          title: "System Architecture",
+          href: "/docs/architecture",
+          desc: "Monorepo topology & pipelines",
+        },
+        {
+          title: "Database Schemas",
+          href: "/docs/database",
+          desc: "MongoDB Mongoose & Redis cache",
+        },
+        {
+          title: "Security Policy",
+          href: "/docs/security",
+          desc: "Encryption & PII scrubbing rules",
+        },
+      ],
     },
     {
       title: "Reference Guides",
-      description: "Complete REST API specifications, Docker configurations, and operational troubleshooting manuals.",
+      description:
+        "Complete REST API specifications, Docker configurations, and operational troubleshooting manuals.",
       icon: Terminal,
-      color: "from-emerald-500/20 to-teal-500/20 border-emerald-500/10 hover:border-emerald-500/30 text-emerald-400",
+      color:
+        "from-emerald-500/20 to-teal-500/20 border-emerald-500/10 hover:border-emerald-500/30 text-emerald-400",
       links: [
-        { title: "API Specification", href: "/docs/api", desc: "Ingest, Metrics, and queries API" },
-        { title: "Production Deployment", href: "/docs/deployment", desc: "Docker & Vercel configuration" },
-        { title: "Troubleshooting Guide", href: "/docs/troubleshooting", desc: "Common errors & database fixes" },
-        { title: "Technical FAQ", href: "/docs/faq", desc: "OpenTelemetry & privacy details" },
-      ]
+        {
+          title: "API Specification",
+          href: "/docs/api",
+          desc: "Ingest, Metrics, and queries API",
+        },
+        {
+          title: "Production Deployment",
+          href: "/docs/deployment",
+          desc: "Docker & Vercel configuration",
+        },
+        {
+          title: "Troubleshooting Guide",
+          href: "/docs/troubleshooting",
+          desc: "Common errors & database fixes",
+        },
+        {
+          title: "Technical FAQ",
+          href: "/docs/faq",
+          desc: "OpenTelemetry & privacy details",
+        },
+      ],
     },
     {
       title: "Community & Releases",
-      description: "Find branching protocols, contribution rules, roadmap milestones, and release changelogs.",
+      description:
+        "Find branching protocols, contribution rules, roadmap milestones, and release changelogs.",
       icon: Milestone,
-      color: "from-amber-500/20 to-orange-500/20 border-amber-500/10 hover:border-amber-500/30 text-amber-450",
+      color:
+        "from-amber-500/20 to-orange-500/20 border-amber-500/10 hover:border-amber-500/30 text-amber-450",
       links: [
-        { title: "Contributing Guide", href: "/docs/contributing", desc: "Branching workflow & reviews" },
-        { title: "Product Roadmap", href: "/docs/roadmap", desc: "Completed & planned milestones" },
-        { title: "Release Changelog", href: "/docs/changelog", desc: "Feature history & tags" },
-      ]
-    }
+        {
+          title: "Contributing Guide",
+          href: "/docs/contributing",
+          desc: "Branching workflow & reviews",
+        },
+        {
+          title: "Product Roadmap",
+          href: "/docs/roadmap",
+          desc: "Completed & planned milestones",
+        },
+        {
+          title: "Release Changelog",
+          href: "/docs/changelog",
+          desc: "Feature history & tags",
+        },
+      ],
+    },
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden relative selection:bg-indigo-500 selection:text-white">
       {/* Background Decorative Gradients & Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-40 z-0 h-[600px]" />
-      
+
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-indigo-650/10 blur-[120px] rounded-full pointer-events-none z-0" />
       <div className="absolute top-[350px] right-[10%] w-[350px] h-[250px] bg-purple-600/5 blur-[100px] rounded-full pointer-events-none z-0" />
 
       {/* Header */}
-      <DocsHeader 
-        sidebarOpen={false} 
-        setSidebarOpen={() => {}} 
-        onSearchOpen={() => setSearchOpen(true)} 
+      <DocsHeader
+        sidebarOpen={false}
+        setSidebarOpen={() => {}}
+        onSearchOpen={() => setSearchOpen(true)}
         hideMobileMenuTrigger={true}
       />
 
@@ -120,7 +186,9 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
           </h1>
 
           <p className="text-slate-400 text-base sm:text-lg max-w-xl mx-auto font-medium">
-            Explore deep technical guides, architecture specifications, API references, and deployment pipelines. Everything you need to scale log analytics.
+            Explore deep technical guides, architecture specifications, API
+            references, and deployment pipelines. Everything you need to scale
+            log analytics.
           </p>
 
           {/* Interactive Search Trigger */}
@@ -145,13 +213,15 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
           {categories.map((cat, index) => {
             const Icon = cat.icon;
             return (
-              <div 
-                key={index} 
+              <div
+                key={index}
                 className="group relative rounded-2xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-slate-900/10 hover:border-slate-800 hover:shadow-[0_0_40px_-15px_rgba(99,102,241,0.15)] flex flex-col gap-6"
               >
                 {/* Header of Card */}
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-xl bg-linear-to-br border shadow-md flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 ${cat.color}`}>
+                  <div
+                    className={`p-3 rounded-xl bg-linear-to-br border shadow-md flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 ${cat.color}`}
+                  >
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
@@ -174,7 +244,9 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
                     >
                       <div className="flex flex-col min-w-0">
                         <span className="truncate">{link.title}</span>
-                        <span className="text-[10px] text-slate-500 font-mono font-medium truncate mt-0.5 group-hover/link:text-slate-450 transition-colors">{link.desc}</span>
+                        <span className="text-[10px] text-slate-500 font-mono font-medium truncate mt-0.5 group-hover/link:text-slate-450 transition-colors">
+                          {link.desc}
+                        </span>
                       </div>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-650 group-hover/link:text-indigo-400 group-hover/link:translate-x-0.5 transition-all shrink-0 ml-1.5" />
                     </Link>
@@ -188,11 +260,15 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
         {/* Developer CTA Section */}
         <section className="w-full max-w-5xl mt-16 md:mt-24 p-6 md:p-8 rounded-2xl border border-indigo-500/10 bg-indigo-950/5 relative overflow-hidden backdrop-blur-xs flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/5 blur-[50px] rounded-full pointer-events-none" />
-          
+
           <div className="space-y-2 text-center sm:text-left max-w-xl">
-            <h3 className="font-bold text-lg text-slate-100">Looking for a quick integration?</h3>
+            <h3 className="font-bold text-lg text-slate-100">
+              Looking for a quick integration?
+            </h3>
             <p className="text-slate-400 text-xs leading-relaxed font-medium">
-              Jump straight into our step-by-step Quick Start guide. Initialize the server workspace, connect your logging agents, and visualize metrics instantly.
+              Jump straight into our step-by-step Quick Start guide. Initialize
+              the server workspace, connect your logging agents, and visualize
+              metrics instantly.
             </p>
           </div>
 
@@ -211,24 +287,33 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 font-mono">
           <div className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-slate-600" />
-            <span>© {new Date().getFullYear()} ObservabilityOS Dev Team. Open Source.</span>
+            <span>
+              © {new Date().getFullYear()} ObservabilityOS Dev Team. Open
+              Source.
+            </span>
           </div>
 
           <div className="flex items-center gap-4 font-semibold">
-            <a 
+            <a
               href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
               target="_blank"
-              rel="noopener noreferrer" 
+              rel="noopener noreferrer"
               className="hover:text-slate-350 transition-colors flex items-center gap-1 cursor-pointer"
             >
               GitHub <ArrowUpRight className="w-3 h-3 text-slate-600" />
             </a>
             <span className="text-slate-800">|</span>
-            <Link href="/docs/introduction" className="hover:text-slate-350 transition-colors cursor-pointer">
+            <Link
+              href="/docs/introduction"
+              className="hover:text-slate-350 transition-colors cursor-pointer"
+            >
               Docs
             </Link>
             <span className="text-slate-800">|</span>
-            <Link href="/docs/api" className="hover:text-slate-350 transition-colors cursor-pointer">
+            <Link
+              href="/docs/api"
+              className="hover:text-slate-350 transition-colors cursor-pointer"
+            >
               API Spec
             </Link>
           </div>
@@ -236,10 +321,10 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
       </footer>
 
       {/* Search Command Palette Dialog */}
-      <DocsSearch 
-        isOpen={searchOpen} 
-        onClose={() => setSearchOpen(false)} 
-        searchIndex={searchIndex} 
+      <DocsSearch
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+        searchIndex={searchIndex}
       />
     </div>
   );

@@ -3,9 +3,6 @@ import { getAuthenticatedUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import { Project, Service, Log } from "@repo/db";
 
-
-
-
 export async function GET(request: Request) {
   try {
     const user = await getAuthenticatedUser();

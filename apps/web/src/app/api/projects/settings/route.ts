@@ -21,8 +21,6 @@ const settingsUpdateSchema = z.object({
     .min(1.0, "Z-Score threshold must be at least 1.0"),
 });
 
-
-
 export async function PATCH(request: Request) {
   try {
     const user = await getAuthenticatedUser();

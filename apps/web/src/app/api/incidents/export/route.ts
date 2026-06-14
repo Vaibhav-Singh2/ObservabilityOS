@@ -1,14 +1,7 @@
 import { getAuthenticatedUser } from "@/lib/auth";
 
 import { NextResponse } from "next/server";
-import {
-
-  Project,
-  Incident,
-  Log,
-  Comment,
-
-} from "@repo/db";
+import { Project, Incident, Log, Comment } from "@repo/db";
 
 import {
   generatePostMortemMarkdown,
@@ -16,8 +9,6 @@ import {
   PostMortemLog,
   PostMortemComment,
 } from "@/lib/postmortem";
-
-
 
 export async function GET(request: Request) {
   try {
@@ -83,7 +74,11 @@ export async function GET(request: Request) {
       .sort({ createdAt: 1 });
 
     // Prepare serialization for post-mortem utility
-    const serviceObj = incident.serviceId as unknown as { name: string; environment: string; _id: string };
+    const serviceObj = incident.serviceId as unknown as {
+      name: string;
+      environment: string;
+      _id: string;
+    };
     const deployObj = incident.deployId as unknown as {
       commitSha: string;
       commitMessage: string;
@@ -133,7 +128,10 @@ export async function GET(request: Request) {
     }));
 
     const pmComments: PostMortemComment[] = comments.map((c) => {
-      const u = c.userId as unknown as { username: string; email?: string } | null;
+      const u = c.userId as unknown as {
+        username: string;
+        email?: string;
+      } | null;
       return {
         content: c.content,
         createdAt: c.createdAt.toISOString(),

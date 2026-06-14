@@ -11,7 +11,10 @@ interface DocsLayoutClientProps {
   searchIndex: SearchDoc[];
 }
 
-export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutClientProps) {
+export default function DocsLayoutClient({
+  children,
+  searchIndex,
+}: DocsLayoutClientProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [expandedDiagram, setExpandedDiagram] = useState<string | null>(null);
@@ -32,7 +35,9 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
 
   // active heading scroll-spy using IntersectionObserver
   useEffect(() => {
-    const headings = Array.from(document.querySelectorAll("article h2, article h3"));
+    const headings = Array.from(
+      document.querySelectorAll("article h2, article h3"),
+    );
     if (headings.length === 0) return;
 
     const observer = new IntersectionObserver(
@@ -40,15 +45,17 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
         const visibleEntries = entries.filter((e) => e.isIntersecting);
         if (visibleEntries.length > 0) {
           // Find the topmost visible heading
-          const topHeading = visibleEntries.reduce((prev, curr) => 
-            curr.boundingClientRect.top < prev.boundingClientRect.top ? curr : prev
+          const topHeading = visibleEntries.reduce((prev, curr) =>
+            curr.boundingClientRect.top < prev.boundingClientRect.top
+              ? curr
+              : prev,
           );
           if (topHeading.target.id) {
             setActiveId(topHeading.target.id);
           }
         }
       },
-      { rootMargin: "-80px 0px -60% 0px", threshold: [0, 1] }
+      { rootMargin: "-80px 0px -60% 0px", threshold: [0, 1] },
     );
 
     headings.forEach((h) => {
@@ -80,7 +87,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
 
     const renderMermaid = async () => {
       const diagrams = Array.from(
-        document.querySelectorAll<HTMLElement>("[data-mermaid-source]")
+        document.querySelectorAll<HTMLElement>("[data-mermaid-source]"),
       ).filter((diagram) => !diagram.dataset.processed);
 
       if (diagrams.length === 0) return;
@@ -131,10 +138,10 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
       } catch (error) {
         diagrams.forEach((diagram) => {
           const container = diagram.closest<HTMLElement>(
-            "[data-mermaid-container]"
+            "[data-mermaid-container]",
           );
           const status = container?.querySelector<HTMLElement>(
-            "[data-mermaid-status]"
+            "[data-mermaid-status]",
           );
           diagram.dataset.processed = "error";
           container?.classList.add("mermaid-shell-error");
@@ -153,7 +160,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
   useEffect(() => {
     const handleExpand = (event: MouseEvent) => {
       const button = (event.target as HTMLElement).closest(
-        "[data-expand-mermaid]"
+        "[data-expand-mermaid]",
       );
       if (!button) return;
 
@@ -187,7 +194,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
 
   useEffect(() => {
     const preElements = document.querySelectorAll("article pre");
-    
+
     preElements.forEach((pre) => {
       if (pre.closest("[data-mermaid-container]")) return;
 
@@ -207,7 +214,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
 
       const header = document.createElement("div");
       header.className = "code-copy-header";
-      
+
       const langLabel = document.createElement("span");
       langLabel.innerText = language;
 
@@ -240,10 +247,10 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
       // Create parent container wrapper
       const wrapper = document.createElement("div");
       wrapper.className = "code-block-wrapper";
-      
+
       // Insert wrapper in DOM before pre element
       pre.parentNode?.insertBefore(wrapper, pre);
-      
+
       pre.className = "";
 
       wrapper.appendChild(header);
@@ -262,9 +269,9 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
 
       <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 overflow-hidden px-4 sm:px-6">
         {/* Navigation Sidebar */}
-        <DocsSidebar 
-          isOpen={sidebarOpen} 
-          onClose={() => setSidebarOpen(false)} 
+        <DocsSidebar
+          isOpen={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
         />
 
         {/* Page Content Panel */}
@@ -295,7 +302,9 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
           <div className="diagram-modal-panel">
             <div className="diagram-modal-header">
               <div>
-                <span className="diagram-modal-eyebrow">Architecture diagram</span>
+                <span className="diagram-modal-eyebrow">
+                  Architecture diagram
+                </span>
                 <h2>Large view</h2>
               </div>
               <button
@@ -304,7 +313,21 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
                 onClick={() => setExpandedDiagram(null)}
                 aria-label="Close large diagram view"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M18 6 6 18" />
+                  <path d="m6 6 12 12" />
+                </svg>
               </button>
             </div>
             <div

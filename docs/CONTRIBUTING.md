@@ -19,10 +19,10 @@ We follow standard feature branching guidelines:
 1. **Fork the Repository**: Create your own fork of the project.
 2. **Clone the Fork**: Clone it locally.
 3. **Branch Creation**: Create a branch off the `main` branch.
-   * `feat/your-feature`: New capabilities or components.
-   * `fix/bug-fix`: Code modifications correcting errors.
-   * `docs/update-docs`: Documentation or markdown updates.
-   * `refactor/cleanup`: Code cleanups, lint fixes, or design adjustments.
+   - `feat/your-feature`: New capabilities or components.
+   - `fix/bug-fix`: Code modifications correcting errors.
+   - `docs/update-docs`: Documentation or markdown updates.
+   - `refactor/cleanup`: Code cleanups, lint fixes, or design adjustments.
 4. **Develop & Verify**: Verify that all typechecks, builds, and lint rules pass.
 5. **Open a PR**: Push your branch to GitHub and open a Pull Request to the upstream `main` branch.
 
@@ -39,24 +39,27 @@ We use **Conventional Commits** formatting to standardize our changelogs and ver
 ```
 
 ### Allowed Types:
-* `feat`: A new feature (e.g. `feat(sdk): add auto-retry buffer flush`).
-* `fix`: A bug fix (e.g. `fix(ingest): correct rate-limiting window offset`).
-* `docs`: Documentation updates (e.g. `docs(api): document search endpoint payloads`).
-* `style`: Styling changes, spacing, linting format fixes (no logic mutations).
-* `refactor`: Code restructuring without modifying public APIs (e.g. `refactor(db): deduplicate schema models`).
-* `test`: Adding or correcting unit/integration tests (e.g. `test(cache): add redis cache invalidation mock`).
-* `chore`: Maintenance chores, dependencies, configuration adjustments (e.g. `chore(deps): upgrade mongoose to v8`).
+
+- `feat`: A new feature (e.g. `feat(sdk): add auto-retry buffer flush`).
+- `fix`: A bug fix (e.g. `fix(ingest): correct rate-limiting window offset`).
+- `docs`: Documentation updates (e.g. `docs(api): document search endpoint payloads`).
+- `style`: Styling changes, spacing, linting format fixes (no logic mutations).
+- `refactor`: Code restructuring without modifying public APIs (e.g. `refactor(db): deduplicate schema models`).
+- `test`: Adding or correcting unit/integration tests (e.g. `test(cache): add redis cache invalidation mock`).
+- `chore`: Maintenance chores, dependencies, configuration adjustments (e.g. `chore(deps): upgrade mongoose to v8`).
 
 ---
 
 ## 🎨 Coding Standards
 
 ### TypeScript
-* Enforce strict mode checks (`strict: true` in `tsconfig.json`).
-* Avoid using `any` types wherever possible. Explicitly define interfaces or use custom types.
-* Prefer using utility wrappers and functional type assertions rather than force-casting.
+
+- Enforce strict mode checks (`strict: true` in `tsconfig.json`).
+- Avoid using `any` types wherever possible. Explicitly define interfaces or use custom types.
+- Prefer using utility wrappers and functional type assertions rather than force-casting.
 
 ### Linting & Formatting
+
 We enforce strict style analysis through ESLint. Check code formatting locally before staging files:
 
 ```bash
@@ -68,9 +71,10 @@ yarn lint:fix
 ```
 
 ### Component Guidelines
-* Use Radix/shadcn UI primitive components (Level 1 controls like Button, Card, Switch, Input, DropdownMenu) located in `apps/web/src/components/ui/` to ensure visual cohesion.
-* Do not introduce arbitrary inline styles or ad-hoc custom control modules unless highly specialized logic is required.
-* Ensure all interactive components include unique, descriptive HTML `id` attributes to support automated browser testing and accessibility.
+
+- Use Radix/shadcn UI primitive components (Level 1 controls like Button, Card, Switch, Input, DropdownMenu) located in `apps/web/src/components/ui/` to ensure visual cohesion.
+- Do not introduce arbitrary inline styles or ad-hoc custom control modules unless highly specialized logic is required.
+- Ensure all interactive components include unique, descriptive HTML `id` attributes to support automated browser testing and accessibility.
 
 ---
 
@@ -78,7 +82,7 @@ yarn lint:fix
 
 To ensure PRs are reviewed and merged quickly:
 
-1. **Write a Description**: Explain *what* changes were made, *why* they were made, and *how* they were verified.
+1. **Write a Description**: Explain _what_ changes were made, _why_ they were made, and _how_ they were verified.
 2. **Link Issues**: Reference any related GitHub issue numbers.
 3. **Maintain Lint Compliance**: PR pipelines will run lint checks and build tasks. If the pipeline fails, address the warnings before requesting a review.
 4. **Review Cycle**: At least one core maintainer must review and approve the PR before it is merged. Address feedback by pushing additional commits directly to your feature branch.
@@ -88,6 +92,7 @@ To ensure PRs are reviewed and merged quickly:
 ## ⚖️ Licensing & Contributor License Agreement (CLA)
 
 By contributing to ObservabilityOS, you agree that your contributions will be licensed under:
+
 1. The project's default **ObservabilityOS Source Available License** for the core packages/apps.
 2. The **MIT License** for the SDK package (`packages/sdk`).
 

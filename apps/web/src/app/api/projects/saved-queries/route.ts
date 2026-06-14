@@ -5,8 +5,6 @@ import { Project } from "@repo/db";
 
 import { z } from "zod";
 
-
-
 const savedQuerySchema = z.object({
   projectId: z.string().min(1),
   name: z.string().min(1, "Name is required"),

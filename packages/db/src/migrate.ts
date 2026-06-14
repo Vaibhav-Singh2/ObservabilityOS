@@ -7,9 +7,9 @@ import path from "path";
 function loadEnv() {
   const possiblePaths = [
     path.resolve(__dirname, "../../../apps/web/.env"), // from packages/db/dist
-    path.resolve(__dirname, "../../apps/web/.env"),    // from packages/db/src
-    path.resolve(process.cwd(), ".env"),              // current working directory
-    path.resolve(process.cwd(), "apps/web/.env"),     // apps/web under cwd
+    path.resolve(__dirname, "../../apps/web/.env"), // from packages/db/src
+    path.resolve(process.cwd(), ".env"), // current working directory
+    path.resolve(process.cwd(), "apps/web/.env"), // apps/web under cwd
   ];
 
   for (const envPath of possiblePaths) {
@@ -19,7 +19,11 @@ function loadEnv() {
         const parts = line.split("=");
         if (parts.length >= 2 && parts[0]) {
           const key = parts[0].trim();
-          const val = parts.slice(1).join("=").trim().replace(/^['"]|['"]$/g, "");
+          const val = parts
+            .slice(1)
+            .join("=")
+            .trim()
+            .replace(/^['"]|['"]$/g, "");
           if (key && !process.env[key]) {
             process.env[key] = val;
           }
@@ -29,7 +33,9 @@ function loadEnv() {
       return;
     }
   }
-  console.warn("[Migrations] No environment file found matching standard paths.");
+  console.warn(
+    "[Migrations] No environment file found matching standard paths.",
+  );
 }
 
 const MIGRATIONS = [

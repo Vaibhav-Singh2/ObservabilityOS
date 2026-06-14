@@ -39,21 +39,25 @@ graph TD
 ## 📦 System Components & Packages
 
 ### 1. apps/web
-* The core Next.js application that serves the frontend developer console (`/dashboard`) and REST APIs.
-* Houses public telemetry ingestion APIs, GitHub OAuth handlers, payment processing webhooks, and SSE live log streaming channels.
-* Configures Redis rate-limiting and JWT user session validation.
+
+- The core Next.js application that serves the frontend developer console (`/dashboard`) and REST APIs.
+- Houses public telemetry ingestion APIs, GitHub OAuth handlers, payment processing webhooks, and SSE live log streaming channels.
+- Configures Redis rate-limiting and JWT user session validation.
 
 ### 2. packages/db
-* Shared data layer containing Mongoose models and database connection handlers.
-* Defines schemas and indexes for: `Project`, `Service`, `Log`, `Incident`, `Metric`, and `AuditLog`.
+
+- Shared data layer containing Mongoose models and database connection handlers.
+- Defines schemas and indexes for: `Project`, `Service`, `Log`, `Incident`, `Metric`, and `AuditLog`.
 
 ### 3. packages/ai
-* Interfaces with AI models (such as Gemini/Claude/GPT-4) using optimized prompt contexts.
-* Formats unstructured log traces and deployment commit messages into readable incident post-mortems.
+
+- Interfaces with AI models (such as Gemini/Claude/GPT-4) using optimized prompt contexts.
+- Formats unstructured log traces and deployment commit messages into readable incident post-mortems.
 
 ### 4. packages/sdk
-* Zero-dependency client-side Winston/Pino-like logger SDK.
-* Integrates a memory-buffered background ring-buffer queue to flush logs asynchronously, preventing request loop blocks in client applications.
+
+- Zero-dependency client-side Winston/Pino-like logger SDK.
+- Integrates a memory-buffered background ring-buffer queue to flush logs asynchronously, preventing request loop blocks in client applications.
 
 ---
 
@@ -92,33 +96,36 @@ graph TD
     D --> E{Active Cooldown Check}
     E -- Active incident in last 5m --> F[Merge logs to incident]
     E -- No active incident --> G[Trigger AI Diagnosis]
-    
+
     subgraph AI Pipeline
         G --> H[Fetch surrounding logs & active endpoint metadata]
         H --> I[Fetch GitHub deployment commits & diffs]
         I --> J[Compile prompt context]
         J --> K[Query Gemini/Claude model]
     end
-    
+
     K --> L[Generate Structured Markdown Post-Mortem]
     L --> M[Save Incident to MongoDB]
     M --> N[Dispatch Slack/Discord Webhook alerts]
 ```
 
 ### Anomaly Z-Score Formula
+
 The statistical anomaly detector calculates standard deviation spikes (Z-score) on historical baselines for error rates, latency, and CPU usage:
 
 $$Z = \frac{x - \mu}{\sigma}$$
 
 Where:
-* $x$: Current metric value (e.g. error rate in the last 5 minutes).
-* $\mu$: Historical baseline average (mean) over the last 12 windows (60 minutes).
-* $\sigma$: Standard deviation of the baseline windows.
-* If $Z \geq$ configured threshold (default `3.0`), the system triggers an anomaly alert.
+
+- $x$: Current metric value (e.g. error rate in the last 5 minutes).
+- $\mu$: Historical baseline average (mean) over the last 12 windows (60 minutes).
+- $\sigma$: Standard deviation of the baseline windows.
+- If $Z \geq$ configured threshold (default `3.0`), the system triggers an anomaly alert.
 
 ---
 
 ## 🔗 Related Documents
-* 🔌 **[API.md](API.md)**: Full REST API specs for Ingest, Metrics, and Queries.
-* 🗄️ **[DATABASE.md](DATABASE.md)**: Schemas, relationships, indexes, and cache key structures.
-* 🛡️ **[SECURITY.md](SECURITY.md)**: Security boundaries and scrubbing regular expressions.
+
+- 🔌 **[API.md](API.md)**: Full REST API specs for Ingest, Metrics, and Queries.
+- 🗄️ **[DATABASE.md](DATABASE.md)**: Schemas, relationships, indexes, and cache key structures.
+- 🛡️ **[SECURITY.md](SECURITY.md)**: Security boundaries and scrubbing regular expressions.

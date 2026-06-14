@@ -28,7 +28,9 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
   let decoded: { userId: string } & jwt.JwtPayload;
   try {
-    decoded = jwt.verify(token, jwtSecret) as { userId: string } & jwt.JwtPayload;
+    decoded = jwt.verify(token, jwtSecret) as {
+      userId: string;
+    } & jwt.JwtPayload;
   } catch {
     redirect("/");
   }
@@ -86,7 +88,11 @@ export default async function SearchPage({ searchParams }: PageProps) {
   }));
 
   const serializedLogs = initialLogs.map((l) => {
-    const s = l.serviceId as unknown as { _id: { toString: () => string }; name: string; environment: string } | null;
+    const s = l.serviceId as unknown as {
+      _id: { toString: () => string };
+      name: string;
+      environment: string;
+    } | null;
     return {
       id: l._id.toString(),
       timestamp: l.timestamp.toISOString(),

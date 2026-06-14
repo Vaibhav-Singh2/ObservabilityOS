@@ -4,10 +4,13 @@ interface RedisCache {
   client: Redis | null;
 }
 
-let cached: RedisCache = (globalThis as unknown as { redisCache: RedisCache }).redisCache;
+let cached: RedisCache = (globalThis as unknown as { redisCache: RedisCache })
+  .redisCache;
 
 if (!cached) {
-  cached = (globalThis as unknown as { redisCache: RedisCache }).redisCache = { client: null };
+  cached = (globalThis as unknown as { redisCache: RedisCache }).redisCache = {
+    client: null,
+  };
 }
 
 export function getRedisClient(): Redis | null {
@@ -26,7 +29,10 @@ export function getRedisClient(): Redis | null {
         port: parsed.port ? parseInt(parsed.port, 10) : 6379,
         username: parsed.username || undefined,
         password: parsed.password || undefined,
-        db: parsed.pathname && parsed.pathname !== "/" ? parseInt(parsed.pathname.substring(1), 10) : 0,
+        db:
+          parsed.pathname && parsed.pathname !== "/"
+            ? parseInt(parsed.pathname.substring(1), 10)
+            : 0,
         maxRetriesPerRequest: 1,
         connectTimeout: 2000,
         lazyConnect: true,
@@ -100,7 +106,10 @@ export function createNewRedisClient(): Redis | null {
         port: parsed.port ? parseInt(parsed.port, 10) : 6379,
         username: parsed.username || undefined,
         password: parsed.password || undefined,
-        db: parsed.pathname && parsed.pathname !== "/" ? parseInt(parsed.pathname.substring(1), 10) : 0,
+        db:
+          parsed.pathname && parsed.pathname !== "/"
+            ? parseInt(parsed.pathname.substring(1), 10)
+            : 0,
         maxRetriesPerRequest: null,
       };
       client = new Redis(options);

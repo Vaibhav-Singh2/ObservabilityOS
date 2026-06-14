@@ -96,7 +96,9 @@ export default function SearchView({
   useEffect(() => {
     if (!isLive) return;
 
-    const eventSource = new EventSource(`/api/logs/stream?projectId=${project.id}`);
+    const eventSource = new EventSource(
+      `/api/logs/stream?projectId=${project.id}`,
+    );
 
     eventSource.onmessage = (event) => {
       try {
@@ -109,9 +111,18 @@ export default function SearchView({
           if (prevLogs.some((l) => l.id === data.id)) return prevLogs;
           // Filter client-side based on currently selected filters in live view
           if (level !== "all" && data.level !== level) return prevLogs;
-          if (serviceId !== "all" && data.service?.id !== serviceId) return prevLogs;
-          if (environment !== "all" && data.service?.environment !== environment) return prevLogs;
-          if (query.trim() && !data.message.toLowerCase().includes(query.toLowerCase())) return prevLogs;
+          if (serviceId !== "all" && data.service?.id !== serviceId)
+            return prevLogs;
+          if (
+            environment !== "all" &&
+            data.service?.environment !== environment
+          )
+            return prevLogs;
+          if (
+            query.trim() &&
+            !data.message.toLowerCase().includes(query.toLowerCase())
+          )
+            return prevLogs;
 
           return [data, ...prevLogs.slice(0, 99)];
         });
@@ -182,7 +193,10 @@ export default function SearchView({
     setExpandedLogId(expandedLogId === logId ? null : logId);
   };
 
-  const handleCopyMetadata = (logId: string, metadata: Record<string, unknown>) => {
+  const handleCopyMetadata = (
+    logId: string,
+    metadata: Record<string, unknown>,
+  ) => {
     navigator.clipboard.writeText(JSON.stringify(metadata, null, 2));
     setCopiedLogId(logId);
     setTimeout(() => setCopiedLogId(null), 2000);
@@ -334,8 +348,8 @@ export default function SearchView({
           <div className="space-y-2 max-h-75 lg:max-h-125 overflow-y-auto pr-1">
             {savedQueries.length === 0 ? (
               <p className="text-xs text-slate-600 italic py-4 text-center">
-                No saved searches yet. Run a query and click &quot;Save Search&quot; to
-                list here.
+                No saved searches yet. Run a query and click &quot;Save
+                Search&quot; to list here.
               </p>
             ) : (
               savedQueries.map((q) => (
@@ -759,7 +773,8 @@ export default function SearchView({
                 </span>
                 {query.trim() && (
                   <div>
-                    <span className="text-slate-650">Query:</span> &quot;{query}&quot;
+                    <span className="text-slate-650">Query:</span> &quot;{query}
+                    &quot;
                   </div>
                 )}
                 <div>

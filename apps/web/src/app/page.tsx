@@ -1,25 +1,25 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { 
-  Github, 
-  Activity, 
-  Shield, 
-  Terminal, 
-  Zap, 
-  Check, 
-  X, 
-  ArrowRight, 
-  AlertTriangle, 
-  Server, 
-  Layers, 
-  MessageSquare, 
-  Play, 
+import {
+  Github,
+  Activity,
+  Shield,
+  Terminal,
+  Zap,
+  Check,
+  X,
+  ArrowRight,
+  AlertTriangle,
+  Server,
+  Layers,
+  MessageSquare,
+  Play,
   ExternalLink,
   Cpu,
   Clock,
   Sparkles,
   RefreshCw,
-  Workflow
+  Workflow,
 } from "lucide-react";
 import jwt from "jsonwebtoken";
 
@@ -29,7 +29,8 @@ import InteractiveDemo from "@/components/InteractiveDemo";
 import FAQAccordion from "@/components/FAQAccordion";
 
 export const metadata = {
-  title: "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
+  title:
+    "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
   description:
     "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
   keywords: [
@@ -39,7 +40,7 @@ export const metadata = {
     "root cause analysis",
     "observability platform",
     "developer monitoring",
-    "OpenTelemetry monitoring"
+    "OpenTelemetry monitoring",
   ],
   alternates: {
     canonical: "https://observabilityos.com",
@@ -63,96 +64,98 @@ export default async function LandingPage() {
     }
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
   const orgSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "ObservabilityOS",
-    "url": baseUrl,
-    "logo": `${baseUrl}/favicon.ico`,
-    "sameAs": ["https://github.com/Vaibhav-Singh2/ObservabilityOS"]
+    name: "ObservabilityOS",
+    url: baseUrl,
+    logo: `${baseUrl}/favicon.ico`,
+    sameAs: ["https://github.com/Vaibhav-Singh2/ObservabilityOS"],
   };
 
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "ObservabilityOS",
-    "applicationCategory": "DeveloperApplication",
-    "operatingSystem": "All",
-    "offers": {
+    name: "ObservabilityOS",
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "All",
+    offers: {
       "@type": "Offer",
-      "price": "29.00",
-      "priceCurrency": "USD",
-      "priceModel": "https://schema.org/Subscription"
+      price: "29.00",
+      priceCurrency: "USD",
+      priceModel: "https://schema.org/Subscription",
     },
-    "description": "AI-native incident post-mortems and telemetry anomaly detection platform. Ingest telemetry, redaction scrub, and resolve incidents 10x faster.",
-    "aggregateRating": {
+    description:
+      "AI-native incident post-mortems and telemetry anomaly detection platform. Ingest telemetry, redaction scrub, and resolve incidents 10x faster.",
+    aggregateRating: {
       "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "reviewCount": "128"
-    }
+      ratingValue: "4.9",
+      reviewCount: "128",
+    },
   };
 
   const webSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "ObservabilityOS",
-    "url": baseUrl,
-    "potentialAction": {
+    name: "ObservabilityOS",
+    url: baseUrl,
+    potentialAction: {
       "@type": "SearchAction",
-      "target": {
+      target: {
         "@type": "EntryPoint",
-        "urlTemplate": "https://docs.observabilityos.com?q={search_term_string}"
+        urlTemplate: "https://docs.observabilityos.com?q={search_term_string}",
       },
-      "query-input": "required name=search_term_string"
-    }
+      "query-input": "required name=search_term_string",
+    },
   };
 
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": [
+    mainEntity: [
       {
         "@type": "Question",
-        "name": "How does ObservabilityOS ensure log data privacy & security?",
-        "acceptedAnswer": {
+        name: "How does ObservabilityOS ensure log data privacy & security?",
+        acceptedAnswer: {
           "@type": "Answer",
-          "text": "All incoming telemetry passes through our high-performance PII scrubbing engine (scrubber.ts) before database storage. It automatically redacts database credentials, authorization headers, JWT strings, credit card numbers, and custom regex patterns you define."
-        }
+          text: "All incoming telemetry passes through our high-performance PII scrubbing engine (scrubber.ts) before database storage. It automatically redacts database credentials, authorization headers, JWT strings, credit card numbers, and custom regex patterns you define.",
+        },
       },
       {
         "@type": "Question",
-        "name": "Does the SDK add network latency to my API endpoints?",
-        "acceptedAnswer": {
+        name: "Does the SDK add network latency to my API endpoints?",
+        acceptedAnswer: {
           "@type": "Answer",
-          "text": "No. The Node.js SDK utilizes an in-memory ring-buffer for high-throughput batching. Logs are stored instantly in memory and flushed asynchronously in the background. The SDK runs on a non-blocking queue."
-        }
+          text: "No. The Node.js SDK utilizes an in-memory ring-buffer for high-throughput batching. Logs are stored instantly in memory and flushed asynchronously in the background. The SDK runs on a non-blocking queue.",
+        },
       },
       {
         "@type": "Question",
-        "name": "How accurate is the statistical Z-score anomaly detection?",
-        "acceptedAnswer": {
+        name: "How accurate is the statistical Z-score anomaly detection?",
+        acceptedAnswer: {
           "@type": "Answer",
-          "text": "We use dynamic rolling baselines to calculate standard deviation spikes (Z-score) on error rates, latency, and CPU usage. Our model adapts to weekly/daily traffic cycles, reducing pager noise by up to 98%."
-        }
+          text: "We use dynamic rolling baselines to calculate standard deviation spikes (Z-score) on error rates, latency, and CPU usage. Our model adapts to weekly/daily traffic cycles, reducing pager noise by up to 98%.",
+        },
       },
       {
         "@type": "Question",
-        "name": "How does the AI incident root-cause diagnosis work?",
-        "acceptedAnswer": {
+        name: "How does the AI incident root-cause diagnosis work?",
+        acceptedAnswer: {
           "@type": "Answer",
-          "text": "When a Z-score threshold is breached, we package the surrounding context: matching error log context, active route signatures, and GitHub webhook deployment events. We pipeline this to GPT-4/Claude via structured prompts to generate a comprehensive markdown post-mortem."
-        }
+          text: "When a Z-score threshold is breached, we package the surrounding context: matching error log context, active route signatures, and GitHub webhook deployment events. We pipeline this to GPT-4/Claude via structured prompts to generate a comprehensive markdown post-mortem.",
+        },
       },
       {
         "@type": "Question",
-        "name": "Is ObservabilityOS compatible with OpenTelemetry (OTLP)?",
-        "acceptedAnswer": {
+        name: "Is ObservabilityOS compatible with OpenTelemetry (OTLP)?",
+        acceptedAnswer: {
           "@type": "Answer",
-          "text": "Yes, fully. The ObservabilityOS ingestion API supports native OTLP HTTP/JSON protocols. If you already use OpenTelemetry collectors, you can simply append our ingestion endpoint and API key to your configuration."
-        }
-      }
-    ]
+          text: "Yes, fully. The ObservabilityOS ingestion API supports native OTLP HTTP/JSON protocols. If you already use OpenTelemetry collectors, you can simply append our ingestion endpoint and API key to your configuration.",
+        },
+      },
+    ],
   };
 
   return (
@@ -181,7 +184,10 @@ export default async function LandingPage() {
       {/* Header / Navigation */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/75 border-b border-slate-900/80">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 hover:opacity-90 transition-opacity"
+          >
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <Activity className="w-4 h-4 text-white" />
             </div>
@@ -192,24 +198,46 @@ export default async function LandingPage() {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-400">
-            <Link href="#product" className="hover:text-slate-200 transition-colors">Product</Link>
-            <Link href="#features" className="hover:text-slate-200 transition-colors">Features</Link>
-            <Link href="#dx" className="hover:text-slate-200 transition-colors">Developer Experience</Link>
-            <Link href="#pricing" className="hover:text-slate-200 transition-colors">Pricing</Link>
-            <Link href="#faq" className="hover:text-slate-200 transition-colors">FAQ</Link>
-            <a 
-              href="http://localhost:3001" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <Link
+              href="#product"
+              className="hover:text-slate-200 transition-colors"
+            >
+              Product
+            </Link>
+            <Link
+              href="#features"
+              className="hover:text-slate-200 transition-colors"
+            >
+              Features
+            </Link>
+            <Link href="#dx" className="hover:text-slate-200 transition-colors">
+              Developer Experience
+            </Link>
+            <Link
+              href="#pricing"
+              className="hover:text-slate-200 transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link
+              href="#faq"
+              className="hover:text-slate-200 transition-colors"
+            >
+              FAQ
+            </Link>
+            <a
+              href="http://localhost:3001"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-slate-200 transition-colors flex items-center gap-0.5"
             >
               Docs
               <ExternalLink className="w-3 h-3 text-slate-500" />
             </a>
-            <a 
-              href="https://github.com/Vaibhav-Singh2/ObservabilityOS" 
-              target="_blank" 
-              rel="noopener noreferrer" 
+            <a
+              href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-slate-200 transition-colors flex items-center gap-1"
             >
               <Github className="w-3.5 h-3.5" />
@@ -251,7 +279,6 @@ export default async function LandingPage() {
 
       {/* Main Content */}
       <main className="flex-1 w-full relative z-10">
-        
         {/* HERO SECTION */}
         <section className="max-w-7xl mx-auto px-6 pt-16 pb-24 text-center flex flex-col items-center">
           {/* Badge */}
@@ -265,7 +292,10 @@ export default async function LandingPage() {
           </h1>
 
           <p className="text-base sm:text-xl text-slate-400 max-w-3xl leading-relaxed mb-10">
-            ObservabilityOS ingests structured logs, automatically scrubs PII, detects latency and error anomalies using statistical Z-scores, and generates GPT-4/Claude root-cause post-mortems. Stop grepping at 2 AM.
+            ObservabilityOS ingests structured logs, automatically scrubs PII,
+            detects latency and error anomalies using statistical Z-scores, and
+            generates GPT-4/Claude root-cause post-mortems. Stop grepping at 2
+            AM.
           </p>
 
           {/* CTA Buttons */}
@@ -307,29 +337,38 @@ export default async function LandingPage() {
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-6 opacity-60">
               <span className="text-sm font-bold font-sans text-slate-300 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" /> OpenTelemetry Native
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />{" "}
+                OpenTelemetry Native
               </span>
               <span className="text-sm font-bold font-sans text-slate-300 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" /> Secure PII Redaction
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-500" />{" "}
+                Secure PII Redaction
               </span>
               <span className="text-sm font-bold font-sans text-slate-300 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" /> GitHub Deploy Sync
+                <span className="w-2.5 h-2.5 rounded-full bg-indigo-600" />{" "}
+                GitHub Deploy Sync
               </span>
               <span className="text-sm font-bold font-sans text-slate-300 flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Slack/Discord Webhooks
+                <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />{" "}
+                Slack/Discord Webhooks
               </span>
             </div>
           </div>
         </section>
 
         {/* INTERACTIVE PRODUCT DEMO SECTION */}
-        <section id="product" className="max-w-7xl mx-auto px-6 py-12 text-center flex flex-col items-center">
+        <section
+          id="product"
+          className="max-w-7xl mx-auto px-6 py-12 text-center flex flex-col items-center"
+        >
           <div className="mb-12">
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-4 text-white">
               See the intelligence live
             </h2>
             <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-              Datadog shows you everything and explains nothing. We show you what matters and explain it in plain English. Interact with our live mockup below.
+              Datadog shows you everything and explains nothing. We show you
+              what matters and explain it in plain English. Interact with our
+              live mockup below.
             </p>
           </div>
           <InteractiveDemo />
@@ -343,7 +382,9 @@ export default async function LandingPage() {
                 Traditional Monitoring is Broken
               </h2>
               <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-                Modern software systems emit gigabytes of logs, but finding the exact commit that broke production remains a manual, stressful scavenger hunt.
+                Modern software systems emit gigabytes of logs, but finding the
+                exact commit that broke production remains a manual, stressful
+                scavenger hunt.
               </p>
             </div>
 
@@ -353,9 +394,13 @@ export default async function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
                   <AlertTriangle className="w-6 h-6 text-red-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-200 mb-3">Alert Fatigue</h3>
+                <h3 className="text-lg font-bold text-slate-200 mb-3">
+                  Alert Fatigue
+                </h3>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  Legacy systems spam your channels with 1,000+ alerts representing minor CPU fluctuations, burying critical product database failures under endless noise.
+                  Legacy systems spam your channels with 1,000+ alerts
+                  representing minor CPU fluctuations, burying critical product
+                  database failures under endless noise.
                 </p>
               </div>
 
@@ -364,9 +409,13 @@ export default async function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-6">
                   <Server className="w-6 h-6 text-orange-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-200 mb-3">Dashboard Overload</h3>
+                <h3 className="text-lg font-bold text-slate-200 mb-3">
+                  Dashboard Overload
+                </h3>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  Grafana and Datadog provide 100+ generic graph configurations. But when an incident occurs, you still have to manually trace timelines to find the root cause.
+                  Grafana and Datadog provide 100+ generic graph configurations.
+                  But when an incident occurs, you still have to manually trace
+                  timelines to find the root cause.
                 </p>
               </div>
 
@@ -375,9 +424,13 @@ export default async function LandingPage() {
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-6">
                   <Terminal className="w-6 h-6 text-indigo-400" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-200 mb-3">The 2 AM Log Crawl</h3>
+                <h3 className="text-lg font-bold text-slate-200 mb-3">
+                  The 2 AM Log Crawl
+                </h3>
                 <p className="text-sm text-slate-400 leading-relaxed">
-                  When a service crashes, engineers spend hours typing log grep queries in terminals, attempting to link random timeout lines back to the latest GitHub release.
+                  When a service crashes, engineers spend hours typing log grep
+                  queries in terminals, attempting to link random timeout lines
+                  back to the latest GitHub release.
                 </p>
               </div>
             </div>
@@ -391,14 +444,15 @@ export default async function LandingPage() {
               How ObservabilityOS works
             </h2>
             <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-              An intelligent, automated workflow that processes raw logs and returns actionable resolutions.
+              An intelligent, automated workflow that processes raw logs and
+              returns actionable resolutions.
             </p>
           </div>
 
           <div className="relative">
             {/* Connection Line */}
             <div className="hidden lg:block absolute top-1/2 left-4 right-4 h-0.5 bg-linear-to-r from-indigo-500/20 via-emerald-500/20 to-indigo-500/20 -translate-y-1/2 z-0" />
-            
+
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 relative z-10">
               {/* Step 1 */}
               <div className="bg-slate-950 border border-slate-900 p-6 rounded-2xl text-left hover:border-slate-850 transition-colors">
@@ -410,7 +464,9 @@ export default async function LandingPage() {
                 </div>
                 <h4 className="font-bold text-slate-200 mb-2">Ingest Logs</h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Integrate our zero-dependency SDK in one line or connect your Docker containers. Telemetry is scrubbed of sensitive PII locally before shipping.
+                  Integrate our zero-dependency SDK in one line or connect your
+                  Docker containers. Telemetry is scrubbed of sensitive PII
+                  locally before shipping.
                 </p>
               </div>
 
@@ -422,9 +478,13 @@ export default async function LandingPage() {
                   </div>
                   <Workflow className="w-5 h-5 text-slate-500" />
                 </div>
-                <h4 className="font-bold text-slate-200 mb-2">Detect Anomalies</h4>
+                <h4 className="font-bold text-slate-200 mb-2">
+                  Detect Anomalies
+                </h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Statistical Z-score algorithms analyze error ratios and latency response times in real-time, immediately isolating anomalies from normal traffic patterns.
+                  Statistical Z-score algorithms analyze error ratios and
+                  latency response times in real-time, immediately isolating
+                  anomalies from normal traffic patterns.
                 </p>
               </div>
 
@@ -438,7 +498,9 @@ export default async function LandingPage() {
                 </div>
                 <h4 className="font-bold text-slate-200 mb-2">AI Analyzes</h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Our LLM processing pipeline ingests structured logs, environment variables, and GitHub commit diffs to compile a full-context root cause description.
+                  Our LLM processing pipeline ingests structured logs,
+                  environment variables, and GitHub commit diffs to compile a
+                  full-context root cause description.
                 </p>
               </div>
 
@@ -450,9 +512,13 @@ export default async function LandingPage() {
                   </div>
                   <MessageSquare className="w-5 h-5 text-slate-500" />
                 </div>
-                <h4 className="font-bold text-slate-200 mb-2">Get Actionable Report</h4>
+                <h4 className="font-bold text-slate-200 mb-2">
+                  Get Actionable Report
+                </h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Receive a detailed Slack/Discord incident alert mapping out exactly what code broke, why, and providing a direct rollback button.
+                  Receive a detailed Slack/Discord incident alert mapping out
+                  exactly what code broke, why, and providing a direct rollback
+                  button.
                 </p>
               </div>
             </div>
@@ -460,30 +526,38 @@ export default async function LandingPage() {
         </section>
 
         {/* FEATURES GRID SECTION */}
-        <section id="features" className="bg-slate-900/10 border-y border-slate-900/80 py-24">
+        <section
+          id="features"
+          className="bg-slate-900/10 border-y border-slate-900/80 py-24"
+        >
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-4">
                 Enterprise Capabilities. Startup Simplicity.
               </h2>
               <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-                ObservabilityOS is built with high-throughput ingestion and AI analytics to help modern engineering teams deploy code with complete confidence.
+                ObservabilityOS is built with high-throughput ingestion and AI
+                analytics to help modern engineering teams deploy code with
+                complete confidence.
               </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              
               {/* Feature 1: AI Incident Reports */}
               <div className="bg-slate-950 border border-slate-900 p-6 rounded-xl hover:border-slate-800 transition-all">
                 <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
                   <Sparkles className="w-5 h-5 text-indigo-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">AI Incident Reports</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  AI Incident Reports
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Instant diagnostic summaries instead of raw log greps.
+                  <strong>Benefit:</strong> Instant diagnostic summaries instead
+                  of raw log greps.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> Lower Mean Time to Resolution (MTTR) by 80%.
+                  <strong>Outcome:</strong> Lower Mean Time to Resolution (MTTR)
+                  by 80%.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-indigo-300">
                   Runs GPT-4/Claude query pipelines on log errors
@@ -495,9 +569,12 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
                   <Activity className="w-5 h-5 text-emerald-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">Anomaly Detection</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  Anomaly Detection
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Zero threshold configurations. Adapts to weekly traffic trends.
+                  <strong>Benefit:</strong> Zero threshold configurations.
+                  Adapts to weekly traffic trends.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
                   <strong>Outcome:</strong> No alert spam or false positives.
@@ -512,12 +589,16 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4">
                   <Terminal className="w-5 h-5 text-purple-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">SDK Ingestion</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  SDK Ingestion
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Non-blocking API calls. Zero-dependency node installation.
+                  <strong>Benefit:</strong> Non-blocking API calls.
+                  Zero-dependency node installation.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> 100% app safety with background batch queue operations.
+                  <strong>Outcome:</strong> 100% app safety with background
+                  batch queue operations.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-purple-300">
                   Memory-buffered background ring-buffer flushes
@@ -529,12 +610,16 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-4">
                   <Play className="w-5 h-5 text-blue-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">Real-Time SSE Monitoring</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  Real-Time SSE Monitoring
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Live system telemetry flows without page refreshes.
+                  <strong>Benefit:</strong> Live system telemetry flows without
+                  page refreshes.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> Immediate confirmation of system hotfixes.
+                  <strong>Outcome:</strong> Immediate confirmation of system
+                  hotfixes.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-blue-300">
                   SSE connection channels stream stdout live
@@ -546,12 +631,16 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-pink-500/10 border border-pink-500/20 flex items-center justify-center mb-4">
                   <MessageSquare className="w-5 h-5 text-pink-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">Multi-channel Webhooks</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  Multi-channel Webhooks
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Slack, Discord, and Teams integration out of the box.
+                  <strong>Benefit:</strong> Slack, Discord, and Teams
+                  integration out of the box.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> Alerts delivered directly to your shared developer workspace.
+                  <strong>Outcome:</strong> Alerts delivered directly to your
+                  shared developer workspace.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-pink-300">
                   Dispatches rich layout blocks via webhook payloads
@@ -563,12 +652,16 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
                   <Clock className="w-5 h-5 text-amber-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">Root Cause Analysis</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  Root Cause Analysis
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Automatic correlation between deploy times and error spikes.
+                  <strong>Benefit:</strong> Automatic correlation between deploy
+                  times and error spikes.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> Pinpoint the exact line of code that introduced the bug.
+                  <strong>Outcome:</strong> Pinpoint the exact line of code that
+                  introduced the bug.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-amber-300">
                   Maps GitHub commit histories to anomaly timestamps
@@ -580,12 +673,16 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-orange-500/10 border border-orange-500/20 flex items-center justify-center mb-4">
                   <Workflow className="w-5 h-5 text-orange-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">Incident Collaboration</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  Incident Collaboration
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Shared threads and runbooks inside the dashboard.
+                  <strong>Benefit:</strong> Shared threads and runbooks inside
+                  the dashboard.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> Developers work together on resolution instead of silos.
+                  <strong>Outcome:</strong> Developers work together on
+                  resolution instead of silos.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-orange-300">
                   Supports threaded commenting on active incidents
@@ -597,12 +694,16 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center justify-center mb-4">
                   <Layers className="w-5 h-5 text-sky-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">No-Config Dashboards</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  No-Config Dashboards
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Dashboards are autogenerated from log metadata.
+                  <strong>Benefit:</strong> Dashboards are autogenerated from
+                  log metadata.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> No time wasted building, tweaking, or correcting charts.
+                  <strong>Outcome:</strong> No time wasted building, tweaking,
+                  or correcting charts.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-sky-300">
                   Dynamic microservice status registries
@@ -614,30 +715,37 @@ export default async function LandingPage() {
                 <div className="w-10 h-10 rounded-lg bg-slate-500/10 border border-slate-500/20 flex items-center justify-center mb-4">
                   <RefreshCw className="w-5 h-5 text-slate-400" />
                 </div>
-                <h3 className="text-base font-bold text-slate-200 mb-2">API & CSV Logs Export</h3>
+                <h3 className="text-base font-bold text-slate-200 mb-2">
+                  API & CSV Logs Export
+                </h3>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Benefit:</strong> Fast structured JSON logs queries via Lucene index.
+                  <strong>Benefit:</strong> Fast structured JSON logs queries
+                  via Lucene index.
                 </p>
                 <p className="text-xs text-slate-400 leading-relaxed mb-3">
-                  <strong>Outcome:</strong> Easily load telemetry inside scripts or export for compliance.
+                  <strong>Outcome:</strong> Easily load telemetry inside scripts
+                  or export for compliance.
                 </p>
                 <div className="text-[11px] font-mono bg-slate-900 px-2.5 py-1.5 rounded text-slate-300">
                   Lucene-based MongoDB Atlas Search API route
                 </div>
               </div>
-
             </div>
           </div>
         </section>
 
         {/* DEVELOPER EXPERIENCE (SDK SWITCHER) */}
-        <section id="dx" className="py-24 max-w-7xl mx-auto px-6 text-center flex flex-col items-center">
+        <section
+          id="dx"
+          className="py-24 max-w-7xl mx-auto px-6 text-center flex flex-col items-center"
+        >
           <div className="mb-12">
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-4">
               Integrated in under 5 minutes
             </h2>
             <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-              A zero-dependency, local-scrubbing SDK for your favorite runtime. Copy the snippet below and start sending telemetry in seconds.
+              A zero-dependency, local-scrubbing SDK for your favorite runtime.
+              Copy the snippet below and start sending telemetry in seconds.
             </p>
           </div>
           <SDKSwitcher />
@@ -651,7 +759,8 @@ export default async function LandingPage() {
                 ObservabilityOS vs Legacy Monitoring
               </h2>
               <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-                Why developers choose ObservabilityOS over traditional monitoring stacks.
+                Why developers choose ObservabilityOS over traditional
+                monitoring stacks.
               </p>
             </div>
 
@@ -666,44 +775,75 @@ export default async function LandingPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-900 text-slate-300">
                   <tr>
-                    <td className="p-4 font-semibold text-slate-200">Setup Time</td>
-                    <td className="p-4 text-indigo-400 font-semibold">1 Minute (One-line SDK / Sidecar)</td>
-                    <td className="p-4 text-slate-500">Days of config, YAML setups & agent configurations</td>
+                    <td className="p-4 font-semibold text-slate-200">
+                      Setup Time
+                    </td>
+                    <td className="p-4 text-indigo-400 font-semibold">
+                      1 Minute (One-line SDK / Sidecar)
+                    </td>
+                    <td className="p-4 text-slate-500">
+                      Days of config, YAML setups & agent configurations
+                    </td>
                   </tr>
                   <tr>
-                    <td className="p-4 font-semibold text-slate-200">Root-Cause Pinpointing</td>
+                    <td className="p-4 font-semibold text-slate-200">
+                      Root-Cause Pinpointing
+                    </td>
                     <td className="p-4 text-emerald-400 flex items-center gap-1.5">
-                      <Check className="w-4 h-4 shrink-0 text-emerald-400" /> Automated AI Post-mortems
+                      <Check className="w-4 h-4 shrink-0 text-emerald-400" />{" "}
+                      Automated AI Post-mortems
                     </td>
                     <td className="p-4 text-slate-500 flex items-center gap-1.5">
-                      <X className="w-4 h-4 shrink-0 text-red-500" /> Manual timeline correlations & log grep queries
+                      <X className="w-4 h-4 shrink-0 text-red-500" /> Manual
+                      timeline correlations & log grep queries
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-4 font-semibold text-slate-200">Alert Signal-to-Noise</td>
-                    <td className="p-4 text-indigo-400 font-semibold">98% noise reduction via rolling Z-score</td>
-                    <td className="p-4 text-slate-500">High spam (static CPU alerts waking teams at 3 AM)</td>
+                    <td className="p-4 font-semibold text-slate-200">
+                      Alert Signal-to-Noise
+                    </td>
+                    <td className="p-4 text-indigo-400 font-semibold">
+                      98% noise reduction via rolling Z-score
+                    </td>
+                    <td className="p-4 text-slate-500">
+                      High spam (static CPU alerts waking teams at 3 AM)
+                    </td>
                   </tr>
                   <tr>
-                    <td className="p-4 font-semibold text-slate-200">PII Data Protection</td>
+                    <td className="p-4 font-semibold text-slate-200">
+                      PII Data Protection
+                    </td>
                     <td className="p-4 text-emerald-400 flex items-center gap-1.5">
-                      <Check className="w-4 h-4 shrink-0 text-emerald-400" /> Local SDK scrubbing (scrubber.ts)
+                      <Check className="w-4 h-4 shrink-0 text-emerald-400" />{" "}
+                      Local SDK scrubbing (scrubber.ts)
                     </td>
                     <td className="p-4 text-slate-500 flex items-center gap-1.5">
-                      <X className="w-4 h-4 shrink-0 text-red-500" /> Forwarded blindly (security compliance hazards)
+                      <X className="w-4 h-4 shrink-0 text-red-500" /> Forwarded
+                      blindly (security compliance hazards)
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-4 font-semibold text-slate-200">OpenTelemetry support</td>
+                    <td className="p-4 font-semibold text-slate-200">
+                      OpenTelemetry support
+                    </td>
                     <td className="p-4 text-emerald-400 flex items-center gap-1.5">
-                      <Check className="w-4 h-4 shrink-0 text-emerald-400" /> Native compliance (HTTP OTLP Ingest)
+                      <Check className="w-4 h-4 shrink-0 text-emerald-400" />{" "}
+                      Native compliance (HTTP OTLP Ingest)
                     </td>
-                    <td className="p-4 text-slate-500">Requires complex exporter pipelines</td>
+                    <td className="p-4 text-slate-500">
+                      Requires complex exporter pipelines
+                    </td>
                   </tr>
                   <tr>
-                    <td className="p-4 font-semibold text-slate-200">Pricing Predictability</td>
-                    <td className="p-4 text-indigo-400 font-semibold">Flat $29/mo (no host/seat limits)</td>
-                    <td className="p-4 text-slate-500">Complex matrices (charges per host, metric, & seat)</td>
+                    <td className="p-4 font-semibold text-slate-200">
+                      Pricing Predictability
+                    </td>
+                    <td className="p-4 text-indigo-400 font-semibold">
+                      Flat $29/mo (no host/seat limits)
+                    </td>
+                    <td className="p-4 text-slate-500">
+                      Complex matrices (charges per host, metric, & seat)
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -718,27 +858,62 @@ export default async function LandingPage() {
               Works with your existing toolchain
             </h2>
             <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-              ObservabilityOS integrates seamlessly into standard backend systems, cloud clusters, and chat workspaces.
+              ObservabilityOS integrates seamlessly into standard backend
+              systems, cloud clusters, and chat workspaces.
             </p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
             {/* Badges */}
             {[
-              { label: "Node.js", color: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" },
-              { label: "Next.js", color: "bg-slate-900/60 border-slate-800 text-slate-200" },
-              { label: "Express", color: "bg-slate-900/60 border-slate-800 text-slate-300" },
-              { label: "Docker", color: "bg-blue-500/10 border-blue-500/20 text-blue-400" },
-              { label: "Kubernetes", color: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" },
-              { label: "PostgreSQL", color: "bg-sky-500/10 border-sky-500/20 text-sky-400" },
-              { label: "Redis", color: "bg-red-500/10 border-red-500/20 text-red-400" },
-              { label: "OpenTelemetry", color: "bg-amber-500/10 border-amber-500/20 text-amber-400" },
-              { label: "Slack Alerts", color: "bg-purple-500/10 border-purple-500/20 text-purple-400" },
-              { label: "Discord webhooks", color: "bg-indigo-500/10 border-indigo-500/20 text-indigo-300" },
-              { label: "GitHub App", color: "bg-slate-900/60 border-slate-800 text-slate-300" }
+              {
+                label: "Node.js",
+                color:
+                  "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
+              },
+              {
+                label: "Next.js",
+                color: "bg-slate-900/60 border-slate-800 text-slate-200",
+              },
+              {
+                label: "Express",
+                color: "bg-slate-900/60 border-slate-800 text-slate-300",
+              },
+              {
+                label: "Docker",
+                color: "bg-blue-500/10 border-blue-500/20 text-blue-400",
+              },
+              {
+                label: "Kubernetes",
+                color: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400",
+              },
+              {
+                label: "PostgreSQL",
+                color: "bg-sky-500/10 border-sky-500/20 text-sky-400",
+              },
+              {
+                label: "Redis",
+                color: "bg-red-500/10 border-red-500/20 text-red-400",
+              },
+              {
+                label: "OpenTelemetry",
+                color: "bg-amber-500/10 border-amber-500/20 text-amber-400",
+              },
+              {
+                label: "Slack Alerts",
+                color: "bg-purple-500/10 border-purple-500/20 text-purple-400",
+              },
+              {
+                label: "Discord webhooks",
+                color: "bg-indigo-500/10 border-indigo-500/20 text-indigo-300",
+              },
+              {
+                label: "GitHub App",
+                color: "bg-slate-900/60 border-slate-800 text-slate-300",
+              },
             ].map((tech, idx) => (
-              <span 
-                key={idx} 
+              <span
+                key={idx}
                 className={`px-4 py-2 rounded-xl border text-xs font-semibold font-mono ${tech.color}`}
               >
                 {tech.label}
@@ -755,7 +930,8 @@ export default async function LandingPage() {
                 What developers are saying
               </h2>
               <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-                Modern teams have replaced complex Grafana setup tasks with ObservabilityOS.
+                Modern teams have replaced complex Grafana setup tasks with
+                ObservabilityOS.
               </p>
             </div>
 
@@ -763,15 +939,23 @@ export default async function LandingPage() {
               {/* Testimonial 1 */}
               <div className="bg-slate-950/60 border border-slate-900 p-8 rounded-2xl flex flex-col justify-between">
                 <p className="text-sm text-slate-350 italic leading-relaxed">
-                  &ldquo;ObservabilityOS changed our developer workflow overnight. When our payments microservice began timeouts, the AI flagged the exact database release commit before our pagerDuty call went off. Our MTTR dropped from 45 minutes to 30 seconds.&rdquo;
+                  &ldquo;ObservabilityOS changed our developer workflow
+                  overnight. When our payments microservice began timeouts, the
+                  AI flagged the exact database release commit before our
+                  pagerDuty call went off. Our MTTR dropped from 45 minutes to
+                  30 seconds.&rdquo;
                 </p>
                 <div className="mt-6 border-t border-slate-900/60 pt-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white text-xs select-none">
                     JS
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-200">Jason Sanders</h4>
-                    <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">CTO @ PaymentsFlow</p>
+                    <h4 className="text-xs font-bold text-slate-200">
+                      Jason Sanders
+                    </h4>
+                    <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">
+                      CTO @ PaymentsFlow
+                    </p>
                   </div>
                 </div>
               </div>
@@ -779,15 +963,23 @@ export default async function LandingPage() {
               {/* Testimonial 2 */}
               <div className="bg-slate-950/60 border border-slate-900 p-8 rounded-2xl flex flex-col justify-between">
                 <p className="text-sm text-slate-350 italic leading-relaxed">
-                  &ldquo;We migrated our Express APIs from Datadog in 10 minutes. The in-memory SDK queue configuration means our endpoint request latency did not spike at all. The automatic Z-score algorithm filters out 99% of noisy telemetry alerts.&rdquo;
+                  &ldquo;We migrated our Express APIs from Datadog in 10
+                  minutes. The in-memory SDK queue configuration means our
+                  endpoint request latency did not spike at all. The automatic
+                  Z-score algorithm filters out 99% of noisy telemetry
+                  alerts.&rdquo;
                 </p>
                 <div className="mt-6 border-t border-slate-900/60 pt-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-emerald-600 flex items-center justify-center font-bold text-white text-xs select-none">
                     AM
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-200">Alex Mercer</h4>
-                    <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">Lead DevOps @ CloudVibe</p>
+                    <h4 className="text-xs font-bold text-slate-200">
+                      Alex Mercer
+                    </h4>
+                    <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">
+                      Lead DevOps @ CloudVibe
+                    </p>
                   </div>
                 </div>
               </div>
@@ -795,15 +987,23 @@ export default async function LandingPage() {
               {/* Testimonial 3 */}
               <div className="bg-slate-950/60 border border-slate-900 p-8 rounded-2xl flex flex-col justify-between">
                 <p className="text-sm text-slate-350 italic leading-relaxed">
-                  &ldquo;The secure PII scrubbing engine (scrubber.ts) is standard compliance gold. We audit logs for client authorization headers and tokens before writing logs to any storage. ObservabilityOS handles all recursive redaction automatically.&rdquo;
+                  &ldquo;The secure PII scrubbing engine (scrubber.ts) is
+                  standard compliance gold. We audit logs for client
+                  authorization headers and tokens before writing logs to any
+                  storage. ObservabilityOS handles all recursive redaction
+                  automatically.&rdquo;
                 </p>
                 <div className="mt-6 border-t border-slate-900/60 pt-4 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center font-bold text-white text-xs select-none">
                     HK
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-200">Hannah Kim</h4>
-                    <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">Head of Security @ MedVault</p>
+                    <h4 className="text-xs font-bold text-slate-200">
+                      Hannah Kim
+                    </h4>
+                    <p className="text-[10px] text-slate-500 uppercase font-mono mt-0.5">
+                      Head of Security @ MedVault
+                    </p>
                   </div>
                 </div>
               </div>
@@ -812,33 +1012,53 @@ export default async function LandingPage() {
             {/* Testimonial Metrics */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-16 text-center border-t border-slate-900 pt-16">
               <div>
-                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">10x</strong>
-                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">Faster Resolution</span>
+                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">
+                  10x
+                </strong>
+                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">
+                  Faster Resolution
+                </span>
               </div>
               <div>
-                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">5 Mins</strong>
-                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">Setup Integration</span>
+                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">
+                  5 Mins
+                </strong>
+                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">
+                  Setup Integration
+                </span>
               </div>
               <div>
-                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">98%</strong>
-                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">Fewer False Alerts</span>
+                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">
+                  98%
+                </strong>
+                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">
+                  Fewer False Alerts
+                </span>
               </div>
               <div>
-                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">99.99%</strong>
-                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">Uptime Maintained</span>
+                <strong className="text-3xl sm:text-4xl font-extrabold text-white block">
+                  99.99%
+                </strong>
+                <span className="text-xs text-slate-500 uppercase font-mono mt-1 block">
+                  Uptime Maintained
+                </span>
               </div>
             </div>
           </div>
         </section>
 
         {/* PRICING PREVIEW */}
-        <section id="pricing" className="py-24 max-w-7xl mx-auto px-6 text-center flex flex-col items-center">
+        <section
+          id="pricing"
+          className="py-24 max-w-7xl mx-auto px-6 text-center flex flex-col items-center"
+        >
           <div className="mb-16">
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-4">
               Simple, developer-first pricing
             </h2>
             <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto">
-              No host-counting or per-seat fees. Choose a plan that aligns with your logging throughput requirements.
+              No host-counting or per-seat fees. Choose a plan that aligns with
+              your logging throughput requirements.
             </p>
           </div>
 
@@ -846,10 +1066,16 @@ export default async function LandingPage() {
             {/* Free Developer Plan */}
             <div className="bg-slate-950 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between text-left hover:border-slate-850 transition-colors">
               <div>
-                <h3 className="text-base font-bold text-slate-200">Free Developer</h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">Side projects & local testing.</p>
+                <h3 className="text-base font-bold text-slate-200">
+                  Free Developer
+                </h3>
+                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
+                  Side projects & local testing.
+                </p>
                 <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">$0</strong>
+                  <strong className="text-3xl font-extrabold text-white">
+                    $0
+                  </strong>
                   <span className="text-xs text-slate-500"> / month</span>
                 </div>
                 <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/60 pt-5">
@@ -879,7 +1105,7 @@ export default async function LandingPage() {
                   </li>
                 </ul>
               </div>
-              <a 
+              <a
                 href="/api/auth/github"
                 className="mt-6 w-full inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold h-10 rounded-lg text-xs transition-colors cursor-pointer"
               >
@@ -897,11 +1123,17 @@ export default async function LandingPage() {
                   Starter
                   <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
                 </h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">Solo founders & small teams in production.</p>
+                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
+                  Solo founders & small teams in production.
+                </p>
                 <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">$29</strong>
+                  <strong className="text-3xl font-extrabold text-white">
+                    $29
+                  </strong>
                   <span className="text-xs text-slate-500"> / month</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">≈ ₹2,499 / month in India</span>
+                  <span className="block text-[10px] text-slate-500 mt-0.5">
+                    ≈ ₹2,499 / month in India
+                  </span>
                 </div>
                 <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/80 pt-5">
                   <li className="flex items-start gap-2 font-semibold text-slate-200">
@@ -930,7 +1162,7 @@ export default async function LandingPage() {
                   </li>
                 </ul>
               </div>
-              <a 
+              <a
                 href="/api/auth/github"
                 className="mt-6 w-full inline-flex items-center justify-center bg-white hover:bg-slate-100 text-slate-950 font-bold h-10 rounded-lg text-xs transition-transform duration-150 hover:-translate-y-0.5 cursor-pointer shadow-md shadow-white/5"
               >
@@ -945,11 +1177,17 @@ export default async function LandingPage() {
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-200">Team</h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">Growing engineering teams with production complexity.</p>
+                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
+                  Growing engineering teams with production complexity.
+                </p>
                 <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">$99</strong>
+                  <strong className="text-3xl font-extrabold text-white">
+                    $99
+                  </strong>
                   <span className="text-xs text-slate-500"> / month</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">≈ ₹7,999 / month in India</span>
+                  <span className="block text-[10px] text-slate-500 mt-0.5">
+                    ≈ ₹7,999 / month in India
+                  </span>
                 </div>
                 <ul className="space-y-3 text-xs text-slate-450 border-t border-slate-900/60 pt-5">
                   <li className="flex items-start gap-2">
@@ -978,7 +1216,7 @@ export default async function LandingPage() {
                   </li>
                 </ul>
               </div>
-              <button 
+              <button
                 disabled
                 className="mt-6 w-full py-2 rounded-lg text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-650 cursor-not-allowed"
               >
@@ -996,11 +1234,17 @@ export default async function LandingPage() {
                   Scale
                   <Zap className="w-3.5 h-3.5 text-amber-400" />
                 </h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">Series A+ companies with compliance & security needs.</p>
+                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
+                  Series A+ companies with compliance & security needs.
+                </p>
                 <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">$299</strong>
+                  <strong className="text-3xl font-extrabold text-white">
+                    $299
+                  </strong>
                   <span className="text-xs text-slate-500"> / month</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">≈ ₹24,999 / month in India</span>
+                  <span className="block text-[10px] text-slate-500 mt-0.5">
+                    ≈ ₹24,999 / month in India
+                  </span>
                 </div>
                 <ul className="space-y-3 text-xs text-slate-450 border-t border-slate-900/60 pt-5">
                   <li className="flex items-start gap-2">
@@ -1029,7 +1273,7 @@ export default async function LandingPage() {
                   </li>
                 </ul>
               </div>
-              <button 
+              <button
                 disabled
                 className="mt-6 w-full py-2 rounded-lg text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-650 cursor-not-allowed"
               >
@@ -1044,25 +1288,29 @@ export default async function LandingPage() {
               <span className="text-slate-400 font-semibold">
                 Usage-based add-ons:
               </span>{" "}
-              Log overages at <span className="text-slate-350">$0.10/GB</span> above
-              plan limit · Additional AI analysis credits at{" "}
+              Log overages at <span className="text-slate-350">$0.10/GB</span>{" "}
+              above plan limit · Additional AI analysis credits at{" "}
               <span className="text-slate-350">$20 / 100 credits</span> · Extra
               seats at <span className="text-slate-350">$30/seat/mo</span> ·{" "}
-              <span className="text-indigo-400 font-semibold">20% off</span> with
-              annual billing.
+              <span className="text-indigo-400 font-semibold">20% off</span>{" "}
+              with annual billing.
             </p>
           </div>
         </section>
 
         {/* FAQ SECTION */}
-        <section id="faq" className="bg-slate-900/10 border-y border-slate-900/80 py-24">
+        <section
+          id="faq"
+          className="bg-slate-900/10 border-y border-slate-900/80 py-24"
+        >
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
               <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white mb-4 font-sans">
                 Frequently Asked Questions
               </h2>
               <p className="text-sm sm:text-base text-slate-400 max-w-xl mx-auto font-sans">
-                Everything you need to know about log shipping, data scrubbing, billing, and AI post-mortems.
+                Everything you need to know about log shipping, data scrubbing,
+                billing, and AI post-mortems.
               </p>
             </div>
             <FAQAccordion />
@@ -1073,12 +1321,14 @@ export default async function LandingPage() {
         <section className="py-24 max-w-4xl mx-auto px-6 text-center">
           <div className="bg-linear-to-br from-indigo-900/40 via-slate-950 to-indigo-950/20 border border-indigo-500/10 rounded-3xl p-10 sm:p-16 relative overflow-hidden shadow-2xl">
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.08),transparent_55%)] pointer-events-none" />
-            
+
             <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mb-4 relative z-10">
               Deploy in under 5 minutes.
             </h2>
             <p className="text-sm sm:text-base text-slate-400 max-w-lg mx-auto mb-10 relative z-10 leading-relaxed">
-              Join teams resolving system errors 10x faster. Create your free account today, install our SDK, and let the AI map your production health automatically.
+              Join teams resolving system errors 10x faster. Create your free
+              account today, install our SDK, and let the AI map your production
+              health automatically.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 relative z-10 w-full sm:w-auto">
@@ -1111,13 +1361,15 @@ export default async function LandingPage() {
                 Install local SDK
               </a>
             </div>
-            
+
             <div className="mt-8 text-[11px] text-slate-500 flex justify-center gap-6 relative z-10">
               <span className="flex items-center gap-1">
-                <Shield className="w-3.5 h-3.5 text-emerald-500" /> Secure OAuth Signup
+                <Shield className="w-3.5 h-3.5 text-emerald-500" /> Secure OAuth
+                Signup
               </span>
               <span className="flex items-center gap-1">
-                <Check className="w-3.5 h-3.5 text-indigo-500" /> Free Tier forever
+                <Check className="w-3.5 h-3.5 text-indigo-500" /> Free Tier
+                forever
               </span>
               <span className="flex items-center gap-1">
                 <Cpu className="w-3.5 h-3.5 text-purple-500" /> OTLP Compliant
@@ -1125,14 +1377,12 @@ export default async function LandingPage() {
             </div>
           </div>
         </section>
-
       </main>
 
       {/* FOOTER */}
       <footer className="border-t border-slate-900 bg-slate-950/80 py-16 relative z-10">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
-            
             {/* Column 1: Brand */}
             <div className="col-span-2 md:col-span-1 space-y-4">
               <div className="flex items-center gap-2.5">
@@ -1144,13 +1394,15 @@ export default async function LandingPage() {
                 </span>
               </div>
               <p className="text-xs text-slate-500 leading-relaxed max-w-sm">
-                AI-native incident post-mortems and telemetry anomaly detection platform. Ingest telemetry, redaction scrub, and resolve incidents 10x faster.
+                AI-native incident post-mortems and telemetry anomaly detection
+                platform. Ingest telemetry, redaction scrub, and resolve
+                incidents 10x faster.
               </p>
               <div className="flex items-center gap-3">
-                <a 
-                  href="https://github.com/Vaibhav-Singh2/ObservabilityOS" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
+                <a
+                  href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-slate-500 hover:text-slate-350 transition-colors"
                   aria-label="GitHub Repository"
                 >
@@ -1161,55 +1413,193 @@ export default async function LandingPage() {
 
             {/* Column 2: Product & Resources */}
             <div className="space-y-3.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Product</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Product
+              </h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><Link href="#product" className="hover:text-slate-350 transition-colors">Interactive Demo</Link></li>
-                <li><Link href="#features" className="hover:text-slate-350 transition-colors">Features Grid</Link></li>
-                <li><Link href="#pricing" className="hover:text-slate-350 transition-colors">Predictable Pricing</Link></li>
-                <li><a href="http://localhost:3001" target="_blank" rel="noopener noreferrer" className="hover:text-slate-350 transition-colors">Documentation</a></li>
-                <li><Link href="#faq" className="hover:text-slate-350 transition-colors">Technical FAQs</Link></li>
+                <li>
+                  <Link
+                    href="#product"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Interactive Demo
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#features"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Features Grid
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#pricing"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Predictable Pricing
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="http://localhost:3001"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Documentation
+                  </a>
+                </li>
+                <li>
+                  <Link
+                    href="#faq"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Technical FAQs
+                  </Link>
+                </li>
               </ul>
             </div>
 
             {/* Column 3: Alternatives */}
             <div className="space-y-3.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Compare</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Compare
+              </h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><Link href="/vs/datadog" className="hover:text-slate-350 transition-colors">vs Datadog</Link></li>
-                <li><Link href="/vs/new-relic" className="hover:text-slate-350 transition-colors">vs New Relic</Link></li>
-                <li><Link href="/vs/grafana" className="hover:text-slate-350 transition-colors">vs Grafana</Link></li>
-                <li><Link href="/vs/sentry" className="hover:text-slate-350 transition-colors">vs Sentry</Link></li>
-                <li><Link href="/vs/better-stack" className="hover:text-slate-350 transition-colors">vs Better Stack</Link></li>
+                <li>
+                  <Link
+                    href="/vs/datadog"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    vs Datadog
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/new-relic"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    vs New Relic
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/grafana"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    vs Grafana
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/sentry"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    vs Sentry
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/vs/better-stack"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    vs Better Stack
+                  </Link>
+                </li>
               </ul>
             </div>
 
             {/* Column 4: Guides */}
             <div className="space-y-3.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Guides</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Guides
+              </h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><Link href="/guides/opentelemetry-monitoring-guide" className="hover:text-slate-350 transition-colors">OpenTelemetry Guide</Link></li>
-                <li><Link href="/guides/ai-incident-analysis-guide" className="hover:text-slate-350 transition-colors">AI Incident Analysis</Link></li>
-                <li><Link href="/guides/log-analytics-best-practices" className="hover:text-slate-350 transition-colors">Log Analytics Tips</Link></li>
-                <li><a href="https://github.com/Vaibhav-Singh2/ObservabilityOS" target="_blank" rel="noopener noreferrer" className="hover:text-slate-350 transition-colors flex items-center gap-1">Open Source Code <ExternalLink className="w-2.5 h-2.5" /></a></li>
+                <li>
+                  <Link
+                    href="/guides/opentelemetry-monitoring-guide"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    OpenTelemetry Guide
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/guides/ai-incident-analysis-guide"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    AI Incident Analysis
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/guides/log-analytics-best-practices"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Log Analytics Tips
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-slate-350 transition-colors flex items-center gap-1"
+                  >
+                    Open Source Code <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
+                </li>
               </ul>
             </div>
 
             {/* Column 5: Company */}
             <div className="space-y-3.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Company</h4>
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">
+                Company
+              </h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><Link href="#" className="hover:text-slate-350 transition-colors">Privacy Policy</Link></li>
-                <li><Link href="#" className="hover:text-slate-350 transition-colors">Terms of Service</Link></li>
-                <li><a href="mailto:support@observabilityos.com" className="hover:text-slate-350 transition-colors">Support Email</a></li>
-                <li><a href="mailto:contact@observabilityos.com" className="hover:text-slate-350 transition-colors">Contact Sales</a></li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Privacy Policy
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <a
+                    href="mailto:support@observabilityos.com"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Support Email
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="mailto:contact@observabilityos.com"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Contact Sales
+                  </a>
+                </li>
               </ul>
             </div>
-
           </div>
 
           <div className="border-t border-slate-900/60 pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
             <div>
-              &copy; {new Date().getFullYear()} ObservabilityOS. All rights reserved.
+              &copy; {new Date().getFullYear()} ObservabilityOS. All rights
+              reserved.
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[10px] text-slate-600">
               <span>Built with Turborepo, Next.js, and Tailwind v4</span>

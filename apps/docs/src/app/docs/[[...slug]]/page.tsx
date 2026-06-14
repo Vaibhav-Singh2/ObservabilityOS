@@ -2,17 +2,17 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { marked } from "marked";
-import { getDocBySlug, getPrevNextLinks, getAllDocsForSearch } from "@/lib/docs";
+import {
+  getDocBySlug,
+  getPrevNextLinks,
+  getAllDocsForSearch,
+} from "@/lib/docs";
 import DocsLayoutClient from "@/components/DocsLayoutClient";
 import { ArrowLeft, ArrowRight, Edit3, ChevronRight, Hash } from "lucide-react";
 
 // Configure marked with a custom renderer for heading IDs to match our TOC IDs
 const renderer = new marked.Renderer();
-renderer.heading = function (
-  arg1: unknown,
-  arg2?: unknown,
-  arg3?: unknown
-) {
+renderer.heading = function (arg1: unknown, arg2?: unknown, arg3?: unknown) {
   let text = "";
   let depth = 2;
   let raw = "";
@@ -45,18 +45,21 @@ interface PageProps {
   }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
   const doc = getDocBySlug(resolvedParams.slug);
-  
+
   if (!doc) {
     return {
       title: "Not Found",
     };
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
-  
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+
   return {
     title: doc.title,
     description: doc.description,
@@ -72,20 +75,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       card: "summary_large_image",
       title: `${doc.title} | ObservabilityOS Docs`,
       description: doc.description,
-    }
+    },
   };
 }
 
 function parseCallouts(html: string): string {
   const blockquoteRegex = /<blockquote>([\s\S]*?)<\/blockquote>/g;
-  
+
   return html.replace(blockquoteRegex, (match, content) => {
-    const alertMatch = content.match(/\[!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\]/i);
+    const alertMatch = content.match(
+      /\[!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\]/i,
+    );
     if (!alertMatch) return match;
 
     const alertType = alertMatch[1].toUpperCase();
-    let cleanContent = content.replace(/\[!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\]/i, "");
-    
+    let cleanContent = content.replace(
+      /\[!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\]/i,
+      "",
+    );
+
     cleanContent = cleanContent.replace(/^[\s\r\n|<br>|<p><\/p>]+/i, "").trim();
     if (cleanContent.startsWith("</p>")) {
       cleanContent = cleanContent.replace(/^<\/p>/, "");
@@ -152,7 +160,7 @@ function parseMermaidBlocks(html: string): string {
         </div>
         <div class="mermaid" data-mermaid-source>${source}</div>
       </div>
-    `
+    `,
   );
 }
 
@@ -173,63 +181,67 @@ export default async function Page({ params }: PageProps) {
 
   // Pre-render markdown body to HTML on the server
   const htmlContent = parseMermaidBlocks(
-    parseCallouts(await marked.parse(doc.body))
+    parseCallouts(await marked.parse(doc.body)),
   );
 
   // Get navigation links
   const { prev, next } = getPrevNextLinks(doc.slug);
 
   // Generate GitHub Edit URL
-  const repoFilePath = doc.slug === "introduction" ? "README.md" : `docs/${doc.slug.toUpperCase() === "ROADMAP" ? "ROADMAP.md" : doc.slug.toUpperCase() === "QUICKSTART" ? "QUICKSTART.md" : doc.slug.toUpperCase() === "INSTALLATION" ? "INSTALLATION.md" : doc.slug.toUpperCase() === "DEVELOPMENT" ? "DEVELOPMENT.md" : doc.slug.toUpperCase() === "ARCHITECTURE" ? "ARCHITECTURE.md" : doc.slug.toUpperCase() === "DATABASE" ? "DATABASE.md" : doc.slug.toUpperCase() === "SECURITY" ? "SECURITY.md" : doc.slug.toUpperCase() === "API" ? "API.md" : doc.slug.toUpperCase() === "DEPLOYMENT" ? "DEPLOYMENT.md" : doc.slug.toUpperCase() === "TROUBLESHOOTING" ? "TROUBLESHOOTING.md" : doc.slug.toUpperCase() === "FAQ" ? "FAQ.md" : doc.slug.toUpperCase() === "CONTRIBUTING" ? "CONTRIBUTING.md" : doc.slug.toUpperCase() === "CHANGELOG" ? "CHANGELOG.md" : `${doc.slug}.md`}`;
+  const repoFilePath =
+    doc.slug === "introduction"
+      ? "README.md"
+      : `docs/${doc.slug.toUpperCase() === "ROADMAP" ? "ROADMAP.md" : doc.slug.toUpperCase() === "QUICKSTART" ? "QUICKSTART.md" : doc.slug.toUpperCase() === "INSTALLATION" ? "INSTALLATION.md" : doc.slug.toUpperCase() === "DEVELOPMENT" ? "DEVELOPMENT.md" : doc.slug.toUpperCase() === "ARCHITECTURE" ? "ARCHITECTURE.md" : doc.slug.toUpperCase() === "DATABASE" ? "DATABASE.md" : doc.slug.toUpperCase() === "SECURITY" ? "SECURITY.md" : doc.slug.toUpperCase() === "API" ? "API.md" : doc.slug.toUpperCase() === "DEPLOYMENT" ? "DEPLOYMENT.md" : doc.slug.toUpperCase() === "TROUBLESHOOTING" ? "TROUBLESHOOTING.md" : doc.slug.toUpperCase() === "FAQ" ? "FAQ.md" : doc.slug.toUpperCase() === "CONTRIBUTING" ? "CONTRIBUTING.md" : doc.slug.toUpperCase() === "CHANGELOG" ? "CHANGELOG.md" : `${doc.slug}.md`}`;
   const githubEditUrl = `https://github.com/Vaibhav-Singh2/ObservabilityOS/edit/main/${repoFilePath}`;
 
   const searchIndex = getAllDocsForSearch();
-  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": [
+    itemListElement: [
       {
         "@type": "ListItem",
-        "position": 1,
-        "name": "Docs",
-        "item": baseUrl
+        position: 1,
+        name: "Docs",
+        item: baseUrl,
       },
       {
         "@type": "ListItem",
-        "position": 2,
-        "name": doc.category,
-        "item": `${baseUrl}/docs/${doc.slug}`
+        position: 2,
+        name: doc.category,
+        item: `${baseUrl}/docs/${doc.slug}`,
       },
       {
         "@type": "ListItem",
-        "position": 3,
-        "name": doc.title,
-        "item": `${baseUrl}/docs/${doc.slug}`
-      }
-    ]
+        position: 3,
+        name: doc.title,
+        item: `${baseUrl}/docs/${doc.slug}`,
+      },
+    ],
   };
 
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "TechArticle",
-    "headline": doc.title,
-    "description": doc.description,
-    "inLanguage": "en-US",
-    "mainEntityOfPage": `${baseUrl}/docs/${doc.slug}`,
-    "publisher": {
+    headline: doc.title,
+    description: doc.description,
+    inLanguage: "en-US",
+    mainEntityOfPage: `${baseUrl}/docs/${doc.slug}`,
+    publisher: {
       "@type": "Organization",
-      "name": "ObservabilityOS",
-      "logo": {
+      name: "ObservabilityOS",
+      logo: {
         "@type": "ImageObject",
-        "url": `https://observabilityos.com/favicon.ico`
-      }
+        url: `https://observabilityos.com/favicon.ico`,
+      },
     },
-    "author": {
+    author: {
       "@type": "Organization",
-      "name": "ObservabilityOS Dev Team"
-    }
+      name: "ObservabilityOS Dev Team",
+    },
   };
 
   return (
@@ -244,13 +256,16 @@ export default async function Page({ params }: PageProps) {
       />
       {/* Grid columns: Center Content and Right TOC */}
       <div className="flex w-full flex-col gap-12 lg:flex-row">
-        
         {/* Left/Center Main Column */}
         <div className="min-w-0 flex-1">
-          
           {/* Breadcrumbs */}
           <nav className="mb-7 flex items-center gap-1.5 text-xs font-medium text-slate-500">
-            <Link href="/docs" className="transition-colors hover:text-slate-200">Docs</Link>
+            <Link
+              href="/docs"
+              className="transition-colors hover:text-slate-200"
+            >
+              Docs
+            </Link>
             <ChevronRight className="h-3 w-3 text-slate-700" />
             <span>{doc.category}</span>
             <ChevronRight className="h-3 w-3 text-slate-700" />
@@ -259,9 +274,15 @@ export default async function Page({ params }: PageProps) {
 
           {/* Heading */}
           <header className="mb-10 border-b border-slate-800/80 pb-8">
-            <span className="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400">{doc.category}</span>
-            <h1 className="text-4xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">{doc.title}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">{doc.description}</p>
+            <span className="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400">
+              {doc.category}
+            </span>
+            <h1 className="text-4xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">
+              {doc.title}
+            </h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">
+              {doc.description}
+            </p>
           </header>
 
           {/* Mobile Collapsible Table of Contents */}
@@ -279,9 +300,13 @@ export default async function Page({ params }: PageProps) {
                 </summary>
                 <ul className="mt-3.5 space-y-2.5 text-xs font-semibold text-slate-400 border-t border-slate-900/60 pt-3.5">
                   {doc.headings.map((heading, idx) => (
-                    <li 
+                    <li
                       key={idx}
-                      className={heading.level === 3 ? "pl-3.5 border-l border-slate-900" : ""}
+                      className={
+                        heading.level === 3
+                          ? "pl-3.5 border-l border-slate-900"
+                          : ""
+                      }
                     >
                       <Link
                         href={`#${heading.id}`}
@@ -337,7 +362,6 @@ export default async function Page({ params }: PageProps) {
               )}
             </div>
           )}
-
         </div>
 
         {/* Right Sidebar: Table of Contents */}
@@ -350,9 +374,13 @@ export default async function Page({ params }: PageProps) {
               </h4>
               <ul className="space-y-2.5 text-[11px] font-semibold text-slate-400">
                 {doc.headings.map((heading, idx) => (
-                  <li 
+                  <li
                     key={idx}
-                    className={heading.level === 3 ? "pl-3.5 border-l border-slate-900" : ""}
+                    className={
+                      heading.level === 3
+                        ? "pl-3.5 border-l border-slate-900"
+                        : ""
+                    }
                   >
                     <Link
                       href={`#${heading.id}`}
@@ -378,7 +406,6 @@ export default async function Page({ params }: PageProps) {
             </div>
           </aside>
         )}
-
       </div>
     </DocsLayoutClient>
   );

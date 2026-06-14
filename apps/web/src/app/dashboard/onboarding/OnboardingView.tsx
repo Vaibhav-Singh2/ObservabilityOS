@@ -408,7 +408,8 @@ logger.info("ObservabilityOS integration successful!", {
                   </div>
                   {!plainApiKey && (
                     <p className="text-[10px] text-amber-500 leading-relaxed mt-1">
-                      ⚠️ API key is secured and cannot be retrieved. If you did not save it, please create a new project.
+                      ⚠️ API key is secured and cannot be retrieved. If you did
+                      not save it, please create a new project.
                     </p>
                   )}
                 </div>

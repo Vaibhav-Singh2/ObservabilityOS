@@ -4,7 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { getSidebarNav } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
-import { BookOpen, Layers, Terminal, Shield, Wrench, FileText, Settings, Rocket, HelpCircle, AlertTriangle, Milestone, History } from "lucide-react";
+import {
+  BookOpen,
+  Layers,
+  Terminal,
+  Shield,
+  Wrench,
+  FileText,
+  Settings,
+  Rocket,
+  HelpCircle,
+  AlertTriangle,
+  Milestone,
+  History,
+} from "lucide-react";
 
 interface DocsSidebarProps {
   isOpen?: boolean;
@@ -13,7 +26,10 @@ interface DocsSidebarProps {
 }
 
 // Map slug names to icons
-const SLUG_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+const SLUG_ICONS: Record<
+  string,
+  React.ComponentType<{ className?: string }>
+> = {
   introduction: BookOpen,
   quickstart: Rocket,
   installation: Settings,
@@ -27,10 +43,14 @@ const SLUG_ICONS: Record<string, React.ComponentType<{ className?: string }>> = 
   faq: HelpCircle,
   contributing: Wrench,
   roadmap: Milestone,
-  changelog: History
+  changelog: History,
 };
 
-export default function DocsSidebar({ isOpen, onClose, className }: DocsSidebarProps) {
+export default function DocsSidebar({
+  isOpen,
+  onClose,
+  className,
+}: DocsSidebarProps) {
   const pathname = usePathname();
   const sidebarData = getSidebarNav();
 
@@ -49,7 +69,7 @@ export default function DocsSidebar({ isOpen, onClose, className }: DocsSidebarP
     <>
       {/* Mobile Sidebar Backdrop */}
       {isOpen && (
-        <div 
+        <div
           onClick={onClose}
           className="fixed inset-0 top-16 z-30 bg-slate-950/80 backdrop-blur-xs md:hidden animate-in fade-in duration-200"
         />
@@ -58,10 +78,10 @@ export default function DocsSidebar({ isOpen, onClose, className }: DocsSidebarP
       <aside
         className={cn(
           "scrollbar-none flex h-full w-64 shrink-0 flex-col gap-7 overflow-y-auto border-r border-slate-900 bg-slate-950 px-4 py-7 transition-transform duration-300 ease-out md:translate-x-0",
-          isOpen 
-            ? "fixed top-16 bottom-0 left-0 z-40 w-[260px] translate-x-0 shadow-2xl shadow-black/80" 
+          isOpen
+            ? "fixed top-16 bottom-0 left-0 z-40 w-[260px] translate-x-0 shadow-2xl shadow-black/80"
             : "fixed top-16 bottom-0 -translate-x-full md:relative md:top-0 md:h-full md:translate-x-0",
-          className
+          className,
         )}
       >
         {sidebarData.map((category, idx) => (
@@ -82,10 +102,15 @@ export default function DocsSidebar({ isOpen, onClose, className }: DocsSidebarP
                         "flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2.5 text-[13px] font-medium leading-none text-slate-400 transition-all hover:border-slate-800 hover:bg-slate-900/50 hover:text-slate-200",
                         isActive
                           ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-300"
-                          : "border-transparent"
+                          : "border-transparent",
                       )}
                     >
-                      <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-indigo-400" : "text-slate-500")} />
+                      <Icon
+                        className={cn(
+                          "w-4 h-4 shrink-0",
+                          isActive ? "text-indigo-400" : "text-slate-500",
+                        )}
+                      />
                       <span className="truncate">{item.title}</span>
                     </Link>
                   </li>

@@ -60,9 +60,7 @@ interface Scenario {
   bgColor: string;
 }
 
-export default function PlaygroundView({
-  project,
-}: PlaygroundViewProps) {
+export default function PlaygroundView({ project }: PlaygroundViewProps) {
   const [activeTab, setActiveTab] = useState<"setup" | "simulating" | "result">(
     "setup",
   );
@@ -79,7 +77,9 @@ export default function PlaygroundView({
   // Console logging state
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [resultIncident, setResultIncident] = useState<ResultIncident | null>(null);
+  const [resultIncident, setResultIncident] = useState<ResultIncident | null>(
+    null,
+  );
   const [errorText, setErrorText] = useState<string>("");
 
   const scenarios: Scenario[] = [
@@ -151,7 +151,8 @@ export default function PlaygroundView({
     },
   ];
 
-  const [prevSelectedScenario, setPrevSelectedScenario] = useState(selectedScenario);
+  const [prevSelectedScenario, setPrevSelectedScenario] =
+    useState(selectedScenario);
   if (selectedScenario !== prevSelectedScenario) {
     setPrevSelectedScenario(selectedScenario);
     const sc = scenarios.find((s) => s.id === selectedScenario);
@@ -254,14 +255,15 @@ export default function PlaygroundView({
     } catch (err) {
       console.error(err);
       setErrorText(
-        err instanceof Error ? err.message : "An unexpected error occurred during simulation.",
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred during simulation.",
       );
       setActiveTab("setup");
     } finally {
       setIsSimulating(false);
     }
   };
-
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -373,7 +375,11 @@ export default function PlaygroundView({
                   <select
                     id="env_select"
                     value={environment}
-                    onChange={(e) => setEnvironment(e.target.value as "prod" | "staging" | "dev")}
+                    onChange={(e) =>
+                      setEnvironment(
+                        e.target.value as "prod" | "staging" | "dev",
+                      )
+                    }
                     disabled={isSimulating}
                     className="flex h-10 w-full rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >

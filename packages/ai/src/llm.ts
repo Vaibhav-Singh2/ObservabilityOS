@@ -11,7 +11,9 @@ function enforceCooldown() {
   const now = Date.now();
   const timeSinceLastCall = now - lastCallTime;
   if (timeSinceLastCall < COOLDOWN_MS) {
-    throw new Error(`LLM call rate limited by AI Cost Control. Cooldown active for another ${((COOLDOWN_MS - timeSinceLastCall) / 1000).toFixed(1)}s.`);
+    throw new Error(
+      `LLM call rate limited by AI Cost Control. Cooldown active for another ${((COOLDOWN_MS - timeSinceLastCall) / 1000).toFixed(1)}s.`,
+    );
   }
   lastCallTime = now;
 }
@@ -41,7 +43,10 @@ export async function generateIncidentAnalysis(
     try {
       enforceCooldown();
     } catch (cooldownErr) {
-      console.warn("[ObservabilityOS AI] Cooldown active, falling back to mock analysis:", cooldownErr);
+      console.warn(
+        "[ObservabilityOS AI] Cooldown active, falling back to mock analysis:",
+        cooldownErr,
+      );
       return generateMockAnalysis(input);
     }
   }
@@ -72,8 +77,10 @@ export async function generateIncidentAnalysis(
       const usage = data.usage || {};
       const inputTokens = usage.input_tokens || 0;
       const outputTokens = usage.output_tokens || 0;
-      const cost = (inputTokens * 0.80 + outputTokens * 4.00) / 1000000;
-      console.log(`[AI Cost Control] Anthropic Claude Call (Incident Analysis). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`);
+      const cost = (inputTokens * 0.8 + outputTokens * 4.0) / 1000000;
+      console.log(
+        `[AI Cost Control] Anthropic Claude Call (Incident Analysis). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`,
+      );
 
       const textContent = data.content?.[0]?.text || "";
       return parseJSONContent(textContent);
@@ -114,8 +121,10 @@ export async function generateIncidentAnalysis(
       const usage = data.usage || {};
       const inputTokens = usage.prompt_tokens || 0;
       const outputTokens = usage.completion_tokens || 0;
-      const cost = (inputTokens * 0.150 + outputTokens * 0.600) / 1000000;
-      console.log(`[AI Cost Control] OpenAI GPT Call (Incident Analysis). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`);
+      const cost = (inputTokens * 0.15 + outputTokens * 0.6) / 1000000;
+      console.log(
+        `[AI Cost Control] OpenAI GPT Call (Incident Analysis). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`,
+      );
 
       const textContent = data.choices?.[0]?.message?.content || "";
       return parseJSONContent(textContent);
@@ -337,7 +346,10 @@ export async function generateEmailDigestSummary(
     try {
       enforceCooldown();
     } catch (cooldownErr) {
-      console.warn("[ObservabilityOS AI] Cooldown active, falling back to mock summary:", cooldownErr);
+      console.warn(
+        "[ObservabilityOS AI] Cooldown active, falling back to mock summary:",
+        cooldownErr,
+      );
       if (input.incidents.length === 0) {
         return "All services were fully operational overnight with 100% availability. No anomalies or active incidents were detected.";
       } else {
@@ -375,8 +387,10 @@ export async function generateEmailDigestSummary(
       const usage = data.usage || {};
       const inputTokens = usage.input_tokens || 0;
       const outputTokens = usage.output_tokens || 0;
-      const cost = (inputTokens * 0.80 + outputTokens * 4.00) / 1000000;
-      console.log(`[AI Cost Control] Anthropic Claude Call (Email Digest). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`);
+      const cost = (inputTokens * 0.8 + outputTokens * 4.0) / 1000000;
+      console.log(
+        `[AI Cost Control] Anthropic Claude Call (Email Digest). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`,
+      );
 
       const textContent = data.content?.[0]?.text || "";
       return textContent.trim();
@@ -416,8 +430,10 @@ export async function generateEmailDigestSummary(
       const usage = data.usage || {};
       const inputTokens = usage.prompt_tokens || 0;
       const outputTokens = usage.completion_tokens || 0;
-      const cost = (inputTokens * 0.150 + outputTokens * 0.600) / 1000000;
-      console.log(`[AI Cost Control] OpenAI GPT Call (Email Digest). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`);
+      const cost = (inputTokens * 0.15 + outputTokens * 0.6) / 1000000;
+      console.log(
+        `[AI Cost Control] OpenAI GPT Call (Email Digest). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`,
+      );
 
       const textContent = data.choices?.[0]?.message?.content || "";
       return textContent.trim();

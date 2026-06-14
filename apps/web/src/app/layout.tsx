@@ -12,15 +12,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+const baseUrl =
+  process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
     template: "%s | ObservabilityOS",
-    default: "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
+    default:
+      "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
   },
-  description: "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
+  description:
+    "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
   keywords: [
     "AI observability",
     "log analytics",
@@ -31,14 +34,16 @@ export const metadata: Metadata = {
     "OpenTelemetry monitoring",
     "DevOps intelligence",
     "server monitoring",
-    "error tracking"
+    "error tracking",
   ],
   alternates: {
     canonical: "./",
   },
   openGraph: {
-    title: "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
-    description: "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
+    title:
+      "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
+    description:
+      "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
     url: baseUrl,
     siteName: "ObservabilityOS",
     locale: "en_US",
@@ -46,8 +51,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
-    description: "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
+    title:
+      "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
+    description:
+      "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
     creator: "@observabilityos",
   },
   robots: {

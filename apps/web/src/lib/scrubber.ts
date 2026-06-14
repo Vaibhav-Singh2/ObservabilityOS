@@ -1,7 +1,10 @@
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
-const JWT_REGEX = /eyJhbGciOi[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*/g;
-const CREDIT_CARD_REGEX = /\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9]{12})|3[47][0-9]{13})\b/g;
-const DB_URI_REGEX = /(mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis):\/\/[^:]+:([^@]+)@/gi;
+const JWT_REGEX =
+  /eyJhbGciOi[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*/g;
+const CREDIT_CARD_REGEX =
+  /\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9]{12})|3[47][0-9]{13})\b/g;
+const DB_URI_REGEX =
+  /(mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis):\/\/[^:]+:([^@]+)@/gi;
 const AUTH_HEADER_REGEX = /(Bearer\s+|Basic\s+|Token\s+)[A-Za-z0-9-_=.]+/gi;
 
 // Sensitive keys in metadata to be redacted fully
@@ -38,7 +41,7 @@ export function scrubObject(obj: unknown): unknown {
   if (obj === null || obj === undefined) return obj;
 
   if (Array.isArray(obj)) {
-    return (obj as unknown[]).map(item => scrubObject(item));
+    return (obj as unknown[]).map((item) => scrubObject(item));
   }
 
   if (typeof obj === "object") {

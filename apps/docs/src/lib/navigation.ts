@@ -37,16 +37,16 @@ const SIDEBAR_NAV: SidebarCategory[] = [
       { title: "Introduction", slug: "introduction" },
       { title: "Quick Start", slug: "quickstart" },
       { title: "Installation", slug: "installation" },
-      { title: "Local Development", slug: "development" }
-    ]
+      { title: "Local Development", slug: "development" },
+    ],
   },
   {
     title: "Core Architecture",
     items: [
       { title: "System Architecture", slug: "architecture" },
       { title: "Database Schemas", slug: "database" },
-      { title: "Security Policy", slug: "security" }
-    ]
+      { title: "Security Policy", slug: "security" },
+    ],
   },
   {
     title: "Reference Guides",
@@ -54,17 +54,17 @@ const SIDEBAR_NAV: SidebarCategory[] = [
       { title: "API Specification", slug: "api" },
       { title: "Production Deployment", slug: "deployment" },
       { title: "Troubleshooting", slug: "troubleshooting" },
-      { title: "Technical FAQ", slug: "faq" }
-    ]
+      { title: "Technical FAQ", slug: "faq" },
+    ],
   },
   {
     title: "Community & Releases",
     items: [
       { title: "Contributing Guide", slug: "contributing" },
       { title: "Product Roadmap", slug: "roadmap" },
-      { title: "Changelog", slug: "changelog" }
-    ]
-  }
+      { title: "Changelog", slug: "changelog" },
+    ],
+  },
 ];
 
 export function getSidebarNav(): SidebarCategory[] {

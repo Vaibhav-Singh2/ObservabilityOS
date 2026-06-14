@@ -231,24 +231,27 @@ export default function ServiceDetailView({
   }, [timeRange, projectId, service.id]);
 
   // Load SLO status helper
-  const loadSloStatus = useCallback(async (showLoading = true) => {
-    if (showLoading) {
-      setIsLoadingSlos(true);
-    }
-    try {
-      const res = await fetch(
-        `/api/services/slo/status?projectId=${projectId}&serviceId=${service.id}`,
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setSloStatus(data.slos || []);
+  const loadSloStatus = useCallback(
+    async (showLoading = true) => {
+      if (showLoading) {
+        setIsLoadingSlos(true);
       }
-    } catch {
-      console.error("Failed to load SLO statuses");
-    } finally {
-      setIsLoadingSlos(false);
-    }
-  }, [projectId, service.id]);
+      try {
+        const res = await fetch(
+          `/api/services/slo/status?projectId=${projectId}&serviceId=${service.id}`,
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setSloStatus(data.slos || []);
+        }
+      } catch {
+        console.error("Failed to load SLO statuses");
+      } finally {
+        setIsLoadingSlos(false);
+      }
+    },
+    [projectId, service.id],
+  );
 
   useEffect(() => {
     Promise.resolve().then(() => {
@@ -615,8 +618,8 @@ export default function ServiceDetailView({
               No Metrics Data Found
             </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-              We haven&apos;t received any CPU, memory, or latency metrics for this
-              service during this period. Ingest metrics to see statistics.
+              We haven&apos;t received any CPU, memory, or latency metrics for
+              this service during this period. Ingest metrics to see statistics.
             </p>
           </div>
         </div>

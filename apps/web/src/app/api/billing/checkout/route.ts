@@ -12,8 +12,6 @@ const checkoutSchema = z.object({
   gateway: z.enum(["stripe", "razorpay"]),
 });
 
-
-
 export async function POST(request: Request) {
   try {
     const user = await getAuthenticatedUser();
