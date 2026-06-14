@@ -32,6 +32,18 @@ export const metadata = {
   title: "ObservabilityOS — AI-Native DevOps Intelligence & Log Anomaly Detection Platform",
   description:
     "Zero-config npm SDK and Docker sidecar. Ingest telemetry, auto-scrub PII, detect anomalies using Z-scores, and generate GPT-4/Claude root-cause post-mortems in seconds.",
+  keywords: [
+    "AI observability",
+    "log analytics",
+    "anomaly detection",
+    "root cause analysis",
+    "observability platform",
+    "developer monitoring",
+    "OpenTelemetry monitoring"
+  ],
+  alternates: {
+    canonical: "https://observabilityos.com",
+  },
 };
 
 export default async function LandingPage() {
@@ -51,8 +63,116 @@ export default async function LandingPage() {
     }
   }
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "ObservabilityOS",
+    "url": baseUrl,
+    "logo": `${baseUrl}/favicon.ico`,
+    "sameAs": ["https://github.com/Vaibhav-Singh2/ObservabilityOS"]
+  };
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ObservabilityOS",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "29.00",
+      "priceCurrency": "USD",
+      "priceModel": "https://schema.org/Subscription"
+    },
+    "description": "AI-native incident post-mortems and telemetry anomaly detection platform. Ingest telemetry, redaction scrub, and resolve incidents 10x faster.",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "128"
+    }
+  };
+
+  const webSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "ObservabilityOS",
+    "url": baseUrl,
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://docs.observabilityos.com?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does ObservabilityOS ensure log data privacy & security?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "All incoming telemetry passes through our high-performance PII scrubbing engine (scrubber.ts) before database storage. It automatically redacts database credentials, authorization headers, JWT strings, credit card numbers, and custom regex patterns you define."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the SDK add network latency to my API endpoints?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. The Node.js SDK utilizes an in-memory ring-buffer for high-throughput batching. Logs are stored instantly in memory and flushed asynchronously in the background. The SDK runs on a non-blocking queue."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How accurate is the statistical Z-score anomaly detection?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We use dynamic rolling baselines to calculate standard deviation spikes (Z-score) on error rates, latency, and CPU usage. Our model adapts to weekly/daily traffic cycles, reducing pager noise by up to 98%."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does the AI incident root-cause diagnosis work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "When a Z-score threshold is breached, we package the surrounding context: matching error log context, active route signatures, and GitHub webhook deployment events. We pipeline this to GPT-4/Claude via structured prompts to generate a comprehensive markdown post-mortem."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is ObservabilityOS compatible with OpenTelemetry (OTLP)?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, fully. The ObservabilityOS ingestion API supports native OTLP HTTP/JSON protocols. If you already use OpenTelemetry collectors, you can simply append our ingestion endpoint and API key to your configuration."
+        }
+      }
+    ]
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white font-sans overflow-x-hidden relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       {/* Background gradients for premium aesthetic */}
       <div className="absolute top-0 left-1/4 w-125 h-125 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute top-300 right-1/4 w-150 h-150 bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
@@ -77,6 +197,15 @@ export default async function LandingPage() {
             <a href="#dx" className="hover:text-slate-200 transition-colors">Developer Experience</a>
             <a href="#pricing" className="hover:text-slate-200 transition-colors">Pricing</a>
             <a href="#faq" className="hover:text-slate-200 transition-colors">FAQ</a>
+            <a 
+              href="http://localhost:3001" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:text-slate-200 transition-colors flex items-center gap-0.5"
+            >
+              Docs
+              <ExternalLink className="w-3 h-3 text-slate-500" />
+            </a>
             <a 
               href="https://github.com/Vaibhav-Singh2/ObservabilityOS" 
               target="_blank" 
@@ -161,11 +290,13 @@ export default async function LandingPage() {
               </a>
             )}
             <a
-              href="#dx"
+              href="http://localhost:3001"
+              target="_blank"
+              rel="noopener noreferrer"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 text-slate-200 font-semibold h-12 px-8 rounded-xl transition-all duration-200 cursor-pointer"
             >
               <Terminal className="w-4 h-4 text-indigo-400" />
-              Read SDK Docs
+              Read Docs
             </a>
           </div>
 
@@ -971,7 +1102,9 @@ export default async function LandingPage() {
                 </a>
               )}
               <a
-                href="#dx"
+                href="http://localhost:3001/docs/quickstart"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold h-12 px-8 rounded-xl transition-all duration-200 cursor-pointer"
               >
                 <Terminal className="w-4 h-4 text-indigo-400" />
@@ -1001,7 +1134,7 @@ export default async function LandingPage() {
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             
             {/* Column 1: Brand */}
-            <div className="col-span-2 space-y-4">
+            <div className="col-span-2 md:col-span-1 space-y-4">
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center">
                   <Activity className="w-3.5 h-3.5 text-white" />
@@ -1026,36 +1159,49 @@ export default async function LandingPage() {
               </div>
             </div>
 
-            {/* Column 2: Product */}
+            {/* Column 2: Product & Resources */}
             <div className="space-y-3.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Product</h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
                 <li><a href="#product" className="hover:text-slate-350 transition-colors">Interactive Demo</a></li>
                 <li><a href="#features" className="hover:text-slate-350 transition-colors">Features Grid</a></li>
                 <li><a href="#pricing" className="hover:text-slate-350 transition-colors">Predictable Pricing</a></li>
-                <li><a href="#dx" className="hover:text-slate-350 transition-colors">Developer Experience</a></li>
-              </ul>
-            </div>
-
-            {/* Column 3: Resources */}
-            <div className="space-y-3.5">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Resources</h4>
-              <ul className="space-y-2 text-xs text-slate-500 font-sans">
-                <li><a href="#dx" className="hover:text-slate-350 transition-colors">SDK Documentation</a></li>
-                <li><a href="https://github.com/Vaibhav-Singh2/ObservabilityOS" target="_blank" rel="noopener noreferrer" className="hover:text-slate-350 transition-colors flex items-center gap-1">Open Source Code <ExternalLink className="w-2.5 h-2.5" /></a></li>
+                <li><a href="http://localhost:3001" target="_blank" rel="noopener noreferrer" className="hover:text-slate-350 transition-colors">Documentation</a></li>
                 <li><a href="#faq" className="hover:text-slate-350 transition-colors">Technical FAQs</a></li>
-                <li><a href="mailto:support@observabilityos.com" className="hover:text-slate-350 transition-colors">Email Support</a></li>
               </ul>
             </div>
 
-            {/* Column 4: Legal & Contact */}
+            {/* Column 3: Alternatives */}
+            <div className="space-y-3.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Compare</h4>
+              <ul className="space-y-2 text-xs text-slate-500 font-sans">
+                <li><Link href="/vs/datadog" className="hover:text-slate-350 transition-colors">vs Datadog</Link></li>
+                <li><Link href="/vs/new-relic" className="hover:text-slate-350 transition-colors">vs New Relic</Link></li>
+                <li><Link href="/vs/grafana" className="hover:text-slate-350 transition-colors">vs Grafana</Link></li>
+                <li><Link href="/vs/sentry" className="hover:text-slate-350 transition-colors">vs Sentry</Link></li>
+                <li><Link href="/vs/better-stack" className="hover:text-slate-350 transition-colors">vs Better Stack</Link></li>
+              </ul>
+            </div>
+
+            {/* Column 4: Guides */}
+            <div className="space-y-3.5">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Guides</h4>
+              <ul className="space-y-2 text-xs text-slate-500 font-sans">
+                <li><Link href="/guides/opentelemetry-monitoring-guide" className="hover:text-slate-350 transition-colors">OpenTelemetry Guide</Link></li>
+                <li><Link href="/guides/ai-incident-analysis-guide" className="hover:text-slate-350 transition-colors">AI Incident Analysis</Link></li>
+                <li><Link href="/guides/log-analytics-best-practices" className="hover:text-slate-350 transition-colors">Log Analytics Tips</Link></li>
+                <li><a href="https://github.com/Vaibhav-Singh2/ObservabilityOS" target="_blank" rel="noopener noreferrer" className="hover:text-slate-350 transition-colors flex items-center gap-1">Open Source Code <ExternalLink className="w-2.5 h-2.5" /></a></li>
+              </ul>
+            </div>
+
+            {/* Column 5: Company */}
             <div className="space-y-3.5">
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono">Company</h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
                 <li><a href="#" className="hover:text-slate-350 transition-colors">Privacy Policy</a></li>
                 <li><a href="#" className="hover:text-slate-350 transition-colors">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-slate-350 transition-colors">Security Auditing</a></li>
-                <li><a href="mailto:contact@observabilityos.com" className="hover:text-slate-350 transition-colors">Sales & Contact</a></li>
+                <li><a href="mailto:support@observabilityos.com" className="hover:text-slate-350 transition-colors">Support Email</a></li>
+                <li><a href="mailto:contact@observabilityos.com" className="hover:text-slate-350 transition-colors">Contact Sales</a></li>
               </ul>
             </div>
 

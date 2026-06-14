@@ -71,6 +71,15 @@ export default function DocsHeader({ sidebarOpen, setSidebarOpen, onSearchOpen }
             <Github className="w-4 h-4 text-slate-500" />
             <span className="hidden sm:inline">GitHub Repository</span>
           </a>
+
+          <a
+            href="http://localhost:3000"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-650 bg-indigo-650 hover:bg-indigo-600 text-white transition-all cursor-pointer shadow-md shadow-indigo-600/10"
+          >
+            Launch Console
+          </a>
         </div>
 
       </div>
