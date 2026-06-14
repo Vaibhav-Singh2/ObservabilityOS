@@ -53,11 +53,11 @@ export default function InteractiveDemo() {
       </div>
 
       {/* Tabs list */}
-      <div className="flex border-b border-slate-900 bg-slate-900/20 px-6">
+      <div className="flex overflow-x-auto scrollbar-none whitespace-nowrap border-b border-slate-900 bg-slate-900/20 px-6">
         <button
           onClick={() => setActiveTab("services")}
           className={cn(
-            "flex items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer",
+            "flex shrink-0 items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer",
             activeTab === "services"
               ? "border-indigo-500 text-white"
               : "border-transparent text-slate-400 hover:text-slate-200"
@@ -70,7 +70,7 @@ export default function InteractiveDemo() {
         <button
           onClick={() => setActiveTab("ai")}
           className={cn(
-            "flex items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer relative",
+            "flex shrink-0 items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer relative",
             activeTab === "ai"
               ? "border-indigo-500 text-white"
               : "border-transparent text-slate-400 hover:text-slate-200"
@@ -87,7 +87,7 @@ export default function InteractiveDemo() {
         <button
           onClick={() => setActiveTab("metrics")}
           className={cn(
-            "flex items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer",
+            "flex shrink-0 items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer",
             activeTab === "metrics"
               ? "border-indigo-500 text-white"
               : "border-transparent text-slate-400 hover:text-slate-200"
@@ -100,7 +100,7 @@ export default function InteractiveDemo() {
         <button
           onClick={() => setActiveTab("timeline")}
           className={cn(
-            "flex items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer",
+            "flex shrink-0 items-center gap-2 px-4 py-3 text-xs font-semibold border-b-2 transition-all cursor-pointer",
             activeTab === "timeline"
               ? "border-indigo-500 text-white"
               : "border-transparent text-slate-400 hover:text-slate-200"
@@ -381,7 +381,7 @@ export default function InteractiveDemo() {
             <div className="p-4 rounded-xl border border-slate-800 bg-slate-950/60">
               <span className="text-[10px] text-slate-500 uppercase font-mono tracking-wider mb-4 block">Telemetry Feed Latency (last 30 seconds)</span>
               
-              <div className="h-28 flex items-end gap-1 px-2">
+              <div className="h-28 flex items-end gap-0.5 sm:gap-1 px-2">
                 {[
                   30, 32, 28, 35, 42, 38, 39, 41, 35, 30, 
                   28, 32, 120, 380, 850, 1100, 1240, 1150, 1200, 1240, 
