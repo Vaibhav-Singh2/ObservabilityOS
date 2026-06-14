@@ -1,0 +1,219 @@
+@import "tailwindcss";
+
+:root {
+  --background: #020617;
+  --foreground: #f8fafc;
+  
+  --card: #0f172a;
+  --card-foreground: #f8fafc;
+  
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+  
+  --primary: #f8fafc;
+  --primary-foreground: #020617;
+  
+  --secondary: #1e293b;
+  --secondary-foreground: #f8fafc;
+  
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+  
+  --destructive: #7f1d1d;
+  --destructive-foreground: #f8fafc;
+  
+  --border: #1e293b;
+  --input: #1e293b;
+  --ring: #4f46e5;
+  
+  --radius: 0.75rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: Arial, Helvetica, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Custom scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b; /* slate-800 */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155; /* slate-700 */
+}
+
+/* Document styling rules */
+.prose {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.prose h1 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  color: #ffffff;
+  letter-spacing: -0.025em;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: #f1f5f9;
+  letter-spacing: -0.02em;
+  border-bottom: 1px solid #1e293b;
+  padding-bottom: 0.5rem;
+}
+
+.prose h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 1.8rem;
+  margin-bottom: 0.8rem;
+  color: #f1f5f9;
+}
+
+.prose p {
+  margin-bottom: 1.2rem;
+  color: #94a3b8; /* slate-400 */
+}
+
+.prose ul, .prose ol {
+  margin-bottom: 1.2rem;
+  padding-left: 1.5rem;
+  color: #94a3b8;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
+}
+
+.prose li {
+  margin-bottom: 0.4rem;
+}
+
+.prose a {
+  color: #818cf8; /* indigo-400 */
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.prose a:hover {
+  color: #6366f1; /* indigo-500 */
+}
+
+.prose blockquote {
+  border-left: 4px solid #4f46e5;
+  padding: 0.8rem 1rem;
+  background: rgba(79, 70, 229, 0.05);
+  border-radius: 0 0.5rem 0.5rem 0;
+  margin-bottom: 1.2rem;
+  font-style: italic;
+  color: #cbd5e1;
+}
+
+.prose code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  background: rgba(30, 41, 59, 0.5); /* slate-900/50 */
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  font-size: 0.85em;
+  color: #e2e8f0;
+}
+
+.prose pre {
+  margin-bottom: 1.2rem;
+  border-radius: 0.75rem;
+  border: 1px solid #1e293b;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+.prose pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: inherit;
+  font-size: inherit;
+  display: block;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1.5rem;
+  font-size: 0.9em;
+}
+
+.prose th, .prose td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #1e293b;
+  text-align: left;
+}
+
+.prose th {
+  font-weight: 600;
+  color: #f1f5f9;
+  background: rgba(30, 41, 59, 0.2);
+}
+
+.prose td {
+  color: #94a3b8;
+}
+
+/* Helper styles for scrollbars hide */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

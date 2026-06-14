@@ -2973,6 +2973,28 @@ __metadata:
   languageName: node
   linkType: hard
 
+"docs@workspace:apps/docs":
+  version: 0.0.0-use.local
+  resolution: "docs@workspace:apps/docs"
+  dependencies:
+    "@tailwindcss/postcss": "npm:^4"
+    "@types/node": "npm:^20"
+    "@types/react": "npm:^19"
+    "@types/react-dom": "npm:^19"
+    clsx: "npm:^2.1.1"
+    eslint: "npm:^9"
+    eslint-config-next: "npm:16.2.6"
+    lucide-react: "npm:^0.475.0"
+    marked: "npm:^12.0.1"
+    next: "npm:16.2.6"
+    react: "npm:19.2.4"
+    react-dom: "npm:19.2.4"
+    tailwind-merge: "npm:^3.6.0"
+    tailwindcss: "npm:^4"
+    typescript: "npm:^5"
+  languageName: unknown
+  linkType: soft
+
 "doctrine@npm:^2.1.0":
   version: 2.1.0
   resolution: "doctrine@npm:2.1.0"
@@ -4880,6 +4902,15 @@ __metadata:
   dependencies:
     "@jridgewell/sourcemap-codec": "npm:^1.5.5"
   checksum: 10c0/299378e38f9a270069fc62358522ddfb44e94244baa0d6a8980ab2a9b2490a1d03b236b447eee309e17eb3bddfa482c61259d47960eb018a904f0ded52780c4a
+  languageName: node
+  linkType: hard
+
+"marked@npm:^12.0.1":
+  version: 12.0.2
+  resolution: "marked@npm:12.0.2"
+  bin:
+    marked: bin/marked.js
+  checksum: 10c0/45ae2e1e3f06b30a5b5f64efc6cde9830c81d1d024fd7668772a3217f1bc0f326e66a6b8970482d9783edf1f581fecac7023a7fa160f2c14dbcc16e064b4eafb
   languageName: node
   linkType: hard
 
