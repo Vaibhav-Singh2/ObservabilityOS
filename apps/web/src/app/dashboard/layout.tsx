@@ -27,10 +27,10 @@ export default async function DashboardLayout({
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string };
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string };
+  } catch {
     redirect("/");
   }
 

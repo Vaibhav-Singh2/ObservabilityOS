@@ -10,9 +10,14 @@ import {
   Deploy,
 } from "@repo/db";
 import jwt from "jsonwebtoken";
-import ProjectDashboardView from "./ProjectDashboardView";
+import ProjectDashboardView, { SerializedService, SerializedDeployment } from "./ProjectDashboardView";
 import ZeroStateView from "./ZeroStateView";
 import { getCache, setCache } from "@/lib/redis";
+import { subDays } from "date-fns";
+
+function getStart24h() {
+  return subDays(new Date(), 1);
+}
 
 interface PageProps {
   searchParams: Promise<{ projectId?: string }>;
@@ -31,10 +36,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string } & jwt.JwtPayload;
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string } & jwt.JwtPayload;
+  } catch {
     redirect("/");
   }
 
@@ -65,12 +70,12 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   const cacheKey = `dashboard:project:${activeProjectId}`;
   const cachedDashboard = await getCache<{
-    services: any[];
-    deployments: any[];
+    services: SerializedService[];
+    deployments: SerializedDeployment[];
   }>(cacheKey);
 
-  let serializedServices: any[] = [];
-  let serializedDeployments: any[] = [];
+  let serializedServices: SerializedService[] = [];
+  let serializedDeployments: SerializedDeployment[] = [];
 
   if (cachedDashboard) {
     serializedServices = cachedDashboard.services;
@@ -83,7 +88,7 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     });
 
     // Calculate 24h statistics using aggregation
-    const start24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const start24h = getStart24h();
     const stats = await Log.aggregate([
       {
         $match: {
@@ -169,9 +174,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     });
 
     serializedDeployments = recentDeploys.map((d) => {
-      const serviceName = (d.serviceId as any)?.name || "unknown-service";
-      const serviceIdStr = (d.serviceId as any)?._id
-        ? (d.serviceId as any)._id.toString()
+      const serviceObj = d.serviceId as unknown as { _id: { toString: () => string }; name: string } | null;
+      const serviceName = serviceObj?.name || "unknown-service";
+      const serviceIdStr = serviceObj?._id
+        ? serviceObj._id.toString()
         : d.serviceId?.toString() || "";
       return {
         id: d._id.toString(),

@@ -2,11 +2,27 @@ import { NextResponse } from "next/server";
 import { connectToDatabase, Project } from "@repo/db";
 import Razorpay from "razorpay";
 
+interface RazorpayPayload {
+  id?: string;
+  customer_id?: string;
+  notes?: {
+    projectId?: string;
+  };
+  status?: string;
+}
+
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get("x-razorpay-signature") || "";
 
-  let event: any;
+  let event: {
+    event?: string;
+    payload?: {
+      subscription?: {
+        entity?: Record<string, unknown>;
+      };
+    } & Record<string, unknown>;
+  } = {};
   try {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (webhookSecret && signature) {
@@ -20,8 +36,8 @@ export async function POST(request: Request) {
       }
     }
     event = JSON.parse(body);
-  } catch (err: any) {
-    console.error(`[Razorpay Webhook] Error:`, err.message);
+  } catch (err) {
+    console.error(`[Razorpay Webhook] Error:`, err instanceof Error ? err.message : err);
     return NextResponse.json(
       { error: "Signature verification failed" },
       { status: 400 },
@@ -29,7 +45,7 @@ export async function POST(request: Request) {
   }
 
   await connectToDatabase();
-  const payload = event.payload?.subscription?.entity || event.payload || {};
+  const payload = (event.payload?.subscription?.entity || event.payload || {}) as RazorpayPayload;
   const eventName = event.event;
 
   try {

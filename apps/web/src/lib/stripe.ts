@@ -9,7 +9,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 export const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2022-11-15" as any,
+  apiVersion: "2022-11-15" as unknown as "2026-05-27.dahlia",
   typescript: true,
 });
 

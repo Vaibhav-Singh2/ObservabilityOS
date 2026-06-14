@@ -28,7 +28,7 @@ export interface PostMortemLog {
   level: string;
   message: string;
   traceId: string | null;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 export interface PostMortemComment {

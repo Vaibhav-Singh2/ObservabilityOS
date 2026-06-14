@@ -1,22 +1,32 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project } from "@repo/db";
 import stripe from "@/lib/stripe";
+import Stripe from "stripe";
+
+interface StripeWebhookSession {
+  metadata?: { projectId?: string };
+  customer?: string | null;
+  subscription?: string | null;
+  id?: string;
+  status?: string;
+}
 
 export async function POST(request: Request) {
   const body = await request.text();
   const signature = request.headers.get("stripe-signature") || "";
 
-  let event: any;
+  let event: Stripe.Event;
   try {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     if (webhookSecret && signature) {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     } else {
       // Direct parsing fallback for dev testing
-      event = JSON.parse(body);
+      event = JSON.parse(body) as Stripe.Event;
     }
-  } catch (err: any) {
-    console.error(`[Stripe Webhook] Error:`, err.message);
+  } catch (err) {
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    console.error(`[Stripe Webhook] Error:`, errorMessage);
     return NextResponse.json(
       { error: "Webhook signature verification failed" },
       { status: 400 },
@@ -24,7 +34,7 @@ export async function POST(request: Request) {
   }
 
   await connectToDatabase();
-  const session = event.data?.object || event.data || {};
+  const session = (event.data?.object || {}) as StripeWebhookSession;
 
   try {
     switch (event.type) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   Settings,
@@ -22,7 +22,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -47,16 +46,42 @@ interface SettingsViewProps {
   };
 }
 
+interface AuditLog {
+  id: string;
+  createdAt: string;
+  action: string;
+  targetId?: string;
+  targetEntity?: string;
+  user?: {
+    username: string;
+  };
+  metadata?: {
+    environment?: string;
+    target?: number;
+    slackChanged?: boolean;
+    discordChanged?: boolean;
+    teamsChanged?: boolean;
+  };
+}
+
 export default function SettingsView({ project }: SettingsViewProps) {
   const router = useRouter();
   const [name, setName] = useState(project.name);
 
   // Audit Logs States
-  const [auditLogs, setAuditLogs] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
   const [isLoadingAudit, setIsLoadingAudit] = useState(true);
 
-  const fetchAuditLogs = async () => {
+  const [prevProjectId, setPrevProjectId] = useState(project.id);
+  if (project.id !== prevProjectId) {
+    setPrevProjectId(project.id);
     setIsLoadingAudit(true);
+  }
+
+  const fetchAuditLogs = useCallback(async (showLoading = true) => {
+    if (showLoading) {
+      setIsLoadingAudit(true);
+    }
     try {
       const res = await fetch(
         `/api/projects/audit-logs?projectId=${project.id}`,
@@ -70,11 +95,13 @@ export default function SettingsView({ project }: SettingsViewProps) {
     } finally {
       setIsLoadingAudit(false);
     }
-  };
+  }, [project.id]);
 
   useEffect(() => {
-    fetchAuditLogs();
-  }, [project.id]);
+    Promise.resolve().then(() => {
+      fetchAuditLogs(false);
+    });
+  }, [fetchAuditLogs]);
 
   const [slackWebhookUrl, setSlackWebhookUrl] = useState(
     project.slackWebhookUrl,
@@ -163,7 +190,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Project Profile Section */}
         <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
           <CardHeader>
             <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
               General Settings
@@ -226,7 +253,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
 
         {/* Incident Alert Threshold Settings */}
         <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
           <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4">
             <Volume2 className="w-4 h-4 text-indigo-400" />
             <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
@@ -288,7 +315,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
 
         {/* Integration settings */}
         <Card className="relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
           <CardHeader>
             <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
               Notification Channel Webhooks
@@ -386,7 +413,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
 
       {/* System & Project Audit Logs Section */}
       <Card className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-slate-800/60">
           <div className="flex items-center gap-2">
             <Terminal className="w-4 h-4 text-indigo-400" />
@@ -398,7 +425,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
             type="button"
             variant="ghost"
             size="icon"
-            onClick={fetchAuditLogs}
+            onClick={() => fetchAuditLogs()}
             className="text-slate-500 hover:text-slate-300"
             title="Refresh logs"
           >
@@ -470,7 +497,7 @@ export default function SettingsView({ project }: SettingsViewProps) {
                           </Badge>
                         </TableCell>
                         <TableCell
-                          className="py-2.5 px-4 text-slate-200 truncate max-w-[200px]"
+                          className="py-2.5 px-4 text-slate-200 truncate max-w-50"
                           title={details}
                         >
                           {details}

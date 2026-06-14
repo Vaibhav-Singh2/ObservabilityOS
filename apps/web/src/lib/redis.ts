@@ -4,10 +4,10 @@ interface RedisCache {
   client: Redis | null;
 }
 
-let cached: RedisCache = (global as any).redisCache;
+let cached: RedisCache = (globalThis as unknown as { redisCache: RedisCache }).redisCache;
 
 if (!cached) {
-  cached = (global as any).redisCache = { client: null };
+  cached = (globalThis as unknown as { redisCache: RedisCache }).redisCache = { client: null };
 }
 
 export function getRedisClient(): Redis | null {
@@ -50,7 +50,7 @@ export async function getCache<T>(key: string): Promise<T | null> {
 
 export async function setCache(
   key: string,
-  value: any,
+  value: unknown,
   ttlSeconds = 300,
 ): Promise<void> {
   const client = getRedisClient();

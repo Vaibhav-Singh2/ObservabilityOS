@@ -29,10 +29,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -90,8 +90,8 @@ export async function PATCH(request: Request) {
 
     if (webhookUpdated) {
       await logAuditEvent({
-        projectId: project._id,
-        userId: user._id,
+        projectId: project._id.toString(),
+        userId: user._id.toString(),
         action: "webhook.update",
         targetEntity: "webhook",
         targetId: project._id.toString(),

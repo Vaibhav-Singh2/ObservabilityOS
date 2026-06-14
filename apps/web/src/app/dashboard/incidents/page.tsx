@@ -21,10 +21,10 @@ export default async function IncidentsPage({ searchParams }: PageProps) {
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string };
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string };
+  } catch {
     redirect("/");
   }
 
@@ -77,8 +77,13 @@ export default async function IncidentsPage({ searchParams }: PageProps) {
   }));
 
   const serializedIncidents = incidents.map((inc) => {
-    const serviceObj = inc.serviceId as any;
-    const deployObj = inc.deployId as any;
+    const serviceObj = inc.serviceId as unknown as { name: string; environment: string; _id: string };
+    const deployObj = inc.deployId as unknown as {
+      _id: { toString: () => string };
+      commitSha: string;
+      commitMessage: string;
+      branch: string;
+    } | null;
 
     return {
       id: inc._id.toString(),

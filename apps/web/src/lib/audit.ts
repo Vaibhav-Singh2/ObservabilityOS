@@ -1,12 +1,12 @@
 import { connectToDatabase, AuditLog } from "@repo/db";
 
 interface AuditEventParams {
-  projectId: string | any;
-  userId: string | any;
+  projectId: string;
+  userId: string;
   action: string;
   targetEntity: string;
   targetId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export async function logAuditEvent({

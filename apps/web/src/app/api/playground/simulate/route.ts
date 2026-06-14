@@ -11,7 +11,6 @@ import {
 } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
-import { Types } from "mongoose";
 import { processAnomalyDetection } from "@/lib/anomaly";
 import { delCache } from "@/lib/redis";
 
@@ -34,10 +33,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -122,7 +121,6 @@ export async function POST(request: Request) {
     }
 
     // 6. Simulate git deployment if requested
-    let deployId: Types.ObjectId | undefined = undefined;
     if (validatedData.includeDeploy) {
       let commitMessage =
         "Deploy general performance patches and minor enhancements";
@@ -145,7 +143,7 @@ export async function POST(request: Request) {
       const commitSha =
         Math.random().toString(16).substring(2, 10) +
         Math.random().toString(16).substring(2, 10);
-      const deploy = await Deploy.create({
+      await Deploy.create({
         projectId: project._id,
         serviceId: service._id,
         commitSha,
@@ -154,12 +152,11 @@ export async function POST(request: Request) {
         environment: validatedData.environment,
         deployedAt: new Date(now.getTime() - 5 * 60 * 1000), // 5 minutes ago
       });
-      deployId = deploy._id;
     }
 
     // 7. Generate scenario-specific logs
     let errorMessages: string[] = [];
-    let scenarioMetadata: Record<string, any> = {};
+    let scenarioMetadata: Record<string, unknown> = {};
 
     switch (validatedData.scenarioId) {
       case "db-timeout":

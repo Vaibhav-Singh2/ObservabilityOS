@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -12,7 +12,6 @@ import {
   GitCommit,
   AlertCircle,
   AlertTriangle,
-  CheckCircle2,
   Activity,
   RefreshCw,
   ShieldCheck,
@@ -20,12 +19,10 @@ import {
   Trash2,
   Sliders,
   Percent,
-  Info,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -116,6 +113,15 @@ export default function ServiceDetailView({
   const [sloTarget, setSloTarget] = useState(99.0);
   const [sloWindow, setSloWindow] = useState(30);
   const [sloLatencyMs, setSloLatencyMs] = useState(500);
+
+  const [prevServiceId, setPrevServiceId] = useState(service.id);
+  const [prevProjectId, setPrevProjectId] = useState(projectId);
+
+  if (service.id !== prevServiceId || projectId !== prevProjectId) {
+    setPrevServiceId(service.id);
+    setPrevProjectId(projectId);
+    setIsLoadingSlos(true);
+  }
 
   const activeIncidents = incidents.filter((i) => i.status !== "resolved");
   const isHealthy = activeIncidents.length === 0;
@@ -209,7 +215,7 @@ export default function ServiceDetailView({
         } else {
           setError(data.error?.message || "Failed to load metrics");
         }
-      } catch (err) {
+      } catch {
         if (active) {
           setError("Failed to communicate with metrics server");
         }
@@ -225,8 +231,10 @@ export default function ServiceDetailView({
   }, [timeRange, projectId, service.id]);
 
   // Load SLO status helper
-  const loadSloStatus = async () => {
-    setIsLoadingSlos(true);
+  const loadSloStatus = useCallback(async (showLoading = true) => {
+    if (showLoading) {
+      setIsLoadingSlos(true);
+    }
     try {
       const res = await fetch(
         `/api/services/slo/status?projectId=${projectId}&serviceId=${service.id}`,
@@ -235,16 +243,18 @@ export default function ServiceDetailView({
         const data = await res.json();
         setSloStatus(data.slos || []);
       }
-    } catch (e) {
-      console.error("Failed to load SLO statuses:", e);
+    } catch {
+      console.error("Failed to load SLO statuses");
     } finally {
       setIsLoadingSlos(false);
     }
-  };
+  }, [projectId, service.id]);
 
   useEffect(() => {
-    loadSloStatus();
-  }, [projectId, service.id]);
+    Promise.resolve().then(() => {
+      loadSloStatus(false);
+    });
+  }, [loadSloStatus]);
 
   // Handle SLO submission
   const handleCreateSlo = async (e: React.FormEvent) => {
@@ -325,7 +335,7 @@ export default function ServiceDetailView({
 
       {/* Service Header Info */}
       <div className="p-6 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col md:flex-row md:items-center justify-between gap-4 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-50 h-50 bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
 
         <div className="space-y-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -586,26 +596,26 @@ export default function ServiceDetailView({
 
       {/* Main Charts Console */}
       {isLoading ? (
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-3 min-h-[300px]">
+        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-3 min-h-75">
           <RefreshCw className="w-8 h-8 text-indigo-500 animate-spin" />
           <p className="text-sm font-semibold text-slate-455">
             Loading timeseries metrics metrics...
           </p>
         </div>
       ) : error ? (
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-3 min-h-[300px] text-rose-400">
+        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-3 min-h-75 text-rose-400">
           <AlertCircle className="w-8 h-8" />
           <p className="text-sm font-semibold">{error}</p>
         </div>
       ) : metrics.length === 0 ? (
-        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-4 min-h-[300px]">
+        <div className="bg-slate-950 border border-slate-900 rounded-2xl p-16 text-center flex flex-col items-center justify-center gap-4 min-h-75">
           <Activity className="w-10 h-10 text-slate-755" />
           <div>
             <h3 className="text-sm font-bold text-slate-350 mb-1">
               No Metrics Data Found
             </h3>
             <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-              We haven't received any CPU, memory, or latency metrics for this
+              We haven&apos;t received any CPU, memory, or latency metrics for this
               service during this period. Ingest metrics to see statistics.
             </p>
           </div>

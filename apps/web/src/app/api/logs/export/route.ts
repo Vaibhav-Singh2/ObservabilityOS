@@ -18,10 +18,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -78,12 +78,19 @@ export async function GET(request: Request) {
       startTime = now - 7 * 24 * 60 * 60 * 1000;
     }
 
-    let logs: any[] = [];
+    let logs: {
+      timestamp: Date;
+      level: string;
+      message: string;
+      traceId?: string;
+      metadata?: Record<string, unknown>;
+      serviceId?: { name: string; environment: string; _id: string } | null;
+    }[] = [];
     let searchUsed = false;
 
     if (query.trim() !== "") {
       try {
-        const pipeline: any[] = [
+        const pipeline: Record<string, unknown>[] = [
           {
             $search: {
               index: "default",
@@ -101,7 +108,7 @@ export async function GET(request: Request) {
         ];
 
         // Apply filters in match stage
-        const matchStage = pipeline[1].$match;
+        const matchStage = (pipeline[1] as Record<string, Record<string, unknown>>).$match;
         if (level !== "all") {
           matchStage.level = level;
         }
@@ -116,11 +123,11 @@ export async function GET(request: Request) {
         pipeline.push({ $sort: { timestamp: -1 } });
         pipeline.push({ $limit: 1000 });
 
-        const aggResult = await Log.aggregate(pipeline);
-        logs = await Log.populate(aggResult, {
+        const aggResult = await Log.aggregate(pipeline as unknown as Parameters<typeof Log.aggregate>[0]);
+        logs = (await Log.populate(aggResult, {
           path: "serviceId",
           select: "name environment",
-        });
+        })) as unknown as typeof logs;
         searchUsed = true;
       } catch (err) {
         console.warn(
@@ -132,7 +139,7 @@ export async function GET(request: Request) {
 
     if (!searchUsed) {
       // Build conditions
-      const conditions: Record<string, any> = {
+      const conditions: Record<string, unknown> = {
         projectId: project._id,
       };
 
@@ -156,14 +163,14 @@ export async function GET(request: Request) {
       }
 
       // Fetch logs, limited to 1000 for export performance
-      logs = await Log.find(conditions)
+      logs = (await Log.find(conditions)
         .populate("serviceId", "name environment")
         .sort({ timestamp: -1 })
-        .limit(1000);
+        .limit(1000)) as unknown as typeof logs;
     }
 
     const exportableLogs: ExportableLog[] = logs.map((l) => {
-      const s = l.serviceId as any;
+      const s = l.serviceId as unknown as { name: string; environment: string; _id: string };
       return {
         timestamp: l.timestamp.toISOString(),
         level: l.level,

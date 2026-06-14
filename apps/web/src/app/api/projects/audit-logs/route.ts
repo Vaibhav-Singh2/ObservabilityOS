@@ -12,10 +12,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -64,7 +64,12 @@ export async function GET(request: Request) {
       .limit(100);
 
     const serialized = logs.map((log) => {
-      const u = log.userId as any;
+      const u = log.userId as unknown as {
+        _id: { toString: () => string };
+        username: string;
+        email?: string | null;
+        avatarUrl?: string | null;
+      } | null;
       return {
         id: log._id.toString(),
         action: log.action,
@@ -73,7 +78,7 @@ export async function GET(request: Request) {
         metadata: log.metadata
           ? log.metadata instanceof Map
             ? Object.fromEntries(log.metadata.entries())
-            : (log.metadata as any)
+            : (log.metadata as Record<string, unknown>)
           : {},
         createdAt: log.createdAt.toISOString(),
         user: u

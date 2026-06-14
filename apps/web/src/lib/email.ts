@@ -27,7 +27,7 @@ interface ProjectDigestData {
 export async function buildAndSendEmailDigest(user: {
   email?: string;
   username: string;
-  _id: any;
+  _id: unknown;
 }) {
   if (!user.email) {
     console.log(
@@ -135,7 +135,7 @@ export async function buildAndSendEmailDigest(user: {
     // Structure incident contexts for AI reasoning
     const incidentDigestContexts: IncidentDigestContext[] = incidents.map(
       (inc) => {
-        const s = inc.serviceId as any;
+        const s = inc.serviceId as unknown as { name: string; environment: string; _id: string };
         return {
           title: inc.title,
           serviceName: s ? s.name : "unknown-service",

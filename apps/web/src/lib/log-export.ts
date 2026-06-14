@@ -3,7 +3,7 @@ export interface ExportableLog {
   level: string;
   message: string;
   traceId?: string | null;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   service?: {
     name: string;
     environment: string;

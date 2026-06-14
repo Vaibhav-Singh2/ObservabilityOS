@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "lint:fix": "eslint . --fix",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,6 +25,7 @@
     "bullmq": "^5.41.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.4.0",
     "ioredis": "^5.5.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.475.0",
@@ -45,6 +47,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
+    "eslint-plugin-tailwind-canonical-classes": "^1.3.3",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

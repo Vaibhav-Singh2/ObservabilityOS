@@ -54,13 +54,13 @@ export default function ZeroStateView() {
         </h2>
         <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
           Projects group your microservices, API credentials, and log ingestion
-          streams. Let's name your first project.
+          streams. Let&apos;s name your first project.
         </p>
       </div>
 
       {/* Creation card */}
       <Card className="w-full relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
         <CardContent className="p-8">
           <form onSubmit={handleCreate} className="space-y-6">
             <div className="space-y-2">

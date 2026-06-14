@@ -132,17 +132,21 @@ export default function BillingView({ project }: BillingViewProps) {
     const status = searchParams.get("checkout_status");
     const gatewayParam = searchParams.get("gateway");
     if (status === "success") {
-      setSuccessMsg(
-        `Congratulations! Your subscription upgrade via ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"} was processed successfully.`,
-      );
+      Promise.resolve().then(() => {
+        setSuccessMsg(
+          `Congratulations! Your subscription upgrade via ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"} was processed successfully.`,
+        );
+      });
       router.replace(`/dashboard/billing?projectId=${project.id}`);
     } else if (status === "cancel") {
-      setErrorMsg(
-        "Checkout was cancelled. Please try again when you are ready.",
-      );
+      Promise.resolve().then(() => {
+        setErrorMsg(
+          "Checkout was cancelled. Please try again when you are ready.",
+        );
+      });
       router.replace(`/dashboard/billing?projectId=${project.id}`);
     }
-  }, [searchParams]);
+  }, [searchParams, project.id, router]);
 
   const loadRazorpayScript = () => {
     return new Promise((resolve) => {
@@ -175,7 +179,7 @@ export default function BillingView({ project }: BillingViewProps) {
       }
 
       if (gateway === "stripe") {
-        window.location.href = data.url;
+        window.location.assign(data.url);
       } else {
         // Razorpay checkout flow
         if (data.isMock) {
@@ -198,27 +202,27 @@ export default function BillingView({ project }: BillingViewProps) {
             currency: data.currency,
             name: data.name,
             description: data.description,
-            handler: async function (_response: unknown) {
+            handler: async function () {
               setSuccessMsg(
                 "Razorpay authorization approved! Reloading settings...",
               );
               setTimeout(() => {
-                window.location.href = `/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`;
+                router.push(`/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`);
               }, 1500);
             },
             prefill: { name: "", email: "" },
             theme: { color: "#4f46e5" },
           };
 
-          const rzp = new (window as any).Razorpay(options);
+          const rzp = new (window as unknown as { Razorpay: new (o: unknown) => { open: () => void } }).Razorpay(options);
           rzp.open();
           setIsSubmitting(false);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setErrorMsg(
-        err.message || "An unexpected error occurred during checkout",
+        err instanceof Error ? err.message : "An unexpected error occurred during checkout",
       );
       setIsSubmitting(false);
     }
@@ -250,15 +254,17 @@ export default function BillingView({ project }: BillingViewProps) {
         `Plan successfully changed to ${targetPlan.toUpperCase()} via Dev Override.`,
       );
       router.refresh();
-    } catch (err: any) {
-      setErrorMsg(err.message || "Dev override failed");
+    } catch (err) {
+      setErrorMsg(err instanceof Error ? err.message : "Dev override failed");
     } finally {
       setIsSandboxUpdating(false);
     }
   };
 
   /** Resolve the display price based on gateway selection */
-  const formatPrice = (plan: Plan): { primary: string; secondary: string | null } => {
+  const formatPrice = (
+    plan: Plan,
+  ): { primary: string; secondary: string | null } => {
     if (plan.priceUSD === 0) return { primary: "$0", secondary: null };
     if (gateway === "razorpay") {
       return {
@@ -300,7 +306,7 @@ export default function BillingView({ project }: BillingViewProps) {
           Billing Management
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Scale your project's limits. Upgrade to unlock advanced anomaly
+          Scale your project&apos;s limits. Upgrade to unlock advanced anomaly
           alerts, webhook integration channels, and team notifications.
         </p>
       </div>
@@ -321,7 +327,7 @@ export default function BillingView({ project }: BillingViewProps) {
 
       {/* Current Subscription Status */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
@@ -332,7 +338,7 @@ export default function BillingView({ project }: BillingViewProps) {
               <span
                 className={`text-2xl font-black uppercase tracking-wide ${
                   project.plan !== "free"
-                    ? "bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent"
+                    ? "bg-linear-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent"
                     : "text-white"
                 }`}
               >
@@ -361,7 +367,9 @@ export default function BillingView({ project }: BillingViewProps) {
               }`}
             />
             Status:{" "}
-            {project.subscriptionStatus === "active" ? "Active" : "None / Unpaid"}
+            {project.subscriptionStatus === "active"
+              ? "Active"
+              : "None / Unpaid"}
           </span>
         </div>
       </div>
@@ -429,7 +437,7 @@ export default function BillingView({ project }: BillingViewProps) {
             >
               {/* Badges */}
               {plan.badge && (
-                <div className="absolute top-0 right-5 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
+                <div className="absolute top-0 right-5 -translate-y-1/2 bg-linear-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
                   {plan.badge}
                 </div>
               )}
@@ -460,7 +468,9 @@ export default function BillingView({ project }: BillingViewProps) {
                     <span className="text-3xl font-extrabold text-white">
                       {price.primary}
                     </span>
-                    <span className="text-slate-500 text-[11px] font-medium">/ mo</span>
+                    <span className="text-slate-500 text-[11px] font-medium">
+                      / mo
+                    </span>
                   </div>
                   {price.secondary && (
                     <span className="text-[10px] text-slate-600 mt-0.5 block">
@@ -475,7 +485,9 @@ export default function BillingView({ project }: BillingViewProps) {
                     <li
                       key={i}
                       className={`flex items-start gap-2 text-[12px] leading-relaxed ${
-                        feature.included ? "text-slate-300" : "text-slate-600 line-through"
+                        feature.included
+                          ? "text-slate-300"
+                          : "text-slate-600 line-through"
                       }`}
                     >
                       <Check
@@ -534,11 +546,15 @@ export default function BillingView({ project }: BillingViewProps) {
       {/* Expansion Revenue Info */}
       <div className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5">
         <p className="text-[11px] text-slate-500 leading-relaxed">
-          <span className="text-slate-400 font-semibold">Usage-based add-ons:</span>{" "}
-          Log overages at <span className="text-slate-300">$0.10/GB</span> above plan limit ·
-          Additional AI analysis credits at <span className="text-slate-300">$20 / 100 credits</span> ·
-          Extra seats at <span className="text-slate-300">$30/seat/mo</span> ·{" "}
-          <span className="text-indigo-400 font-semibold">20% off</span> with annual billing.
+          <span className="text-slate-400 font-semibold">
+            Usage-based add-ons:
+          </span>{" "}
+          Log overages at <span className="text-slate-300">$0.10/GB</span> above
+          plan limit · Additional AI analysis credits at{" "}
+          <span className="text-slate-300">$20 / 100 credits</span> · Extra
+          seats at <span className="text-slate-300">$30/seat/mo</span> ·{" "}
+          <span className="text-indigo-400 font-semibold">20% off</span> with
+          annual billing.
         </p>
       </div>
 

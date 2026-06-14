@@ -21,10 +21,10 @@ export default async function BillingPage({ searchParams }: PageProps) {
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string };
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string };
+  } catch {
     redirect("/");
   }
 

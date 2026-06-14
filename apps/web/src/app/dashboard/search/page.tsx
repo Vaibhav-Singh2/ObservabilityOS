@@ -3,6 +3,11 @@ import { redirect } from "next/navigation";
 import { connectToDatabase, User, Project, Service, Log } from "@repo/db";
 import jwt from "jsonwebtoken";
 import SearchView from "./SearchView";
+import { subDays } from "date-fns";
+
+function getStart24h() {
+  return subDays(new Date(), 1);
+}
 
 interface PageProps {
   searchParams: Promise<{ projectId?: string }>;
@@ -21,10 +26,10 @@ export default async function SearchPage({ searchParams }: PageProps) {
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string } & jwt.JwtPayload;
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string } & jwt.JwtPayload;
+  } catch {
     redirect("/");
   }
 
@@ -58,7 +63,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   });
 
   // Fetch default logs for the last 24h to display immediately (limit 100)
-  const start24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const start24h = getStart24h();
   const initialLogs = await Log.find({
     projectId: activeProject._id,
     timestamp: { $gte: start24h },
@@ -81,7 +86,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   }));
 
   const serializedLogs = initialLogs.map((l) => {
-    const s = l.serviceId as any;
+    const s = l.serviceId as unknown as { _id: { toString: () => string }; name: string; environment: string } | null;
     return {
       id: l._id.toString(),
       timestamp: l.timestamp.toISOString(),

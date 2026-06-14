@@ -15,14 +15,18 @@ import {
   ArrowLeft,
   Activity,
   CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+
+interface OnboardingService {
+  id: string;
+  name: string;
+  environment: string;
+}
 
 interface OnboardingViewProps {
   project: {
@@ -63,7 +67,7 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
   const [latencySloThreshold, setLatencySloThreshold] = useState(500);
   const [latencySloWindow, setLatencySloWindow] = useState(30);
 
-  const [services, setServices] = useState<any[]>([]);
+  const [services, setServices] = useState<OnboardingService[]>([]);
   const [isLoadingServices, setIsLoadingServices] = useState(false);
   const [isSavingSlos, setIsSavingSlos] = useState(false);
 
@@ -74,6 +78,19 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
     "idle" | "polling" | "success" | "error"
   >("idle");
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [prevStep, setPrevStep] = useState(step);
+  if (step !== prevStep) {
+    setPrevStep(step);
+    if (step === 4) {
+      setPollingStatus("polling");
+    } else {
+      setPollingStatus("idle");
+    }
+    if (step === 5 && services.length === 0) {
+      setIsLoadingServices(true);
+    }
+  }
 
   const endpointUrl =
     typeof window !== "undefined"
@@ -98,7 +115,6 @@ logger.info("ObservabilityOS integration successful!", {
   // Start polling when on Step 4
   useEffect(() => {
     if (step === 4) {
-      setPollingStatus("polling");
       const checkIngestion = async () => {
         try {
           const res = await fetch(
@@ -127,9 +143,6 @@ logger.info("ObservabilityOS integration successful!", {
         clearInterval(pollIntervalRef.current);
         pollIntervalRef.current = null;
       }
-      if (step !== 4) {
-        setPollingStatus("idle");
-      }
     }
 
     return () => {
@@ -143,7 +156,6 @@ logger.info("ObservabilityOS integration successful!", {
   // Fetch services when entering SLO setup step
   useEffect(() => {
     if (step === 5 && services.length === 0) {
-      setIsLoadingServices(true);
       fetch(`/api/services?projectId=${project.id}`)
         .then((res) => {
           if (!res.ok) throw new Error("Failed to fetch services");
@@ -200,7 +212,7 @@ logger.info("ObservabilityOS integration successful!", {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               projectId: project.id,
-              serviceId: targetService._id,
+              serviceId: targetService.id,
               slo: {
                 name: "Availability SLO",
                 type: "availability",
@@ -219,7 +231,7 @@ logger.info("ObservabilityOS integration successful!", {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               projectId: project.id,
-              serviceId: targetService._id,
+              serviceId: targetService.id,
               slo: {
                 name: "Latency SLO",
                 type: "latency",
@@ -341,7 +353,7 @@ logger.info("ObservabilityOS integration successful!", {
 
       {/* Steps Cards */}
       <Card className="relative overflow-hidden shadow-2xl">
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
         <CardContent className="p-6">
           {/* STEP 1: Project Identity */}
           {step === 1 && (
@@ -355,9 +367,9 @@ logger.info("ObservabilityOS integration successful!", {
                     Welcome to your new project!
                   </h2>
                   <p className="text-xs text-slate-400 leading-normal">
-                    You've successfully created{" "}
+                    You&apos;ve successfully created{" "}
                     <strong className="text-white font-semibold">
-                      "{project.name}"
+                      &quot;{project.name}&quot;
                     </strong>
                     . We have generated a unique API Ingestion Key.
                   </p>
@@ -398,7 +410,7 @@ logger.info("ObservabilityOS integration successful!", {
                   onClick={() => setStep(2)}
                   className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs"
                 >
-                  Let's get started
+                  Let&apos;s get started
                   <ArrowRight className="w-4 h-4 ml-1.5" />
                 </Button>
               </div>
@@ -543,7 +555,7 @@ logger.info("ObservabilityOS integration successful!", {
               </div>
 
               {/* Ingestion Polling Card */}
-              <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-6 flex flex-col items-center justify-center min-h-[140px] text-center shadow-lg shadow-indigo-500/10">
+              <div className="bg-slate-950 border border-indigo-500/30 rounded-xl p-6 flex flex-col items-center justify-center min-h-35 text-center shadow-lg shadow-indigo-500/10">
                 {pollingStatus === "polling" && (
                   <div className="space-y-3">
                     <RefreshCw className="w-7 h-7 text-indigo-500 animate-spin mx-auto" />
@@ -644,10 +656,10 @@ logger.info("ObservabilityOS integration successful!", {
                     Define Service Level Objectives (SLOs)
                   </h2>
                   <p className="text-xs text-slate-400 leading-normal font-sans">
-                    Set compliance targets for the ingested services. We've
+                    Set compliance targets for the ingested services. We&apos;ve
                     detected your service{" "}
                     <span className="text-white font-semibold">
-                      "{services[0]?.name || "main-api"}"
+                      &quot;{services[0]?.name || "main-api"}&quot;
                     </span>{" "}
                     in{" "}
                     <span className="text-indigo-400 font-semibold">
@@ -904,7 +916,7 @@ logger.info("ObservabilityOS integration successful!", {
                   <p className="text-xs text-slate-400 leading-normal font-sans">
                     Finally, set up alerting integrations to get instant AI
                     diagnostic summaries and SLO budget updates pushed directly
-                    to your team's communication channels.
+                    to your team&apos;s communication channels.
                   </p>
                 </div>
               </div>

@@ -88,7 +88,7 @@ export default function ProjectSelector({ projects }: ProjectSelectorProps) {
             size="sm"
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-800 text-sm font-semibold hover:bg-slate-800/80 hover:border-slate-700 transition-all duration-150 cursor-pointer"
           >
-            <span className="truncate max-w-[150px]">
+            <span className="truncate max-w-37.5">
               {activeProject ? activeProject.name : "Select Project..."}
             </span>
             <ChevronDown className="w-4 h-4 text-slate-400" />

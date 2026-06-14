@@ -10,7 +10,6 @@ import {
   Terminal,
   Sparkles,
   CheckCircle2,
-  AlertCircle,
   Clock,
   Cpu,
   ChevronDown,
@@ -30,7 +29,7 @@ interface LogItem {
   level: string;
   message: string;
   traceId: string | null;
-  metadata: any | null;
+  metadata: Record<string, unknown> | null;
 }
 
 interface IncidentDetailsProps {
@@ -222,7 +221,7 @@ export default function IncidentDetailsView({
 
       {/* Incident Header Card */}
       <div className="p-6 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-50 h-50 bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
 
         <div className="space-y-3 flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -255,15 +254,14 @@ export default function IncidentDetailsView({
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 shrink-0">
           {/* Export Post-Mortem Button */}
-          <button
-            onClick={() => {
-              window.location.href = `/api/incidents/export?projectId=${projectId}&incidentId=${incident.id}`;
-            }}
+          <a
+            href={`/api/incidents/export?projectId=${projectId}&incidentId=${incident.id}`}
+            download
             className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-900 hover:bg-slate-850 border border-slate-800 text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             Export Post-Mortem
-          </button>
+          </a>
 
           {incident.status !== "resolved" ? (
             <>
@@ -454,7 +452,7 @@ export default function IncidentDetailsView({
                   No comments posted yet. Start the discussion below.
                 </p>
               ) : (
-                <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+                <div className="space-y-4 max-h-100 overflow-y-auto pr-1">
                   {comments.map((comment) => {
                     const isAuthor = comment.user?.id === currentUser.id;
                     return (

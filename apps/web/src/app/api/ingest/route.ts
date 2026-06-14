@@ -103,7 +103,7 @@ export async function POST(request: Request) {
               name: logItem.service,
               environment: logItem.environment,
             });
-          } catch (err) {
+          } catch {
             // In case of concurrent request race conditions, retrieve the created service
             s = await Service.findOne({
               projectId: project._id,

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { connectToDatabase, Project, Service, User } from "@repo/db";
+import { connectToDatabase, Project, Service, User, Incident, Deploy, Log, Comment, Metric } from "@repo/db";
 import jwt from "jsonwebtoken";
 import { logAuditEvent } from "@/lib/audit";
 import { delCache } from "@/lib/redis";
@@ -14,10 +14,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -318,11 +318,10 @@ export async function DELETE(request: Request) {
 
     // Clean up associated resources in background or sequentially
     // In Mongoose / MongoDB Atlas, we delete documents matching the serviceId.
-    const { Incident, Deploy, Log, Comment, Metric } = require("@repo/db");
 
     // Find all incidents to clean up their comments
     const incidentDocs = await Incident.find({ serviceId: service._id });
-    const incidentIds = incidentDocs.map((inc: any) => inc._id);
+    const incidentIds = incidentDocs.map((inc: { _id: unknown }) => inc._id);
 
     await Comment.deleteMany({ incidentId: { $in: incidentIds } });
     await Incident.deleteMany({ serviceId: service._id });
@@ -332,8 +331,8 @@ export async function DELETE(request: Request) {
 
     // Write audit log
     await logAuditEvent({
-      projectId: project._id,
-      userId: user._id,
+      projectId: project._id.toString(),
+      userId: user._id.toString(),
       action: "service.delete",
       targetEntity: "service",
       targetId: serviceName,

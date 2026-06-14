@@ -13,12 +13,10 @@ import IncidentDetailsView from "./IncidentDetailsView";
 
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ projectId?: string }>;
 }
 
 export default async function IncidentDetailPage({
   params,
-  searchParams,
 }: PageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -32,10 +30,10 @@ export default async function IncidentDetailPage({
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string };
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string };
+  } catch {
     redirect("/");
   }
 
@@ -46,10 +44,8 @@ export default async function IncidentDetailPage({
   }
 
   const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
 
   const incidentId = resolvedParams.id;
-  const projectId = resolvedSearchParams.projectId;
 
   if (!incidentId) {
     redirect("/dashboard/incidents");
@@ -79,8 +75,14 @@ export default async function IncidentDetailPage({
   });
 
   // Serialize Mongoose objects
-  const serviceObj = incident.serviceId as any;
-  const deployObj = incident.deployId as any;
+  const serviceObj = incident.serviceId as unknown as { _id: { toString: () => string }; name: string; environment: string; runbookUrl?: string; troubleshootingSteps?: string };
+  const deployObj = incident.deployId as unknown as {
+    _id: { toString: () => string };
+    commitSha: string;
+    commitMessage: string;
+    branch: string;
+    deployedAt?: Date | null;
+  } | null;
 
   const serializedIncident = {
     id: incident._id.toString(),
@@ -134,7 +136,7 @@ export default async function IncidentDetailPage({
     .sort({ createdAt: 1 });
 
   const serializedComments = comments.map((c) => {
-    const u = c.userId as any;
+    const u = c.userId as unknown as { _id: { toString: () => string }; username: string; avatarUrl?: string };
     return {
       id: c._id.toString(),
       content: c.content,

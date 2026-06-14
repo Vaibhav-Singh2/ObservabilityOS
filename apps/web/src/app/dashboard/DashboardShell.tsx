@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   Activity,
@@ -17,13 +18,19 @@ import {
 } from "lucide-react";
 import ProjectSelector from "./ProjectSelector";
 
+interface ProjectItem {
+  id: string;
+  name: string;
+  apiKey: string;
+}
+
 interface DashboardShellProps {
   user: {
     username: string;
     avatarUrl: string;
     email: string;
   };
-  projects: any[];
+  projects: ProjectItem[];
   children: React.ReactNode;
 }
 
@@ -65,7 +72,7 @@ export default function DashboardShell({
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
               <Activity className="w-4 h-4 text-white" />
             </div>
-            <span className="font-semibold text-base tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            <span className="font-semibold text-base tracking-tight bg-linear-to-r from-white to-slate-400 bg-clip-text text-transparent">
               ObservabilityOS
             </span>
           </Link>
@@ -216,10 +223,13 @@ export default function DashboardShell({
         <div className="p-4 border-t border-slate-900 bg-slate-950/50">
           <div className="flex items-center gap-3 mb-4">
             {user.avatarUrl ? (
-              <img
+              <Image
                 src={user.avatarUrl}
                 alt={user.username}
+                width={36}
+                height={36}
                 className="w-9 h-9 rounded-full border border-slate-800"
+                unoptimized
               />
             ) : (
               <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold">
@@ -278,7 +288,7 @@ export default function DashboardShell({
 
         {/* Dashboard Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 relative">
-          <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-100 h-100 bg-indigo-500/5 rounded-full blur-[100px] pointer-events-none" />
           {children}
         </main>
       </div>

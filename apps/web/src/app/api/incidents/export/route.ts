@@ -25,10 +25,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -97,8 +97,13 @@ export async function GET(request: Request) {
       .sort({ createdAt: 1 });
 
     // Prepare serialization for post-mortem utility
-    const serviceObj = incident.serviceId as any;
-    const deployObj = incident.deployId as any;
+    const serviceObj = incident.serviceId as unknown as { name: string; environment: string; _id: string };
+    const deployObj = incident.deployId as unknown as {
+      commitSha: string;
+      commitMessage: string;
+      branch: string;
+      deployedAt?: Date | null;
+    } | null;
 
     const pmIncident: PostMortemIncident = {
       id: incident._id.toString(),
@@ -138,11 +143,11 @@ export async function GET(request: Request) {
       level: l.level,
       message: l.message,
       traceId: l.traceId || null,
-      metadata: l.metadata || null,
+      metadata: (l.metadata || {}) as Record<string, unknown>,
     }));
 
     const pmComments: PostMortemComment[] = comments.map((c) => {
-      const u = c.userId as any;
+      const u = c.userId as unknown as { username: string; email?: string } | null;
       return {
         content: c.content,
         createdAt: c.createdAt.toISOString(),

@@ -109,7 +109,7 @@ export async function POST(request: Request) {
               name: item.service,
               environment: item.environment,
             });
-          } catch (err) {
+          } catch {
             // Retrieve in case of concurrent creation race condition
             s = await Service.findOne({
               projectId: project._id,

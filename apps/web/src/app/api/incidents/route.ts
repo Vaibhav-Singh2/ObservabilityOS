@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { connectToDatabase, Incident, Project, User } from "@repo/db";
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
 import { delCache } from "@/lib/redis";
 
 async function getAuthenticatedUser() {
@@ -14,10 +13,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as jwt.JwtPayload & { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }

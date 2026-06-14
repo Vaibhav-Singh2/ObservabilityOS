@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, ComponentType } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   Terminal,
   Database,
@@ -12,8 +11,6 @@ import {
   AlertTriangle,
   Play,
   Loader2,
-  CheckCircle2,
-  ExternalLink,
   GitCommit,
   ArrowRight,
   Sparkles,
@@ -38,18 +35,25 @@ interface PlaygroundViewProps {
     name: string;
     apiKey: string;
   };
-  services: Array<{
-    id: string;
-    name: string;
-    environment: string;
-  }>;
+}
+
+interface ResultIncident {
+  id: string;
+  title: string;
+  summary: string;
+  rootCause: string;
+  impact: string;
+  suggestedFix: string[];
+  confidence: number;
+  status: string;
+  createdAt: string;
 }
 
 interface Scenario {
   id: string;
   title: string;
   description: string;
-  icon: any;
+  icon: ComponentType<{ className?: string }>;
   defaultService: string;
   color: string;
   borderColor: string;
@@ -58,9 +62,7 @@ interface Scenario {
 
 export default function PlaygroundView({
   project,
-  services,
 }: PlaygroundViewProps) {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<"setup" | "simulating" | "result">(
     "setup",
   );
@@ -77,7 +79,7 @@ export default function PlaygroundView({
   // Console logging state
   const [consoleLogs, setConsoleLogs] = useState<string[]>([]);
   const [isSimulating, setIsSimulating] = useState<boolean>(false);
-  const [resultIncident, setResultIncident] = useState<any>(null);
+  const [resultIncident, setResultIncident] = useState<ResultIncident | null>(null);
   const [errorText, setErrorText] = useState<string>("");
 
   const scenarios: Scenario[] = [
@@ -149,13 +151,14 @@ export default function PlaygroundView({
     },
   ];
 
-  // Update default service name when scenario changes
-  useEffect(() => {
+  const [prevSelectedScenario, setPrevSelectedScenario] = useState(selectedScenario);
+  if (selectedScenario !== prevSelectedScenario) {
+    setPrevSelectedScenario(selectedScenario);
     const sc = scenarios.find((s) => s.id === selectedScenario);
     if (sc) {
       setServiceName(sc.defaultService);
     }
-  }, [selectedScenario]);
+  }
 
   const handleStartSimulation = async () => {
     setIsSimulating(true);
@@ -248,10 +251,10 @@ export default function PlaygroundView({
         await new Promise((r) => setTimeout(r, 1000));
         setActiveTab("setup");
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       setErrorText(
-        err.message || "An unexpected error occurred during simulation.",
+        err instanceof Error ? err.message : "An unexpected error occurred during simulation.",
       );
       setActiveTab("setup");
     } finally {
@@ -259,7 +262,6 @@ export default function PlaygroundView({
     }
   };
 
-  const currentScenario = scenarios.find((s) => s.id === selectedScenario);
 
   return (
     <div className="space-y-6 max-w-6xl">
@@ -285,7 +287,7 @@ export default function PlaygroundView({
         <div className="lg:col-span-2 space-y-6">
           {/* Preset Scenarios Grid */}
           <Card className="border-slate-900 bg-slate-950/40 backdrop-blur-sm relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
                 1. Select Preset Scenario
@@ -371,7 +373,7 @@ export default function PlaygroundView({
                   <select
                     id="env_select"
                     value={environment}
-                    onChange={(e) => setEnvironment(e.target.value as any)}
+                    onChange={(e) => setEnvironment(e.target.value as "prod" | "staging" | "dev")}
                     disabled={isSimulating}
                     className="flex h-10 w-full rounded-md border border-slate-800 bg-slate-900/60 px-3 py-2 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
                   >
@@ -478,7 +480,7 @@ export default function PlaygroundView({
         {/* Right Column: Log Console & Results */}
         <div className="space-y-6">
           {/* Console / Log Terminal */}
-          <Card className="border-slate-900 bg-slate-950/40 backdrop-blur-sm h-full flex flex-col min-h-[400px]">
+          <Card className="border-slate-900 bg-slate-950/40 backdrop-blur-sm h-full flex flex-col min-h-100">
             <CardHeader className="pb-3 border-b border-slate-900">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -495,7 +497,7 @@ export default function PlaygroundView({
                 )}
               </div>
             </CardHeader>
-            <CardContent className="flex-1 p-4 bg-black/40 font-mono text-[11px] leading-relaxed overflow-y-auto space-y-2 select-text max-h-[480px]">
+            <CardContent className="flex-1 p-4 bg-black/40 font-mono text-[11px] leading-relaxed overflow-y-auto space-y-2 select-text max-h-120">
               {consoleLogs.length === 0 ? (
                 <div className="text-slate-600 h-full flex flex-col items-center justify-center py-12 text-center space-y-2">
                   <Terminal className="w-8 h-8 opacity-25" />
@@ -507,11 +509,11 @@ export default function PlaygroundView({
                 </div>
               ) : (
                 consoleLogs.map((log, i) => {
-                  let isSuccess =
+                  const isSuccess =
                     log.includes("PERSISTED") ||
                     log.includes("successfully") ||
                     log.includes("complete");
-                  let isAnomaly =
+                  const isAnomaly =
                     log.includes("anomaly") || log.includes("exceeds");
                   return (
                     <div
@@ -537,7 +539,7 @@ export default function PlaygroundView({
       {/* Incident Result Modal/Details */}
       {resultIncident && activeTab === "result" && (
         <Card className="border-emerald-500/30 bg-slate-950/70 backdrop-blur-md relative overflow-hidden ring-1 ring-emerald-500/10 mt-6">
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 to-transparent pointer-events-none" />
 
           <CardHeader className="border-b border-slate-900 pb-4">
             <div className="flex flex-wrap items-center justify-between gap-4">

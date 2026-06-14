@@ -20,7 +20,7 @@ export default async function LandingPage() {
       try {
         jwt.verify(token, jwtSecret);
         isLoggedIn = true;
-      } catch (e) {
+      } catch {
         // Invalid token
       }
     }
@@ -29,8 +29,8 @@ export default async function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white font-sans overflow-hidden">
       {/* Background gradients for premium aesthetic */}
-      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-125 h-125 bg-indigo-500/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-150 h-150 bg-emerald-500/5 rounded-full blur-[150px] pointer-events-none" />
 
       {/* Header */}
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/75 border-b border-slate-900">
@@ -39,7 +39,7 @@ export default async function LandingPage() {
             <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <Activity className="w-4 h-4 text-white" />
             </div>
-            <span className="font-semibold text-lg tracking-tight bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            <span className="font-semibold text-lg tracking-tight bg-linear-to-r from-white to-slate-400 bg-clip-text text-transparent">
               ObservabilityOS
             </span>
           </div>
@@ -76,7 +76,7 @@ export default async function LandingPage() {
             AI-Native Observability
           </div>
 
-          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 bg-gradient-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight leading-[1.1] mb-6 bg-linear-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
             Go from raw logs to AI post-mortems in seconds.
           </h1>
 
@@ -88,7 +88,7 @@ export default async function LandingPage() {
 
           {/* Call to Action Card */}
           <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-8 backdrop-blur-sm max-w-md w-full shadow-2xl relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-2xl pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent rounded-2xl pointer-events-none" />
             <h2 className="text-xl font-bold text-slate-200 mb-2">
               {isLoggedIn ? "Welcome Back" : "Get Started Free"}
             </h2>
@@ -195,4 +195,3 @@ export default async function LandingPage() {
     </div>
   );
 }
-

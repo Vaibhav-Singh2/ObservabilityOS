@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { format, formatDistanceToNow } from "date-fns";
 import { useRouter } from "next/navigation";
 import {
   Copy,
@@ -39,7 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface SerializedService {
+export interface SerializedService {
   id: string;
   name: string;
   environment: "prod" | "staging" | "dev";
@@ -51,7 +52,7 @@ interface SerializedService {
   healthStatus: "healthy" | "warning" | "incident";
 }
 
-interface SerializedDeployment {
+export interface SerializedDeployment {
   id: string;
   serviceId: string;
   serviceName: string;
@@ -73,29 +74,27 @@ interface ProjectDashboardViewProps {
 }
 
 function formatDate(dateString: string) {
-  const d = new Date(dateString);
-  if (isNaN(d.getTime())) return "N/A";
-  const year = d.getFullYear();
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "N/A";
+    return format(d, "yyyy-MM-dd");
+  } catch {
+    return "N/A";
+  }
 }
 
 function timeAgo(dateString: string | null) {
   if (!dateString) return "N/A";
-  const d = new Date(dateString);
-  if (isNaN(d.getTime())) return "N/A";
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMins = Math.floor(diffMs / (60 * 1000));
-  const diffHours = Math.floor(diffMs / (60 * 60 * 1000));
-  const diffDays = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-
-  if (diffMins < 1) return "just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  return `${diffDays}d ago`;
+  try {
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "N/A";
+    return formatDistanceToNow(d, { addSuffix: true });
+  } catch {
+    return "N/A";
+  }
 }
+
+const subscribe = () => () => {};
 
 export default function ProjectDashboardView({
   project,
@@ -103,12 +102,12 @@ export default function ProjectDashboardView({
   deployments = [],
 }: ProjectDashboardViewProps) {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    subscribe,
+    () => true,
+    () => false
+  );
   const [showKey, setShowKey] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,7 +184,7 @@ export default function ProjectDashboardView({
 
           {/* Credentials Card */}
           <Card className="relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
             <CardHeader className="pb-4">
               <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
                 Ingestion Configuration
@@ -266,7 +265,7 @@ export default function ProjectDashboardView({
           <CardContent className="pt-4 flex-1 flex flex-col justify-between">
             <Tabs
               value={sdkTab}
-              onValueChange={(val) => setSdkTab(val as any)}
+              onValueChange={(val) => setSdkTab(val as "basic" | "multi" | "deploy")}
               className="w-full"
             >
               <TabsList className="grid w-full grid-cols-3 mb-4">
@@ -444,7 +443,7 @@ curl -X POST "${endpointUrl.replace("/api/ingest", "/api/webhooks/github")}" \\
                             className={`relative inline-flex rounded-full h-2 w-2 ${health.bg}`}
                           />
                         </span>
-                        <h3 className="text-sm font-bold text-white truncate max-w-[130px] group-hover:text-indigo-400 transition-colors">
+                        <h3 className="text-sm font-bold text-white truncate max-w-32.5 group-hover:text-indigo-400 transition-colors">
                           {service.name}
                         </h3>
                       </div>
@@ -640,7 +639,9 @@ curl -X POST "${endpointUrl.replace("/api/ingest", "/api/webhooks/github")}" \\
                       </TableCell>
                       <TableCell className="py-3.5 px-4 text-right text-slate-400 font-medium">
                         <div className="flex flex-col items-end font-sans">
-                          <span>{isMounted ? timeAgo(deploy.deployedAt) : "—"}</span>
+                          <span>
+                            {isMounted ? timeAgo(deploy.deployedAt) : "—"}
+                          </span>
                           <span className="text-[10px] text-slate-500 font-normal">
                             {isMounted && deploy.deployedAt
                               ? new Date(deploy.deployedAt).toLocaleTimeString(
@@ -693,7 +694,7 @@ curl -X POST "${endpointUrl.replace("/api/ingest", "/api/webhooks/github")}" \\
                       type="button"
                       variant={environment === env ? "default" : "secondary"}
                       size="sm"
-                      onClick={() => setEnvironment(env as any)}
+                      onClick={() => setEnvironment(env as "prod" | "staging" | "dev")}
                       className="capitalize"
                     >
                       {env}

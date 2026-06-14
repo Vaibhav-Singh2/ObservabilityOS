@@ -28,10 +28,10 @@ export async function GET() {
       );
     }
 
-    let decoded: any;
+    let decoded: { userId: string };
     try {
-      decoded = jwt.verify(token, jwtSecret);
-    } catch (e) {
+      decoded = jwt.verify(token, jwtSecret) as { userId: string };
+    } catch {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Invalid session" } },
         { status: 401 },

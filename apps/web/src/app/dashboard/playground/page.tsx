@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Service } from "@repo/db";
+import { connectToDatabase, User, Project } from "@repo/db";
 import jwt from "jsonwebtoken";
 import PlaygroundView from "./PlaygroundView";
 
@@ -21,10 +21,10 @@ export default async function PlaygroundPage({ searchParams }: PageProps) {
     redirect("/");
   }
 
-  let decoded: any;
+  let decoded: { userId: string };
   try {
-    decoded = jwt.verify(token, jwtSecret);
-  } catch (e) {
+    decoded = jwt.verify(token, jwtSecret) as { userId: string };
+  } catch {
     redirect("/");
   }
 
@@ -52,24 +52,13 @@ export default async function PlaygroundPage({ searchParams }: PageProps) {
     redirect("/dashboard");
   }
 
-  const services = await Service.find({ projectId: activeProject._id }).sort({
-    name: 1,
-    environment: 1,
-  });
-
   const serializedProject = {
     id: activeProject._id.toString(),
     name: activeProject.name,
     apiKey: activeProject.apiKey,
   };
 
-  const serializedServices = services.map((s) => ({
-    id: s._id.toString(),
-    name: s.name,
-    environment: s.environment,
-  }));
-
   return (
-    <PlaygroundView project={serializedProject} services={serializedServices} />
+    <PlaygroundView project={serializedProject} />
   );
 }

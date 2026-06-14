@@ -2,8 +2,15 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { connectToDatabase, Project, Service, Metric, User } from "@repo/db";
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
 import { getCache, setCache } from "@/lib/redis";
+
+interface MetricDataPoint {
+  timestamp: string;
+  cpu: number;
+  memory: number;
+  memoryLimit: number;
+  latency: number;
+}
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -14,10 +21,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as jwt.JwtPayload & { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -97,7 +104,7 @@ export async function GET(request: Request) {
     }
 
     const cacheKey = `metrics:query:${project._id.toString()}:${service._id.toString()}:${timeRange}`;
-    const cachedData = await getCache<any[]>(cacheKey);
+    const cachedData = await getCache<MetricDataPoint[]>(cacheKey);
     if (cachedData) {
       return NextResponse.json({ metrics: cachedData });
     }

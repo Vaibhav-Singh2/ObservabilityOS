@@ -58,6 +58,33 @@ interface SerializedIncident {
   } | null;
 }
 
+interface RawIncident {
+  _id: string;
+  title: string;
+  summary: string;
+  rootCause: string;
+  impact: string;
+  suggestedFix: string[];
+  confidence: number;
+  status: "open" | "investigating" | "resolved";
+  createdAt: string;
+  updatedAt: string;
+  resolvedAt?: string | null;
+  ttd: number;
+  ttr?: number | null;
+  serviceId?: {
+    _id: string;
+    name: string;
+    environment: string;
+  } | null;
+  deployId?: {
+    _id: string;
+    commitSha: string;
+    commitMessage: string;
+    branch: string;
+  } | null;
+}
+
 interface IncidentsViewProps {
   project: {
     id: string;
@@ -87,7 +114,7 @@ export default function IncidentsView({
       const res = await fetch(`/api/incidents?projectId=${project.id}`);
       if (res.ok) {
         const data = await res.json();
-        const formattedIncidents = data.incidents.map((inc: any) => {
+        const formattedIncidents = data.incidents.map((inc: RawIncident) => {
           return {
             id: inc._id.toString(),
             title: inc.title,
@@ -259,8 +286,8 @@ export default function IncidentsView({
 
       {/* Incidents List */}
       {filteredIncidents.length === 0 ? (
-        <Card className="relative overflow-hidden border-dashed py-12 text-center flex flex-col items-center justify-center min-h-[300px]">
-          <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none" />
+        <Card className="relative overflow-hidden border-dashed py-12 text-center flex flex-col items-center justify-center min-h-75">
+          <div className="absolute inset-0 bg-linear-to-b from-indigo-500/5 to-transparent pointer-events-none" />
           <CardContent className="flex flex-col items-center">
             <div className="w-12 h-12 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-center mb-4 text-slate-500 shadow-inner">
               <CheckCircle2 className="w-6 h-6 text-indigo-500/60" />

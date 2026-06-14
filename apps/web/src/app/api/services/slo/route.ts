@@ -14,10 +14,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -114,8 +114,8 @@ export async function POST(request: Request) {
     await service.save();
 
     await logAuditEvent({
-      projectId: project._id,
-      userId: user._id,
+      projectId: project._id.toString(),
+      userId: user._id.toString(),
       action,
       targetEntity: "slo",
       targetId: slo.name,
@@ -226,8 +226,8 @@ export async function DELETE(request: Request) {
     await service.save();
 
     await logAuditEvent({
-      projectId: project._id,
-      userId: user._id,
+      projectId: project._id.toString(),
+      userId: user._id.toString(),
       action: "slo.delete",
       targetEntity: "slo",
       targetId: sloName,

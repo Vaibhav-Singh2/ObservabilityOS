@@ -11,8 +11,10 @@ import { Types } from "mongoose";
 import { dispatchMultiChannelIncidentAlert } from "./alerts";
 import { delCache } from "./redis";
 
+import type { Queue } from "bullmq";
+
 // Setup queue and worker dependencies dynamically to avoid crash if ioredis fails to connect.
-let queue: any = null;
+let queue: Queue | null = null;
 
 const REDIS_URL = process.env.REDIS_URL;
 

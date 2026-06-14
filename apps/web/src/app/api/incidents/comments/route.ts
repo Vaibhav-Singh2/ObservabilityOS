@@ -13,10 +13,10 @@ async function getAuthenticatedUser() {
   if (!jwtSecret) return null;
 
   try {
-    const decoded: any = jwt.verify(token, jwtSecret);
+    const decoded = jwt.verify(token, jwtSecret) as { userId: string };
     await connectToDatabase();
     return await User.findById(decoded.userId);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -91,7 +91,12 @@ export async function POST(request: Request) {
       throw new Error("Failed to retrieve created comment");
     }
 
-    const u = populated.userId as any;
+    const u = populated.userId as unknown as {
+      _id: { toString: () => string };
+      username: string;
+      email?: string | null;
+      avatarUrl?: string | null;
+    } | null;
     const serializedComment = {
       id: populated._id.toString(),
       incidentId: populated.incidentId.toString(),

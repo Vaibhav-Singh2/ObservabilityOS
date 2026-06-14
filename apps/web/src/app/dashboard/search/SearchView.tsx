@@ -20,7 +20,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -49,7 +48,7 @@ interface SerializedLog {
   level: "error" | "warn" | "info" | "debug";
   message: string;
   traceId: string | null;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
   service: {
     id: string;
     name: string;
@@ -143,7 +142,7 @@ export default function SearchView({
     setExpandedLogId(expandedLogId === logId ? null : logId);
   };
 
-  const handleCopyMetadata = (logId: string, metadata: any) => {
+  const handleCopyMetadata = (logId: string, metadata: Record<string, unknown>) => {
     navigator.clipboard.writeText(JSON.stringify(metadata, null, 2));
     setCopiedLogId(logId);
     setTimeout(() => setCopiedLogId(null), 2000);
@@ -233,14 +232,12 @@ export default function SearchView({
       timeRange,
       format,
     });
-    window.location.href = `/api/logs/export?${params.toString()}`;
-  };
-
-  const levelStyles = {
-    error: "bg-rose-500/10 border-rose-500/20 text-rose-400" as const,
-    warn: "bg-amber-500/10 border-amber-500/20 text-amber-400" as const,
-    info: "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" as const,
-    debug: "bg-slate-500/10 border-slate-500/20 text-slate-400" as const,
+    const link = document.createElement("a");
+    link.href = `/api/logs/export?${params.toString()}`;
+    link.setAttribute("download", "");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -294,10 +291,10 @@ export default function SearchView({
             <Badge variant="secondary">{savedQueries.length}</Badge>
           </div>
 
-          <div className="space-y-2 max-h-[300px] lg:max-h-[500px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-75 lg:max-h-125 overflow-y-auto pr-1">
             {savedQueries.length === 0 ? (
               <p className="text-xs text-slate-600 italic py-4 text-center">
-                No saved searches yet. Run a query and click "Save Search" to
+                No saved searches yet. Run a query and click &quot;Save Search&quot; to
                 list here.
               </p>
             ) : (
@@ -704,7 +701,7 @@ export default function SearchView({
                 </span>
                 {query.trim() && (
                   <div>
-                    <span className="text-slate-650">Query:</span> "{query}"
+                    <span className="text-slate-650">Query:</span> &quot;{query}&quot;
                   </div>
                 )}
                 <div>
