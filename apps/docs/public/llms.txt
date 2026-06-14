@@ -1,0 +1,32 @@
+# ObservabilityOS Documentation Index (llms.txt)
+
+Welcome to the LLM-readable structured directory for the ObservabilityOS developer documentation. Use this index to locate APIs, installation instructions, and architectural layouts.
+
+## Navigation Structure
+
+The documentation is grouped into the following categories and logical slugs:
+
+### 1. Getting Started
+- **Introduction** (`/docs/introduction`): Overview of the ObservabilityOS DevOps Intelligence Platform. Matches `README.md`.
+- **Quick Start** (`/docs/quickstart`): 5-minute setup guide to get MongoDB, Redis, and log ingestion running.
+- **Installation** (`/docs/installation`): System specifications, local environment variables, and production build targets.
+- **Local Development** (`/docs/development`): Running monorepo workspace scripts, tests, and debugging sandboxes.
+
+### 2. Core Architecture
+- **System Architecture** (`/docs/architecture`): Data topology, local scrubbing sidecar loops, and standard-deviation calculations.
+- **Database Schemas** (`/docs/database`): MongoDB Mongoose schemas (Logs, Projects, Users, Incidents) and Redis caching models.
+- **Security Policy** (`/docs/security`): PII redaction engine mechanics (scrubber.ts), API key rotation, and rate-limiting.
+
+### 3. Reference Guides
+- **API Specification** (`/docs/api`): Query endpoints, authentication headers, JSON structures, and log post parameters.
+- **Production Deployment** (`/docs/deployment`): Docker Compose configurations, Kubernetes, PM2, and health check routes.
+- **Troubleshooting** (`/docs/troubleshooting`): Hydration mismatches, database connect errors, and clock offset adjustments.
+- **Technical FAQ** (`/docs/faq`): Common queries about OpenTelemetry, Anthropic/OpenAI keys, and local data compliance.
+
+### 4. Community & Releases
+- **Contributing Guide** (`/docs/contributing`): Standard Conventional Commits rules, PR checklists, and developer setup.
+- **Product Roadmap** (`/docs/roadmap`): Current engineering milestones and future roadmap features.
+- **Release Changelog** (`/docs/changelog`): Historical release notes, features completed, and visual modifications.
+
+---
+For dynamic sitemaps of all documentation, fetch the raw sitemap XML at: `https://docs.observabilityos.com/sitemap.xml`.

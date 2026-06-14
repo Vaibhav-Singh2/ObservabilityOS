@@ -54,15 +54,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: "Not Found",
     };
   }
+
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
   
   return {
     title: doc.title,
     description: doc.description,
+    alternates: {
+      canonical: `${baseUrl}/docs/${doc.slug}`,
+    },
     openGraph: {
       title: `${doc.title} | ObservabilityOS Docs`,
       description: doc.description,
-      url: `http://localhost:3001/docs/${doc.slug}`,
+      url: `${baseUrl}/docs/${doc.slug}`,
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${doc.title} | ObservabilityOS Docs`,
+      description: doc.description,
+    }
   };
 }
 
@@ -92,9 +102,64 @@ export default async function Page({ params }: PageProps) {
   const githubEditUrl = `https://github.com/Vaibhav-Singh2/ObservabilityOS/edit/main/${repoFilePath}`;
 
   const searchIndex = getAllDocsForSearch();
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Docs",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": doc.category,
+        "item": `${baseUrl}/docs/${doc.slug}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": doc.title,
+        "item": `${baseUrl}/docs/${doc.slug}`
+      }
+    ]
+  };
+
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": doc.title,
+    "description": doc.description,
+    "inLanguage": "en-US",
+    "mainEntityOfPage": `${baseUrl}/docs/${doc.slug}`,
+    "publisher": {
+      "@type": "Organization",
+      "name": "ObservabilityOS",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `https://observabilityos.com/favicon.ico`
+      }
+    },
+    "author": {
+      "@type": "Organization",
+      "name": "ObservabilityOS Dev Team"
+    }
+  };
 
   return (
     <DocsLayoutClient searchIndex={searchIndex}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       {/* Grid columns: Center Content and Right TOC */}
       <div className="flex flex-col lg:flex-row gap-10 w-full relative">
         

@@ -1,21 +1,40 @@
 import "./globals.css";
 import type { Metadata } from "next";
 
+const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(baseUrl),
   title: {
     template: "%s | ObservabilityOS Docs",
     default: "ObservabilityOS Documentation",
   },
   description:
     "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
-  metadataBase: new URL("http://localhost:3001"),
+  keywords: [
+    "observability documentation",
+    "OpenTelemetry setup",
+    "AI incident response guide",
+    "telemetry SDK API",
+    "DevOps guides",
+    "ObservabilityOS docs"
+  ],
+  alternates: {
+    canonical: "./",
+  },
   openGraph: {
     title: "ObservabilityOS Documentation",
-    description: "Developer guides, architectural specifications, and API references.",
-    url: "http://localhost:3001/docs",
+    description: "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
+    url: baseUrl,
     siteName: "ObservabilityOS",
     locale: "en_US",
     type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ObservabilityOS Documentation",
+    description: "Developer guides, architectural specifications, and API references for the ObservabilityOS AI-native telemetry platform.",
+    creator: "@observabilityos",
   },
   robots: {
     index: true,
