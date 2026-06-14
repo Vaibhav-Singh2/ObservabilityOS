@@ -260,7 +260,7 @@ export default function DocsLayoutClient({ children, searchIndex }: DocsLayoutCl
         onSearchOpen={() => setSearchOpen(true)}
       />
 
-      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 overflow-hidden px-4 sm:px-6">
+      <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 overflow-hidden px-4 sm:px-6">
         {/* Navigation Sidebar */}
         <DocsSidebar 
           isOpen={sidebarOpen} 

@@ -264,6 +264,38 @@ export default async function Page({ params }: PageProps) {
             <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">{doc.description}</p>
           </header>
 
+          {/* Mobile Collapsible Table of Contents */}
+          {doc.headings.length > 0 && (
+            <div className="xl:hidden mb-8 border border-slate-900 bg-slate-950/40 rounded-xl p-4">
+              <details className="group">
+                <summary className="text-xs font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center justify-between cursor-pointer list-none select-none">
+                  <span className="flex items-center gap-1.5">
+                    <Hash className="w-3.5 h-3.5 text-slate-500" />
+                    On this page
+                  </span>
+                  <span className="text-slate-500 transition-transform group-open:rotate-90">
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
+                </summary>
+                <ul className="mt-3.5 space-y-2.5 text-xs font-semibold text-slate-400 border-t border-slate-900/60 pt-3.5">
+                  {doc.headings.map((heading, idx) => (
+                    <li 
+                      key={idx}
+                      className={heading.level === 3 ? "pl-3.5 border-l border-slate-900" : ""}
+                    >
+                      <Link
+                        href={`#${heading.id}`}
+                        className="hover:text-indigo-400 transition-all block truncate"
+                      >
+                        {heading.text}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            </div>
+          )}
+
           {/* Markdown compiled HTML */}
           <article className="prose prose-slate prose-invert max-w-none">
             <div dangerouslySetInnerHTML={{ __html: htmlContent }} />

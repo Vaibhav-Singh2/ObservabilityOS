@@ -86,7 +86,7 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden selection:bg-indigo-500 selection:text-white">
+    <div className="flex flex-col min-h-screen bg-slate-950 text-slate-100 overflow-x-hidden relative selection:bg-indigo-500 selection:text-white">
       {/* Background Decorative Gradients & Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] pointer-events-none opacity-40 z-0 h-[600px]" />
       
@@ -98,6 +98,7 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
         sidebarOpen={false} 
         setSidebarOpen={() => {}} 
         onSearchOpen={() => setSearchOpen(true)} 
+        hideMobileMenuTrigger={true}
       />
 
       {/* Hero Section */}
