@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Copy,
@@ -103,7 +103,12 @@ export default function ProjectDashboardView({
   deployments = [],
 }: ProjectDashboardViewProps) {
   const router = useRouter();
+  const [isMounted, setIsMounted] = useState(false);
   const [showKey, setShowKey] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   const [copiedKey, setCopiedKey] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -635,9 +640,9 @@ curl -X POST "${endpointUrl.replace("/api/ingest", "/api/webhooks/github")}" \\
                       </TableCell>
                       <TableCell className="py-3.5 px-4 text-right text-slate-400 font-medium">
                         <div className="flex flex-col items-end font-sans">
-                          <span>{timeAgo(deploy.deployedAt)}</span>
+                          <span>{isMounted ? timeAgo(deploy.deployedAt) : "—"}</span>
                           <span className="text-[10px] text-slate-500 font-normal">
-                            {deploy.deployedAt
+                            {isMounted && deploy.deployedAt
                               ? new Date(deploy.deployedAt).toLocaleTimeString(
                                   [],
                                   { hour: "2-digit", minute: "2-digit" },
