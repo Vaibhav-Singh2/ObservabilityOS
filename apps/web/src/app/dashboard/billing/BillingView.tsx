@@ -5,13 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   CreditCard,
   Check,
-  HelpCircle,
   Sparkles,
   ArrowRight,
   ShieldCheck,
   Zap,
   AlertCircle,
-  TrendingUp,
   Cpu,
   Globe2,
   DollarSign,
@@ -26,6 +24,100 @@ interface BillingViewProps {
     billingProvider: string;
   };
 }
+
+interface PlanFeature {
+  text: string;
+  included: boolean;
+}
+
+interface Plan {
+  id: string;
+  name: string;
+  priceUSD: number;
+  priceINR: number;
+  description: string;
+  badge?: string;
+  features: PlanFeature[];
+  backendPlan: string;
+  available: boolean;
+}
+
+const PLANS: Plan[] = [
+  {
+    id: "free",
+    name: "Free Developer",
+    priceUSD: 0,
+    priceINR: 0,
+    description: "Side projects & local testing.",
+    features: [
+      { text: "1 service monitored", included: true },
+      { text: "500MB logs / month", included: true },
+      { text: "7-day data retention", included: true },
+      { text: "Basic statistical anomaly checking", included: true },
+      { text: "Multi-channel alerts (Slack, Discord, Teams)", included: false },
+      { text: "AI incident root cause analysis", included: false },
+    ],
+    backendPlan: "free",
+    available: true,
+  },
+  {
+    id: "starter",
+    name: "Starter",
+    priceUSD: 29,
+    priceINR: 2499,
+    description: "Solo founders & small teams in production.",
+    badge: "Most Popular",
+    features: [
+      { text: "Up to 5 services monitored", included: true },
+      { text: "5GB logs / month", included: true },
+      { text: "30-day secure data retention", included: true },
+      { text: "Instant alerts (Slack, Discord, Teams)", included: true },
+      { text: "AI SRE Analyst — incident diagnostics", included: true },
+      { text: "1 team member seat", included: true },
+    ],
+    backendPlan: "pro",
+    available: true,
+  },
+  {
+    id: "team",
+    name: "Team",
+    priceUSD: 99,
+    priceINR: 7999,
+    description: "Growing engineering teams with production complexity.",
+    features: [
+      { text: "Unlimited services", included: true },
+      { text: "20GB logs / month", included: true },
+      { text: "30-day log retention", included: true },
+      { text: "Advanced AI root cause analysis", included: true },
+      { text: "GitHub + Jira + PagerDuty integrations", included: true },
+      { text: "Up to 10 team members", included: true },
+      { text: "SLO/SLA tracking + AI post-mortems", included: true },
+      { text: "Priority support", included: true },
+    ],
+    backendPlan: "team",
+    available: false,
+  },
+  {
+    id: "scale",
+    name: "Scale",
+    priceUSD: 299,
+    priceINR: 24999,
+    description: "Series A+ companies with compliance & security needs.",
+    features: [
+      { text: "Everything in Team", included: true },
+      { text: "100GB logs / month", included: true },
+      { text: "90-day retention", included: true },
+      { text: "Unlimited team members", included: true },
+      { text: "SAML SSO + SOC2 audit log exports", included: true },
+      { text: "Custom AI model fine-tuning", included: true },
+      { text: "SLA guarantee + Dedicated Slack support", included: true },
+    ],
+    backendPlan: "scale",
+    available: false,
+  },
+];
+
+const PLAN_ORDER = ["free", "starter", "team", "scale"];
 
 export default function BillingView({ project }: BillingViewProps) {
   const router = useRouter();
@@ -83,16 +175,10 @@ export default function BillingView({ project }: BillingViewProps) {
       }
 
       if (gateway === "stripe") {
-        if (data.isMock) {
-          // Redirect to the mock callback url
-          window.location.href = data.url;
-        } else {
-          window.location.href = data.url;
-        }
+        window.location.href = data.url;
       } else {
         // Razorpay checkout flow
         if (data.isMock) {
-          // Simulate the popup & automatically trigger manual override upgrade for local developer convenience
           setSuccessMsg(
             "Initiating Mock Razorpay Checkout... (Upgrading account in sandbox mode)",
           );
@@ -112,23 +198,16 @@ export default function BillingView({ project }: BillingViewProps) {
             currency: data.currency,
             name: data.name,
             description: data.description,
-            handler: async function (response: any) {
+            handler: async function (_response: unknown) {
               setSuccessMsg(
                 "Razorpay authorization approved! Reloading settings...",
               );
-              // We'll update the plan manually or reload to fetch webhook result
-              // Wait 1.5 seconds then reload
               setTimeout(() => {
                 window.location.href = `/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`;
               }, 1500);
             },
-            prefill: {
-              name: "",
-              email: "",
-            },
-            theme: {
-              color: "#4f46e5",
-            },
+            prefill: { name: "", email: "" },
+            theme: { color: "#4f46e5" },
           };
 
           const rzp = new (window as any).Razorpay(options);
@@ -178,13 +257,44 @@ export default function BillingView({ project }: BillingViewProps) {
     }
   };
 
+  /** Resolve the display price based on gateway selection */
+  const formatPrice = (plan: Plan): { primary: string; secondary: string | null } => {
+    if (plan.priceUSD === 0) return { primary: "$0", secondary: null };
+    if (gateway === "razorpay") {
+      return {
+        primary: `₹${plan.priceINR.toLocaleString("en-IN")}`,
+        secondary: `$${plan.priceUSD} USD`,
+      };
+    }
+    return { primary: `$${plan.priceUSD}`, secondary: null };
+  };
+
+  /** Map backend plan name to our UI plan id */
+  const currentPlanId = (): string => {
+    if (project.plan === "pro") return "starter";
+    return project.plan; // "free" | "team" | "scale"
+  };
+
+  const isCurrentPlan = (plan: Plan) => plan.id === currentPlanId();
+
+  const isUpgrade = (plan: Plan) => {
+    const currentIndex = PLAN_ORDER.indexOf(currentPlanId());
+    return PLAN_ORDER.indexOf(plan.id) > currentIndex;
+  };
+
+  const currentDisplayName = () => {
+    if (project.plan === "pro") return "Starter";
+    if (project.plan === "free") return "Free Tier";
+    return project.plan.charAt(0).toUpperCase() + project.plan.slice(1);
+  };
+
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="space-y-8 max-w-6xl">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 text-indigo-400 text-xs font-bold uppercase tracking-widest mb-1.5">
           <CreditCard className="w-3.5 h-3.5" />
-          Subscription & Plans
+          Subscription &amp; Plans
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
           Billing Management
@@ -212,7 +322,6 @@ export default function BillingView({ project }: BillingViewProps) {
       {/* Current Subscription Status */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
@@ -222,228 +331,215 @@ export default function BillingView({ project }: BillingViewProps) {
               <span className="text-lg text-slate-350">Current Plan:</span>
               <span
                 className={`text-2xl font-black uppercase tracking-wide ${
-                  project.plan === "pro"
+                  project.plan !== "free"
                     ? "bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent"
                     : "text-white"
                 }`}
               >
-                {project.plan === "pro" ? "Pro Tier" : "Free Tier"}
+                {currentDisplayName()}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              {project.plan === "pro"
+              {project.plan !== "free"
                 ? `Active subscription managed via ${project.billingProvider.toUpperCase()}`
-                : "Limited to 10,000 log events per month & statistical alerts."}
+                : "Limited to 1 service, 500MB logs/month & 7-day retention."}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <span
+            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full self-start sm:self-center ${
+              project.subscriptionStatus === "active"
+                ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                : "text-slate-400 bg-slate-950 border border-slate-800"
+            }`}
+          >
             <span
-              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
+              className={`w-1.5 h-1.5 rounded-full ${
                 project.subscriptionStatus === "active"
-                  ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
-                  : "text-slate-400 bg-slate-950 border border-slate-850"
+                  ? "bg-emerald-400 animate-pulse"
+                  : "bg-slate-600"
               }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full ${
-                  project.subscriptionStatus === "active"
-                    ? "bg-emerald-400 animate-pulse"
-                    : "bg-slate-600"
-                }`}
-              />
-              Status:{" "}
-              {project.subscriptionStatus === "active"
-                ? "Active"
-                : "None / Unpaid"}
-            </span>
-          </div>
+            />
+            Status:{" "}
+            {project.subscriptionStatus === "active" ? "Active" : "None / Unpaid"}
+          </span>
         </div>
       </div>
 
-      {/* Pricing Comparison Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {/* Free Plan */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-3xl p-8 flex flex-col justify-between hover:border-slate-800 transition-colors">
-          <div>
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg font-bold text-white">Free Developer</h3>
-                <p className="text-xs text-slate-500 mt-1">
-                  Ideal for side projects & local testing.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-white">$0</span>
-              <span className="text-slate-500 text-xs font-medium">
-                / month
-              </span>
-            </div>
-
-            <ul className="mt-8 space-y-4 text-sm text-slate-400">
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>Up to 10,000 logs per month</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>Basic statistical anomaly checking</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-indigo-400 shrink-0" />
-                <span>3-day data retention window</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-slate-600 line-through">
-                <Check className="w-4 h-4 shrink-0" />
-                <span>Multi-channel alerts (Slack, Discord, Teams)</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-slate-600 line-through">
-                <Check className="w-4 h-4 shrink-0" />
-                <span>AI incident root cause generator</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="mt-8">
-            <button
-              disabled={project.plan === "free"}
-              onClick={() => handleSandboxOverride("free")}
-              className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all border ${
-                project.plan === "free"
-                  ? "bg-slate-950 border-slate-900 text-slate-600 cursor-not-allowed"
-                  : "bg-slate-900 hover:bg-slate-850 border-slate-800 text-white cursor-pointer"
-              }`}
-            >
-              {project.plan === "free" ? "Current Tier" : "Downgrade to Free"}
-            </button>
-          </div>
+      {/* Gateway Selection */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 shrink-0">
+          Payment Gateway
+        </span>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={() => setGateway("stripe")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+              gateway === "stripe"
+                ? "bg-indigo-600/15 border-indigo-500 text-white"
+                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
+            }`}
+          >
+            <Globe2 className="w-3.5 h-3.5" />
+            Stripe
+            <span className="text-[9px] text-slate-500 font-normal hidden sm:inline">
+              · International Cards
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setGateway("razorpay")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
+              gateway === "razorpay"
+                ? "bg-indigo-600/15 border-indigo-500 text-white"
+                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
+            }`}
+          >
+            <DollarSign className="w-3.5 h-3.5" />
+            Razorpay
+            <span className="text-[9px] text-slate-500 font-normal hidden sm:inline">
+              · UPI, Net Banking
+            </span>
+          </button>
         </div>
+        {gateway === "razorpay" && (
+          <span className="text-[10px] text-indigo-400 font-semibold flex items-center gap-1">
+            🇮🇳 Prices shown in INR
+          </span>
+        )}
+      </div>
 
-        {/* Pro Plan */}
-        <div className="bg-slate-900 border-2 border-indigo-500/40 rounded-3xl p-8 flex flex-col justify-between relative shadow-2xl shadow-indigo-500/5">
-          <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
-            Popular Choice
-          </div>
+      {/* Pricing Cards — responsive 1→2→4 column grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        {PLANS.map((plan) => {
+          const price = formatPrice(plan);
+          const isCurrent = isCurrentPlan(plan);
+          const upgrade = isUpgrade(plan);
+          const isHighlighted = plan.id === "starter";
 
-          <div>
-            <div className="flex justify-between items-start">
+          return (
+            <div
+              key={plan.id}
+              className={`rounded-3xl p-6 flex flex-col justify-between relative transition-all ${
+                isHighlighted
+                  ? "bg-slate-900 border-2 border-indigo-500/40 shadow-2xl shadow-indigo-500/5"
+                  : "bg-slate-900/60 border border-slate-800/80 hover:border-slate-700"
+              } ${!plan.available ? "opacity-70" : ""}`}
+            >
+              {/* Badges */}
+              {plan.badge && (
+                <div className="absolute top-0 right-5 -translate-y-1/2 bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
+                  {plan.badge}
+                </div>
+              )}
+              {!plan.available && (
+                <div className="absolute top-0 left-5 -translate-y-1/2 bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-slate-700">
+                  Coming Soon
+                </div>
+              )}
+
+              {/* Plan Name */}
               <div>
-                <h3 className="text-lg font-bold text-white flex items-center gap-1.5">
-                  Pro Production
-                  <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
+                <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+                  {plan.name}
+                  {plan.id === "starter" && (
+                    <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                  )}
+                  {plan.id === "scale" && (
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  )}
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">
-                  For professional apps running in production.
+                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                  {plan.description}
                 </p>
-              </div>
-            </div>
 
-            <div className="mt-6 flex items-baseline gap-1">
-              <span className="text-4xl font-extrabold text-white">$49</span>
-              <span className="text-slate-400 text-xs font-medium">
-                / month
-              </span>
-            </div>
-
-            <ul className="mt-8 space-y-4 text-sm text-slate-350">
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  <strong>Unlimited</strong> log aggregation
-                </span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Real-time custom threshold checks</span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  <strong>30-day</strong> secure data retention
-                </span>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>Instant alerts (Slack, Discord, MS Teams)</span>
-              </li>
-              <li className="flex items-center gap-2.5 text-indigo-400">
-                <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>
-                  <strong>AI SRE Analyst:</strong> Automates incident
-                  diagnostics
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="mt-8 space-y-4">
-            {project.plan !== "pro" ? (
-              <>
-                {/* Gateway Selection */}
-                <div className="space-y-2">
-                  <span className="block text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                    Choose Gateway Method
-                  </span>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setGateway("stripe")}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
-                        gateway === "stripe"
-                          ? "bg-indigo-600/15 border-indigo-500 text-white font-semibold"
-                          : "bg-slate-950 border-slate-900 text-slate-450 hover:bg-slate-900/60"
-                      }`}
-                    >
-                      <span className="text-xs font-bold flex items-center gap-1">
-                        <Globe2 className="w-3.5 h-3.5" />
-                        Stripe
-                      </span>
-                      <span className="text-[9px] text-slate-500 mt-0.5">
-                        International Cards
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setGateway("razorpay")}
-                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all cursor-pointer ${
-                        gateway === "razorpay"
-                          ? "bg-indigo-600/15 border-indigo-500 text-white font-semibold"
-                          : "bg-slate-950 border-slate-900 text-slate-450 hover:bg-slate-900/60"
-                      }`}
-                    >
-                      <span className="text-xs font-bold flex items-center gap-1">
-                        <DollarSign className="w-3.5 h-3.5" />
-                        Razorpay
-                      </span>
-                      <span className="text-[9px] text-slate-500 mt-0.5">
-                        UPI, Net Banking, Wallets
-                      </span>
-                    </button>
+                {/* Price */}
+                <div className="mt-5">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-extrabold text-white">
+                      {price.primary}
+                    </span>
+                    <span className="text-slate-500 text-[11px] font-medium">/ mo</span>
                   </div>
+                  {price.secondary && (
+                    <span className="text-[10px] text-slate-600 mt-0.5 block">
+                      ≈ {price.secondary}
+                    </span>
+                  )}
                 </div>
 
-                <button
-                  onClick={handleCheckout}
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
-                >
-                  {isSubmitting
-                    ? "Proceeding..."
-                    : `Upgrade via ${gateway === "stripe" ? "Stripe" : "Razorpay"}`}
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
-              <div className="text-center py-2.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2">
-                <Check className="w-4 h-4" />
-                Pro Tier Active
+                {/* Features */}
+                <ul className="mt-5 space-y-2.5">
+                  {plan.features.map((feature, i) => (
+                    <li
+                      key={i}
+                      className={`flex items-start gap-2 text-[12px] leading-relaxed ${
+                        feature.included ? "text-slate-300" : "text-slate-600 line-through"
+                      }`}
+                    >
+                      <Check
+                        className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
+                          feature.included
+                            ? plan.id === "free"
+                              ? "text-indigo-400"
+                              : "text-emerald-400"
+                            : "text-slate-700"
+                        }`}
+                      />
+                      {feature.text}
+                    </li>
+                  ))}
+                </ul>
               </div>
-            )}
-          </div>
-        </div>
+
+              {/* CTA */}
+              <div className="mt-6">
+                {!plan.available ? (
+                  <button
+                    disabled
+                    className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed"
+                  >
+                    Notify Me
+                  </button>
+                ) : isCurrent ? (
+                  <div className="text-center py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
+                    <Check className="w-3.5 h-3.5" />
+                    Current Plan
+                  </div>
+                ) : upgrade ? (
+                  <button
+                    onClick={handleCheckout}
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-950 disabled:cursor-not-allowed text-white py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
+                  >
+                    {isSubmitting ? "Processing..." : "Upgrade"}
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleSandboxOverride("free")}
+                    disabled={isSandboxUpdating}
+                    className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white cursor-pointer transition-all disabled:opacity-50"
+                  >
+                    Downgrade to Free
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Expansion Revenue Info */}
+      <div className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5">
+        <p className="text-[11px] text-slate-500 leading-relaxed">
+          <span className="text-slate-400 font-semibold">Usage-based add-ons:</span>{" "}
+          Log overages at <span className="text-slate-300">$0.10/GB</span> above plan limit ·
+          Additional AI analysis credits at <span className="text-slate-300">$20 / 100 credits</span> ·
+          Extra seats at <span className="text-slate-300">$30/seat/mo</span> ·{" "}
+          <span className="text-indigo-400 font-semibold">20% off</span> with annual billing.
+        </p>
       </div>
 
       {/* Sandbox Tools */}
@@ -466,7 +562,7 @@ export default function BillingView({ project }: BillingViewProps) {
               handleSandboxOverride(project.plan === "pro" ? "free" : "pro")
             }
             disabled={isSandboxUpdating}
-            className="px-4 py-2 bg-slate-950 border border-slate-800 hover:border-slate-750 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer"
+            className="px-4 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer"
           >
             {isSandboxUpdating
               ? "Updating..."
