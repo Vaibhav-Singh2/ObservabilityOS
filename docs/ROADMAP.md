@@ -15,14 +15,16 @@ This document specifies completed features, near-term sprints, and the long-term
 - **Multi-channel webhook alerts**: Native notifications to Slack, Discord, and Microsoft Teams.
 - **Data exports**: Stream download logs in CSV/JSON format.
 - **Administrative Audit Trail**: Setting console mutation trails for compliance.
+- **Saved Queries Sidebar**: Extend dashboard settings to allow developers to save queries and pin shortcuts to their sidebar.
+- **Automated Morning Digest**: Integrated Resend to email engineers summaries of microservice health and incident alerts.
+- **Documentation Platform & SEO**: Separate statically-rendered Next.js documentation platform with dynamic marked link mapping, structured JSON-LD data, and sitemaps/robots configs.
+- **Hybrid Licensing Framework**: Core system licensed under Source Available terms and packages/sdk under permissive MIT.
 
 ---
 
 ## 📅 Short-Term Roadmap (Next 30 Days)
 
 - **Docker Sidecar Agent**: Provide a lightweight Docker sidecar container to tail log files and redirect stdout for non-Node.js systems (Go, Python, Nginx, PostgreSQL).
-- **Automated Weekly Digest**: Integrate Resend to email founders and engineering managers weekly reports of microservice health scores, error counts, and resolved incidents.
-- **Saved Queries Sidebar**: Extend dashboard settings to allow developers to save queries and pin shortcuts to their sidebar.
 
 ---
 

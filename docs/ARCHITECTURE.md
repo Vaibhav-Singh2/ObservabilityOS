@@ -12,6 +12,7 @@ ObservabilityOS is managed as a monorepo workspace using **Turborepo**. The code
 graph TD
     subgraph Applications
         WEB[Next.js App: apps/web]
+        DOCS[Next.js App: apps/docs]
     end
 
     subgraph Packages
@@ -38,7 +39,13 @@ graph TD
 
 ## 📦 System Components & Packages
 
-### 1. apps/web
+### 1. apps/docs
+
+- Statically-rendered Next.js application that serves the customer-facing documentation, manuals, API specifications, and licensing terms.
+- Implements custom markdown dynamic link-resolving compilation to cleanly adapt GitHub file trees to Next.js routes.
+- Fully optimized with sitemaps, robots configurations, meta-descriptions, and structured JSON-LD schemas to support both search engines and AI web crawlers.
+
+### 2. apps/web
 
 - The core Next.js application that serves the frontend developer console (`/dashboard`) and REST APIs.
 - Houses public telemetry ingestion APIs, GitHub OAuth handlers, payment processing webhooks, and SSE live log streaming channels.

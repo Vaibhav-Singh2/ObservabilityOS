@@ -4,6 +4,22 @@ All notable changes to the ObservabilityOS project are documented here, grouped 
 
 ---
 
+## [v1.3.0] — Documentation Platform, Licensing & SEO Optimization
+
+### Added
+
+- **Documentation Portal (`apps/docs`)**: Built a standalone statically-rendered Next.js documentation platform with dynamic routing support.
+
+* **Marked Markdown Compiler Link Resolution**: Developed custom marked compiler extensions rewriting relative markdown and licensing references to target web paths or remote GitHub links dynamically.
+* **Hybrid Licensing Framework**: Standardized commercial and open-source boundaries, releasing `packages/sdk` under MIT and the core platform (`apps/web`, `apps/worker`) under a custom Source Available license.
+* **Advanced SEO / Discoverability**: Programmed sitemap generators, robots configurations, meta metadata, and JSON-LD structured schemas to facilitate search ranking and AI crawler discoverability.
+* **Branding Refinements**: Added heartbeat-style favicon, app icons, and OpenGraph/Twitter social media preview visuals for both platforms.
+
+### Fixed
+
+- **Layout Scroll Correction**: Resolved Next.js client-side layout jumping warnings by embedding scroll attributes.
+- **Scroll & Navigation Overflows**: Hardened header containment heights, mobile responsiveness layouts, and container scroll containment.
+
 ## [v1.2.0] — Security Hardening, Rate Limiting & PII Scrubbing
 
 ### Added
