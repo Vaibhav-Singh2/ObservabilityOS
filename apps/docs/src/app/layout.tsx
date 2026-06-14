@@ -1,5 +1,16 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
 
@@ -48,7 +59,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark scroll-smooth">
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} dark scroll-smooth antialiased`}
+    >
       <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
         {children}
       </body>

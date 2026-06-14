@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Activity, Github, Menu, Search, X } from "lucide-react";
-
+import Link from "next/link";
 
 interface DocsHeaderProps {
   sidebarOpen: boolean;
@@ -10,11 +9,14 @@ interface DocsHeaderProps {
   onSearchOpen: () => void;
 }
 
-export default function DocsHeader({ sidebarOpen, setSidebarOpen, onSearchOpen }: DocsHeaderProps) {
+export default function DocsHeader({
+  sidebarOpen,
+  setSidebarOpen,
+  onSearchOpen,
+}: DocsHeaderProps) {
   return (
     <header className="sticky top-0 z-50 h-16 w-full border-b border-slate-900/80 bg-slate-950/75 backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-6 h-full flex items-center justify-between gap-4">
-        
+      <div className="mx-auto flex h-full max-w-360 items-center justify-between gap-4 px-4 sm:px-6">
         {/* Left Side: Brand Logo */}
         <div className="flex items-center gap-4">
           {/* Mobile menu trigger */}
@@ -23,15 +25,25 @@ export default function DocsHeader({ sidebarOpen, setSidebarOpen, onSearchOpen }
             className="p-1.5 rounded-lg hover:bg-slate-900 border border-transparent hover:border-slate-800 md:hidden text-slate-400 hover:text-white cursor-pointer"
             aria-label="Toggle navigation menu"
           >
-            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {sidebarOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
           </button>
 
-          <Link href="/docs" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity">
-            <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/10">
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 transition-opacity hover:opacity-90"
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-indigo-400/20 bg-indigo-500/15">
               <Activity className="w-4 h-4 text-white" />
             </div>
-            <span className="font-semibold text-base tracking-tight bg-linear-to-r from-white to-slate-400 bg-clip-text text-transparent">
-              ObservabilityOS <span className="text-xs text-indigo-400 font-mono font-bold ml-1.5 uppercase tracking-widest bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/15">Docs</span>
+            <span className="text-base font-semibold tracking-tight text-slate-100">
+              ObservabilityOS{" "}
+              <span className="ml-1.5 border-l border-slate-700 pl-2 text-xs font-medium text-slate-400">
+                Docs
+              </span>
             </span>
           </Link>
         </div>
@@ -40,7 +52,7 @@ export default function DocsHeader({ sidebarOpen, setSidebarOpen, onSearchOpen }
         <div className="flex-1 max-w-sm hidden sm:block">
           <button
             onClick={onSearchOpen}
-            className="w-full flex items-center justify-between px-3 h-9 rounded-lg border border-slate-850 bg-slate-900/30 text-xs text-slate-500 hover:text-slate-350 hover:border-slate-700 transition-all cursor-pointer select-none"
+            className="flex h-9 w-full cursor-pointer select-none items-center justify-between rounded-lg border border-slate-800 bg-slate-900/45 px-3 text-xs text-slate-500 transition-all hover:border-slate-700 hover:text-slate-300"
           >
             <span className="flex items-center gap-2">
               <Search className="w-3.5 h-3.5 text-slate-500" />
@@ -66,7 +78,7 @@ export default function DocsHeader({ sidebarOpen, setSidebarOpen, onSearchOpen }
             href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-850 bg-slate-950 hover:bg-slate-900 text-slate-400 hover:text-white transition-all cursor-pointer"
+            className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-800 px-3 py-1.5 text-xs font-medium text-slate-400 transition-all hover:border-slate-700 hover:bg-slate-900 hover:text-white"
           >
             <Github className="w-4 h-4 text-slate-500" />
             <span className="hidden sm:inline">GitHub Repository</span>
@@ -76,12 +88,11 @@ export default function DocsHeader({ sidebarOpen, setSidebarOpen, onSearchOpen }
             href="http://localhost:3000"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs font-semibold px-3 py-1.5 rounded-lg border border-indigo-650 bg-indigo-650 hover:bg-indigo-600 text-white transition-all cursor-pointer shadow-md shadow-indigo-600/10"
+            className="flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-500"
           >
             Launch Console
           </a>
         </div>
-
       </div>
     </header>
   );

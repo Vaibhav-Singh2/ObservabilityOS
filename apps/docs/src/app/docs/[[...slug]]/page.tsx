@@ -76,6 +76,86 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   };
 }
 
+function parseCallouts(html: string): string {
+  const blockquoteRegex = /<blockquote>([\s\S]*?)<\/blockquote>/g;
+  
+  return html.replace(blockquoteRegex, (match, content) => {
+    const alertMatch = content.match(/\[!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\]/i);
+    if (!alertMatch) return match;
+
+    const alertType = alertMatch[1].toUpperCase();
+    let cleanContent = content.replace(/\[!(NOTE|WARNING|TIP|IMPORTANT|CAUTION)\]/i, "");
+    
+    cleanContent = cleanContent.replace(/^[\s\r\n|<br>|<p><\/p>]+/i, "").trim();
+    if (cleanContent.startsWith("</p>")) {
+      cleanContent = cleanContent.replace(/^<\/p>/, "");
+    }
+    if (!cleanContent.startsWith("<p>")) {
+      cleanContent = `<p>${cleanContent}`;
+    }
+
+    let borderClass = "border-l-4 border-indigo-500 bg-indigo-500/5";
+    let textClass = "text-indigo-400";
+    let title = "Note";
+    let iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`;
+
+    if (alertType === "WARNING") {
+      borderClass = "border-l-4 border-amber-500 bg-amber-500/5";
+      textClass = "text-amber-500";
+      title = "Warning";
+      iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+    } else if (alertType === "TIP") {
+      borderClass = "border-l-4 border-emerald-500 bg-emerald-500/5";
+      textClass = "text-emerald-400";
+      title = "Tip";
+      iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`;
+    } else if (alertType === "IMPORTANT") {
+      borderClass = "border-l-4 border-purple-500 bg-purple-500/5";
+      textClass = "text-purple-400";
+      title = "Important";
+      iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+    } else if (alertType === "CAUTION") {
+      borderClass = "border-l-4 border-rose-500 bg-rose-500/5";
+      textClass = "text-rose-450";
+      title = "Caution";
+      iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+    }
+
+    return `
+      <div class="callout my-6 p-4 rounded-r-xl border-y border-r border-slate-900 ${borderClass} flex flex-col gap-2.5">
+        <div class="flex items-center gap-2 text-xs font-bold font-mono tracking-wider uppercase select-none ${textClass}">
+          ${iconSvg}
+          <span>${title}</span>
+        </div>
+        <div class="callout-body text-[13.5px] leading-relaxed text-slate-400 font-medium">
+          ${cleanContent}
+        </div>
+      </div>
+    `;
+  });
+}
+
+function parseMermaidBlocks(html: string): string {
+  return html.replace(
+    /<pre><code class="language-mermaid">([\s\S]*?)<\/code><\/pre>/g,
+    (_, source: string) => `
+      <div class="mermaid-shell" data-mermaid-container>
+        <div class="mermaid-toolbar">
+          <span class="mermaid-label">Architecture diagram</span>
+          <div class="mermaid-actions">
+            <span class="mermaid-status" data-mermaid-status>Rendering</span>
+            <button class="mermaid-expand-button" type="button" data-expand-mermaid aria-label="Open diagram in large view">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M16 3h3a2 2 0 0 1 2 2v3"/><path d="M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+              <span>Expand</span>
+            </button>
+          </div>
+        </div>
+        <div class="mermaid" data-mermaid-source>${source}</div>
+      </div>
+    `
+  );
+}
+
 export default async function Page({ params }: PageProps) {
   const resolvedParams = await params;
   const slugArray = resolvedParams.slug;
@@ -92,7 +172,9 @@ export default async function Page({ params }: PageProps) {
   }
 
   // Pre-render markdown body to HTML on the server
-  const htmlContent = await marked.parse(doc.body);
+  const htmlContent = parseMermaidBlocks(
+    parseCallouts(await marked.parse(doc.body))
+  );
 
   // Get navigation links
   const { prev, next } = getPrevNextLinks(doc.slug);
@@ -161,26 +243,25 @@ export default async function Page({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
       />
       {/* Grid columns: Center Content and Right TOC */}
-      <div className="flex flex-col lg:flex-row gap-10 w-full relative">
+      <div className="flex w-full flex-col gap-12 lg:flex-row">
         
         {/* Left/Center Main Column */}
-        <div className="flex-1 min-w-0 max-w-3xl">
+        <div className="min-w-0 flex-1">
           
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold font-mono uppercase tracking-wider mb-6">
-            <Link href="/docs" className="hover:text-slate-350 transition-colors">Docs</Link>
-            <ChevronRight className="w-3 h-3 text-slate-700" />
-            <span className="text-slate-600">{doc.category}</span>
-            <ChevronRight className="w-3 h-3 text-slate-700" />
-            <span className="text-indigo-400 truncate">{doc.title}</span>
+          <nav className="mb-7 flex items-center gap-1.5 text-xs font-medium text-slate-500">
+            <Link href="/docs" className="transition-colors hover:text-slate-200">Docs</Link>
+            <ChevronRight className="h-3 w-3 text-slate-700" />
+            <span>{doc.category}</span>
+            <ChevronRight className="h-3 w-3 text-slate-700" />
+            <span className="truncate text-slate-300">{doc.title}</span>
           </nav>
 
           {/* Heading */}
-          <header className="space-y-2 mb-8">
-            <span className="text-[10px] font-bold font-mono text-indigo-500 uppercase tracking-widest">{doc.category}</span>
-            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">{doc.title}</h1>
-            <p className="text-slate-400 text-sm leading-relaxed max-w-2xl font-medium">{doc.description}</p>
-            <div className="border-b border-slate-900/60 pt-4" />
+          <header className="mb-10 border-b border-slate-800/80 pb-8">
+            <span className="mb-3 block text-xs font-semibold uppercase tracking-[0.18em] text-indigo-400">{doc.category}</span>
+            <h1 className="text-4xl font-semibold tracking-[-0.035em] text-white sm:text-5xl">{doc.title}</h1>
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-400">{doc.description}</p>
           </header>
 
           {/* Markdown compiled HTML */}
@@ -241,12 +322,12 @@ export default async function Page({ params }: PageProps) {
                     key={idx}
                     className={heading.level === 3 ? "pl-3.5 border-l border-slate-900" : ""}
                   >
-                    <a
+                    <Link
                       href={`#${heading.id}`}
                       className="hover:text-indigo-400 transition-all block truncate"
                     >
                       {heading.text}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

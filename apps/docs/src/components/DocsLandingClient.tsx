@@ -146,11 +146,11 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
             return (
               <div 
                 key={index} 
-                className="group relative rounded-2xl border border-slate-900 bg-slate-950/60 p-6 backdrop-blur-sm transition-all hover:bg-slate-900/10 flex flex-col gap-6"
+                className="group relative rounded-2xl border border-slate-900 bg-slate-950/40 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-slate-900/10 hover:border-slate-800 hover:shadow-[0_0_40px_-15px_rgba(99,102,241,0.15)] flex flex-col gap-6"
               >
                 {/* Header of Card */}
                 <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-xl bg-linear-to-br border shadow-md flex items-center justify-center shrink-0 ${cat.color}`}>
+                  <div className={`p-3 rounded-xl bg-linear-to-br border shadow-md flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105 ${cat.color}`}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="space-y-1">
@@ -169,13 +169,13 @@ export default function DocsLandingClient({ searchIndex }: DocsLandingClientProp
                     <Link
                       key={lIdx}
                       href={link.href}
-                      className="group/link flex items-center justify-between p-2.5 rounded-lg border border-transparent hover:border-slate-850 hover:bg-slate-900/30 transition-all text-xs font-semibold text-slate-400 hover:text-slate-200 cursor-pointer"
+                      className="group/link flex items-center justify-between p-2.5 rounded-lg border border-transparent hover:border-slate-900 hover:bg-slate-950/90 transition-all duration-200 text-xs font-semibold text-slate-400 hover:text-slate-200 cursor-pointer"
                     >
                       <div className="flex flex-col min-w-0">
                         <span className="truncate">{link.title}</span>
                         <span className="text-[10px] text-slate-500 font-mono font-medium truncate mt-0.5 group-hover/link:text-slate-450 transition-colors">{link.desc}</span>
                       </div>
-                      <ChevronRight className="w-3.5 h-3.5 text-slate-600 group-hover/link:text-indigo-400 transition-colors shrink-0 ml-1.5" />
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-650 group-hover/link:text-indigo-400 group-hover/link:translate-x-0.5 transition-all shrink-0 ml-1.5" />
                     </Link>
                   ))}
                 </div>

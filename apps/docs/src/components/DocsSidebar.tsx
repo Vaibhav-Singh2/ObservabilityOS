@@ -46,43 +46,55 @@ export default function DocsSidebar({ isOpen, onClose, className }: DocsSidebarP
   const activeSlug = getActiveDocSlug();
 
   return (
-    <aside
-      className={cn(
-        "w-64 border-r border-slate-900 bg-slate-950 p-6 flex flex-col gap-6 shrink-0 h-[calc(100vh-4rem)] overflow-y-auto sticky top-16 scrollbar-none",
-        isOpen ? "block fixed inset-y-16 left-0 z-40 w-full max-w-[260px]" : "hidden md:block",
-        className
+    <>
+      {/* Mobile Sidebar Backdrop */}
+      {isOpen && (
+        <div 
+          onClick={onClose}
+          className="fixed inset-0 top-16 z-30 bg-slate-950/80 backdrop-blur-xs md:hidden animate-in fade-in duration-200"
+        />
       )}
-    >
-      {sidebarData.map((category, idx) => (
-        <div key={idx} className="space-y-2.5">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-slate-500 font-mono">
-            {category.title}
-          </h4>
-          <ul className="space-y-1 text-xs">
-            {category.items.map((item, itemIdx) => {
-              const isActive = activeSlug === item.slug;
-              const Icon = SLUG_ICONS[item.slug] || FileText;
-              return (
-                <li key={itemIdx}>
-                  <Link
-                    href={`/docs/${item.slug}`}
-                    onClick={onClose}
-                    className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-lg font-semibold transition-all hover:bg-slate-900/40 text-slate-400 hover:text-slate-200 cursor-pointer",
-                      isActive
-                        ? "bg-indigo-600/10 border border-indigo-500/10 text-indigo-400 hover:text-indigo-400 hover:bg-indigo-600/10"
-                        : "border border-transparent"
-                    )}
-                  >
-                    <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-indigo-400" : "text-slate-500")} />
-                    <span className="truncate">{item.title}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </aside>
+
+      <aside
+        className={cn(
+          "scrollbar-none flex h-full w-64 shrink-0 flex-col gap-7 overflow-y-auto border-r border-slate-900 bg-slate-950 px-4 py-7 transition-transform duration-300 ease-out md:translate-x-0",
+          isOpen 
+            ? "fixed inset-y-16 left-0 z-40 w-[260px] translate-x-0 shadow-2xl shadow-black/80" 
+            : "fixed inset-y-16 -translate-x-full md:relative md:top-0 md:h-full md:translate-x-0",
+          className
+        )}
+      >
+        {sidebarData.map((category, idx) => (
+          <div key={idx} className="space-y-2">
+            <h4 className="px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              {category.title}
+            </h4>
+            <ul className="space-y-1 text-xs">
+              {category.items.map((item, itemIdx) => {
+                const isActive = activeSlug === item.slug;
+                const Icon = SLUG_ICONS[item.slug] || FileText;
+                return (
+                  <li key={itemIdx}>
+                    <Link
+                      href={`/docs/${item.slug}`}
+                      onClick={onClose}
+                      className={cn(
+                        "flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2.5 text-[13px] font-medium leading-none text-slate-400 transition-all hover:border-slate-800 hover:bg-slate-900/50 hover:text-slate-200",
+                        isActive
+                          ? "border-indigo-500/20 bg-indigo-500/10 text-indigo-300"
+                          : "border-transparent"
+                      )}
+                    >
+                      <Icon className={cn("w-4 h-4 shrink-0", isActive ? "text-indigo-400" : "text-slate-500")} />
+                      <span className="truncate">{item.title}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </aside>
+    </>
   );
 }
