@@ -1,8 +1,20 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { connectToDatabase, Project, Incident, Log, Comment, User } from "@repo/db";
+import {
+  connectToDatabase,
+  Project,
+  Incident,
+  Log,
+  Comment,
+  User,
+} from "@repo/db";
 import jwt from "jsonwebtoken";
-import { generatePostMortemMarkdown, PostMortemIncident, PostMortemLog, PostMortemComment } from "@/lib/postmortem";
+import {
+  generatePostMortemMarkdown,
+  PostMortemIncident,
+  PostMortemLog,
+  PostMortemComment,
+} from "@/lib/postmortem";
 
 async function getAuthenticatedUser() {
   const cookieStore = await cookies();
@@ -27,7 +39,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -37,34 +49,47 @@ export async function GET(request: Request) {
 
     if (!projectId || !incidentId) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId and incidentId are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId and incidentId are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
     // Tenant check: Ensure user owns this project
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
         { error: { code: "FORBIDDEN", message: "Forbidden: Access denied" } },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // Fetch Incident
-    const incident = await Incident.findOne({ _id: incidentId, projectId: project._id })
+    const incident = await Incident.findOne({
+      _id: incidentId,
+      projectId: project._id,
+    })
       .populate("serviceId")
       .populate("deployId");
 
     if (!incident) {
       return NextResponse.json(
         { error: { code: "NOT_FOUND", message: "Incident not found" } },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Fetch related logs
-    const logs = await Log.find({ _id: { $in: incident.relatedLogs } }).sort({ timestamp: 1 });
+    const logs = await Log.find({ _id: { $in: incident.relatedLogs } }).sort({
+      timestamp: 1,
+    });
 
     // Fetch comments
     const comments = await Comment.find({ incidentId: incident._id })
@@ -85,7 +110,9 @@ export async function GET(request: Request) {
       confidence: incident.confidence,
       status: incident.status,
       createdAt: incident.createdAt.toISOString(),
-      resolvedAt: incident.resolvedAt ? incident.resolvedAt.toISOString() : null,
+      resolvedAt: incident.resolvedAt
+        ? incident.resolvedAt.toISOString()
+        : null,
       ttd: incident.ttd,
       ttr: incident.ttr || null,
       service: serviceObj
@@ -99,7 +126,9 @@ export async function GET(request: Request) {
             commitSha: deployObj.commitSha,
             commitMessage: deployObj.commitMessage,
             branch: deployObj.branch,
-            deployedAt: deployObj.deployedAt ? deployObj.deployedAt.toISOString() : null,
+            deployedAt: deployObj.deployedAt
+              ? deployObj.deployedAt.toISOString()
+              : null,
           }
         : null,
     };
@@ -126,7 +155,11 @@ export async function GET(request: Request) {
       };
     });
 
-    const markdownContent = generatePostMortemMarkdown(pmIncident, pmLogs, pmComments);
+    const markdownContent = generatePostMortemMarkdown(
+      pmIncident,
+      pmLogs,
+      pmComments,
+    );
 
     // Format incident title for safe file naming
     const safeTitle = incident.title
@@ -144,8 +177,13 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Export PostMortem GET Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to export postmortem" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to export postmortem",
+        },
+      },
+      { status: 500 },
     );
   }
 }

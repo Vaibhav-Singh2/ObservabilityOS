@@ -1,6 +1,13 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Incident, Log, Comment } from "@repo/db";
+import {
+  connectToDatabase,
+  User,
+  Project,
+  Incident,
+  Log,
+  Comment,
+} from "@repo/db";
 import jwt from "jsonwebtoken";
 import IncidentDetailsView from "./IncidentDetailsView";
 
@@ -9,7 +16,10 @@ interface PageProps {
   searchParams: Promise<{ projectId?: string }>;
 }
 
-export default async function IncidentDetailPage({ params, searchParams }: PageProps) {
+export default async function IncidentDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
@@ -37,7 +47,7 @@ export default async function IncidentDetailPage({ params, searchParams }: PageP
 
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  
+
   const incidentId = resolvedParams.id;
   const projectId = resolvedSearchParams.projectId;
 
@@ -55,13 +65,18 @@ export default async function IncidentDetailPage({ params, searchParams }: PageP
   }
 
   // Tenant isolation verification: Ensure the user owns the project this incident belongs to
-  const project = await Project.findOne({ _id: incident.projectId, ownerId: user._id });
+  const project = await Project.findOne({
+    _id: incident.projectId,
+    ownerId: user._id,
+  });
   if (!project) {
     redirect("/dashboard/incidents");
   }
 
   // Fetch the actual log documents that triggered this incident
-  const logs = await Log.find({ _id: { $in: incident.relatedLogs } }).sort({ timestamp: 1 });
+  const logs = await Log.find({ _id: { $in: incident.relatedLogs } }).sort({
+    timestamp: 1,
+  });
 
   // Serialize Mongoose objects
   const serviceObj = incident.serviceId as any;
@@ -97,12 +112,14 @@ export default async function IncidentDetailPage({ params, searchParams }: PageP
           commitSha: deployObj.commitSha,
           commitMessage: deployObj.commitMessage,
           branch: deployObj.branch,
-          deployedAt: deployObj.deployedAt ? deployObj.deployedAt.toISOString() : null,
+          deployedAt: deployObj.deployedAt
+            ? deployObj.deployedAt.toISOString()
+            : null,
         }
       : null,
   };
 
-  const serializedLogs = logs.map(l => ({
+  const serializedLogs = logs.map((l) => ({
     id: l._id.toString(),
     timestamp: l.timestamp.toISOString(),
     level: l.level,
@@ -116,17 +133,19 @@ export default async function IncidentDetailPage({ params, searchParams }: PageP
     .populate("userId")
     .sort({ createdAt: 1 });
 
-  const serializedComments = comments.map(c => {
+  const serializedComments = comments.map((c) => {
     const u = c.userId as any;
     return {
       id: c._id.toString(),
       content: c.content,
       createdAt: c.createdAt.toISOString(),
-      user: u ? {
-        id: u._id.toString(),
-        username: u.username,
-        avatarUrl: u.avatarUrl || null,
-      } : null,
+      user: u
+        ? {
+            id: u._id.toString(),
+            username: u.username,
+            avatarUrl: u.avatarUrl || null,
+          }
+        : null,
     };
   });
 

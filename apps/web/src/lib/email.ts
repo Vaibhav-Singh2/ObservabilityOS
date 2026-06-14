@@ -2,7 +2,9 @@ import { Resend } from "resend";
 import { connectToDatabase, Log, Service, Incident, Project } from "@repo/db";
 import { generateEmailDigestSummary, IncidentDigestContext } from "@repo/ai";
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+const resend = process.env.RESEND_API_KEY
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 interface ServiceStats {
   name: string;
@@ -22,9 +24,15 @@ interface ProjectDigestData {
   aiSummary: string;
 }
 
-export async function buildAndSendEmailDigest(user: { email?: string; username: string; _id: any }) {
+export async function buildAndSendEmailDigest(user: {
+  email?: string;
+  username: string;
+  _id: any;
+}) {
   if (!user.email) {
-    console.log(`[Email Digest] User ${user.username} has no email configured. Skipping digest.`);
+    console.log(
+      `[Email Digest] User ${user.username} has no email configured. Skipping digest.`,
+    );
     return;
   }
   await connectToDatabase();
@@ -32,7 +40,9 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
   // 1. Fetch user's projects
   const projects = await Project.find({ ownerId: user._id }).sort({ name: 1 });
   if (projects.length === 0) {
-    console.log(`[Email Digest] User ${user.username} has no projects. Skipping digest.`);
+    console.log(
+      `[Email Digest] User ${user.username} has no projects. Skipping digest.`,
+    );
     return;
   }
 
@@ -41,15 +51,18 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
 
   // 2. Aggregate metrics for each project
   for (const project of projects) {
-    const services = await Service.find({ projectId: project._id }).sort({ name: 1, environment: 1 });
-    
+    const services = await Service.find({ projectId: project._id }).sort({
+      name: 1,
+      environment: 1,
+    });
+
     // Fetch logs aggregation for last 24h
     const stats = await Log.aggregate([
       {
         $match: {
           projectId: project._id,
-          timestamp: { $gte: start24h }
-        }
+          timestamp: { $gte: start24h },
+        },
       },
       {
         $group: {
@@ -57,40 +70,49 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
           totalLogs: { $sum: 1 },
           errorLogs: {
             $sum: {
-              $cond: [{ $eq: ["$level", "error"] }, 1, 0]
-            }
+              $cond: [{ $eq: ["$level", "error"] }, 1, 0],
+            },
           },
           avgLatency: {
             $avg: {
-              $ifNull: ["$metadata.latencyMs", "$metadata.latency"]
-            }
-          }
-        }
-      }
+              $ifNull: ["$metadata.latencyMs", "$metadata.latency"],
+            },
+          },
+        },
+      },
     ]);
 
     // Fetch incidents created in last 24h
     const incidents = await Incident.find({
       projectId: project._id,
-      createdAt: { $gte: start24h }
-    }).populate("serviceId").sort({ createdAt: -1 });
+      createdAt: { $gte: start24h },
+    })
+      .populate("serviceId")
+      .sort({ createdAt: -1 });
 
-    const statsMap = new Map(stats.map(s => [s._id.toString(), s]));
+    const statsMap = new Map(stats.map((s) => [s._id.toString(), s]));
     const openIncidentsServiceIds = new Set(
       incidents
-        .filter(inc => inc.status !== "resolved")
-        .map(inc => inc.serviceId?._id?.toString() || "")
+        .filter((inc) => inc.status !== "resolved")
+        .map((inc) => inc.serviceId?._id?.toString() || ""),
     );
 
-    const serviceStatsList: ServiceStats[] = services.map(s => {
-      const serviceStats = statsMap.get(s._id.toString()) || { totalLogs: 0, errorLogs: 0, avgLatency: null };
+    const serviceStatsList: ServiceStats[] = services.map((s) => {
+      const serviceStats = statsMap.get(s._id.toString()) || {
+        totalLogs: 0,
+        errorLogs: 0,
+        avgLatency: null,
+      };
       const totalLogs = serviceStats.totalLogs;
       const errorLogs = serviceStats.errorLogs;
       const errorRate = totalLogs > 0 ? (errorLogs / totalLogs) * 100 : 0;
-      const availability = totalLogs > 0 ? ((totalLogs - errorLogs) / totalLogs) * 100 : 100;
-      const avgLatency = serviceStats.avgLatency !== null && serviceStats.avgLatency !== undefined
-        ? Math.round(serviceStats.avgLatency as number)
-        : null;
+      const availability =
+        totalLogs > 0 ? ((totalLogs - errorLogs) / totalLogs) * 100 : 100;
+      const avgLatency =
+        serviceStats.avgLatency !== null &&
+        serviceStats.avgLatency !== undefined
+          ? Math.round(serviceStats.avgLatency as number)
+          : null;
 
       let healthStatus: "healthy" | "warning" | "incident" = "healthy";
       if (openIncidentsServiceIds.has(s._id.toString())) {
@@ -111,17 +133,19 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
     });
 
     // Structure incident contexts for AI reasoning
-    const incidentDigestContexts: IncidentDigestContext[] = incidents.map(inc => {
-      const s = inc.serviceId as any;
-      return {
-        title: inc.title,
-        serviceName: s ? s.name : "unknown-service",
-        environment: s ? s.environment : "prod",
-        status: inc.status,
-        createdAt: inc.createdAt.toISOString(),
-        rootCause: inc.rootCause,
-      };
-    });
+    const incidentDigestContexts: IncidentDigestContext[] = incidents.map(
+      (inc) => {
+        const s = inc.serviceId as any;
+        return {
+          title: inc.title,
+          serviceName: s ? s.name : "unknown-service",
+          environment: s ? s.environment : "prod",
+          status: inc.status,
+          createdAt: inc.createdAt.toISOString(),
+          rootCause: inc.rootCause,
+        };
+      },
+    );
 
     // 3. Generate AI summary of overnight incidents
     let aiSummary = "";
@@ -131,8 +155,12 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
         incidents: incidentDigestContexts,
       });
     } catch (err) {
-      console.error(`[Email Digest] AI summary failed for project ${project.name}:`, err);
-      aiSummary = "Morning executive report is ready. System health and services logs are successfully synchronized.";
+      console.error(
+        `[Email Digest] AI summary failed for project ${project.name}:`,
+        err,
+      );
+      aiSummary =
+        "Morning executive report is ready. System health and services logs are successfully synchronized.";
     }
 
     projectDigestDataList.push({
@@ -146,7 +174,11 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
 
   // 4. Build HTML digest template
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-  const htmlContent = generateHtmlDigestEmail(user.username, projectDigestDataList, appUrl);
+  const htmlContent = generateHtmlDigestEmail(
+    user.username,
+    projectDigestDataList,
+    appUrl,
+  );
 
   // 5. Send or log email
   if (resend) {
@@ -158,7 +190,9 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
         html: htmlContent,
       });
 
-      console.log(`[Email Digest] Dispatched email to ${user.email}. ID: ${emailResponse.data?.id}`);
+      console.log(
+        `[Email Digest] Dispatched email to ${user.email}. ID: ${emailResponse.data?.id}`,
+      );
       return { success: true, method: "resend", id: emailResponse.data?.id };
     } catch (err) {
       console.error("[Email Digest] Resend dispatch error:", err);
@@ -166,30 +200,56 @@ export async function buildAndSendEmailDigest(user: { email?: string; username: 
     }
   } else {
     // Development fallback logging
-    console.log("\n=================================================================================");
-    console.log(`☀️ [DEVELOPMENT MODE - EMAIL DIGEST] Logging morning digest for user: ${user.email}`);
-    console.log("---------------------------------------------------------------------------------");
+    console.log(
+      "\n=================================================================================",
+    );
+    console.log(
+      `☀️ [DEVELOPMENT MODE - EMAIL DIGEST] Logging morning digest for user: ${user.email}`,
+    );
+    console.log(
+      "---------------------------------------------------------------------------------",
+    );
     console.log(`HTML Payload length: ${htmlContent.length} bytes`);
     console.log("Projects summarized:");
     for (const p of projectDigestDataList) {
-      console.log(`- Project: ${p.projectName} (API key: ${p.apiKey.slice(0, 10)}...)`);
+      console.log(
+        `- Project: ${p.projectName} (API key: ${p.apiKey.slice(0, 10)}...)`,
+      );
       console.log(`  AI Summary: "${p.aiSummary}"`);
-      console.log(`  Services: ${p.services.length}, Incidents overnight: ${p.incidents.length}`);
+      console.log(
+        `  Services: ${p.services.length}, Incidents overnight: ${p.incidents.length}`,
+      );
     }
-    console.log("---------------------------------------------------------------------------------");
+    console.log(
+      "---------------------------------------------------------------------------------",
+    );
     console.log("Email HTML template output preview saved inside server logs.");
-    console.log("=================================================================================\n");
+    console.log(
+      "=================================================================================\n",
+    );
     return { success: true, method: "console", html: htmlContent };
   }
 }
 
-function generateHtmlDigestEmail(username: string, projects: ProjectDigestData[], appUrl: string): string {
-  const projectSections = projects.map(p => {
-    // Services status rows
-    const serviceRows = p.services.length > 0
-      ? p.services.map(s => {
-          const healthIndicator = s.healthStatus === "incident" ? "🔴" : s.healthStatus === "warning" ? "🟡" : "🟢";
-          return `
+function generateHtmlDigestEmail(
+  username: string,
+  projects: ProjectDigestData[],
+  appUrl: string,
+): string {
+  const projectSections = projects
+    .map((p) => {
+      // Services status rows
+      const serviceRows =
+        p.services.length > 0
+          ? p.services
+              .map((s) => {
+                const healthIndicator =
+                  s.healthStatus === "incident"
+                    ? "🔴"
+                    : s.healthStatus === "warning"
+                      ? "🟡"
+                      : "🟢";
+                return `
             <tr style="border-bottom: 1px solid #1e293b;">
               <td style="padding: 10px 0; font-family: monospace; font-size: 12px; color: #f1f5f9;">
                 ${healthIndicator} ${s.name} <span style="color: #64748b; font-size: 10px;">(${s.environment.toUpperCase()})</span>
@@ -205,8 +265,9 @@ function generateHtmlDigestEmail(username: string, projects: ProjectDigestData[]
               </td>
             </tr>
           `;
-        }).join("")
-      : `
+              })
+              .join("")
+          : `
         <tr>
           <td colspan="4" style="padding: 16px 0; text-align: center; font-size: 12px; color: #64748b;">
             No services registered. Set up client logger to start tracking health metrics.
@@ -214,9 +275,12 @@ function generateHtmlDigestEmail(username: string, projects: ProjectDigestData[]
         </tr>
       `;
 
-    // Incidents list
-    const incidentItems = p.incidents.length > 0
-      ? p.incidents.map(inc => `
+      // Incidents list
+      const incidentItems =
+        p.incidents.length > 0
+          ? p.incidents
+              .map(
+                (inc) => `
           <div style="border-left: 3px solid #ef4444; background: rgba(239, 68, 68, 0.05); border: 1px solid #311818; padding: 12px; margin-bottom: 12px; rounded: 8px;">
             <div style="font-weight: bold; font-size: 13px; color: #ef4444; margin-bottom: 4px;">
               🚨 ${inc.title}
@@ -228,14 +292,16 @@ function generateHtmlDigestEmail(username: string, projects: ProjectDigestData[]
               <strong>Diagnosis:</strong> ${inc.rootCause}
             </div>
           </div>
-        `).join("")
-      : `
+        `,
+              )
+              .join("")
+          : `
         <div style="border: 1px dashed #1e293b; border-radius: 8px; padding: 16px; text-align: center; font-size: 12px; color: #64748b;">
           ✅ No SRE incidents occurred during this 24-hour cycle.
         </div>
       `;
 
-    return `
+      return `
       <!-- Project Section -->
       <div style="background-color: #0f172a; border: 1px solid #1e293b; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
         <h2 style="font-size: 16px; font-weight: bold; color: #ffffff; margin-top: 0; margin-bottom: 12px; border-bottom: 1px solid #1e293b; padding-bottom: 8px;">
@@ -273,7 +339,8 @@ function generateHtmlDigestEmail(username: string, projects: ProjectDigestData[]
         </div>
       </div>
     `;
-  }).join("");
+    })
+    .join("");
 
   return `
     <!DOCTYPE html>

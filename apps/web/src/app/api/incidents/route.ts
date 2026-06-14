@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -38,16 +38,24 @@ export async function GET(request: Request) {
     if (!projectId) {
       return NextResponse.json(
         { error: { code: "BAD_REQUEST", message: "projectId is required" } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Tenant Check: Ensure user owns this project
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "FORBIDDEN", message: "Forbidden: You do not own this project" } },
-        { status: 403 }
+        {
+          error: {
+            code: "FORBIDDEN",
+            message: "Forbidden: You do not own this project",
+          },
+        },
+        { status: 403 },
       );
     }
 
@@ -60,8 +68,13 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Incidents GET Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to retrieve incidents" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to retrieve incidents",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -72,16 +85,22 @@ export async function PATCH(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { incidentId, status } = await request.json();
 
-    if (!incidentId || !status || !["open", "investigating", "resolved"].includes(status)) {
+    if (
+      !incidentId ||
+      !status ||
+      !["open", "investigating", "resolved"].includes(status)
+    ) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "Invalid payload parameters" } },
-        { status: 400 }
+        {
+          error: { code: "BAD_REQUEST", message: "Invalid payload parameters" },
+        },
+        { status: 400 },
       );
     }
 
@@ -90,16 +109,19 @@ export async function PATCH(request: Request) {
     if (!incident) {
       return NextResponse.json(
         { error: { code: "NOT_FOUND", message: "Incident not found" } },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Tenant Check: Ensure user owns the project this incident belongs to
-    const project = await Project.findOne({ _id: incident.projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: incident.projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
         { error: { code: "FORBIDDEN", message: "Forbidden: Access denied" } },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -109,7 +131,8 @@ export async function PATCH(request: Request) {
 
     if (status === "resolved" && previousStatus !== "resolved") {
       incident.resolvedAt = new Date();
-      incident.ttr = incident.resolvedAt.getTime() - incident.createdAt.getTime();
+      incident.ttr =
+        incident.resolvedAt.getTime() - incident.createdAt.getTime();
     } else if (status !== "resolved" && previousStatus === "resolved") {
       incident.resolvedAt = undefined;
       incident.ttr = undefined;
@@ -129,8 +152,13 @@ export async function PATCH(request: Request) {
   } catch (error) {
     console.error("Incidents PATCH Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to update incident" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update incident",
+        },
+      },
+      { status: 500 },
     );
   }
 }

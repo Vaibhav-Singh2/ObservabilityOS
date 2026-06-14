@@ -23,22 +23,22 @@ const SEVERITY_COLORS = {
     decimal: 15158332,
     cleanHex: "E74C3C",
     emoji: "🚨",
-    label: "BREACHED"
+    label: "BREACHED",
   },
   warning: {
     hex: "#F1C40F", // Yellow
     decimal: 15848719,
     cleanHex: "F1C40F",
     emoji: "⚠️",
-    label: "WARNING"
+    label: "WARNING",
   },
   healthy: {
     hex: "#2ECC71", // Green
     decimal: 3066993,
     cleanHex: "2ECC71",
     emoji: "✅",
-    label: "RECOVERED / HEALTHY"
-  }
+    label: "RECOVERED / HEALTHY",
+  },
 };
 
 export interface AlertAdapter {
@@ -49,14 +49,15 @@ export class SlackAlertAdapter implements AlertAdapter {
   async send(webhookUrl: string, payload: AlertPayload): Promise<boolean> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const serviceLink = `${appUrl}/dashboard/services/${payload.serviceId}?projectId=${payload.projectId}`;
-    
+
     const config = SEVERITY_COLORS[payload.currentStatus];
     const prevEmoji = SEVERITY_COLORS[payload.previousStatus].emoji;
     const currEmoji = config.emoji;
 
-    const typeLabel = payload.sloType === "latency" 
-      ? `Latency (<${payload.latencyThresholdMs ?? 500}ms)` 
-      : "Availability";
+    const typeLabel =
+      payload.sloType === "latency"
+        ? `Latency (<${payload.latencyThresholdMs ?? 500}ms)`
+        : "Availability";
 
     const slackPayload = {
       attachments: [
@@ -68,49 +69,49 @@ export class SlackAlertAdapter implements AlertAdapter {
               text: {
                 type: "plain_text",
                 text: `${currEmoji} SLO ${config.label}: ${payload.serviceName}`,
-                emoji: true
-              }
+                emoji: true,
+              },
             },
             {
               type: "section",
               fields: [
                 {
                   type: "mrkdwn",
-                  text: `*SLO:* ${payload.sloName}`
+                  text: `*SLO:* ${payload.sloName}`,
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Type:* ${typeLabel}`
+                  text: `*Type:* ${typeLabel}`,
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Environment:* \`${payload.environment}\``
+                  text: `*Environment:* \`${payload.environment}\``,
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Target Compliance:* ${payload.target}%`
-                }
-              ]
+                  text: `*Target Compliance:* ${payload.target}%`,
+                },
+              ],
             },
             {
               type: "section",
               fields: [
                 {
                   type: "mrkdwn",
-                  text: `*Current Compliance:* *${payload.compliance}%*`
+                  text: `*Current Compliance:* *${payload.compliance}%*`,
                 },
                 {
                   type: "mrkdwn",
-                  text: `*Error Budget Remaining:* *${payload.budgetRemaining} reqs* (${payload.budgetRemainingPercent}%)`
-                }
-              ]
+                  text: `*Error Budget Remaining:* *${payload.budgetRemaining} reqs* (${payload.budgetRemainingPercent}%)`,
+                },
+              ],
             },
             {
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: `*Transition:* \`${payload.previousStatus}\` ${prevEmoji} ➡️ *${payload.currentStatus}* ${currEmoji}`
-              }
+                text: `*Transition:* \`${payload.previousStatus}\` ${prevEmoji} ➡️ *${payload.currentStatus}* ${currEmoji}`,
+              },
             },
             {
               type: "actions",
@@ -120,24 +121,25 @@ export class SlackAlertAdapter implements AlertAdapter {
                   text: {
                     type: "plain_text",
                     text: "Investigate SLO Details",
-                    emoji: true
+                    emoji: true,
                   },
-                  style: payload.currentStatus === "breached" ? "danger" : "default",
+                  style:
+                    payload.currentStatus === "breached" ? "danger" : "default",
                   url: serviceLink,
-                  action_id: "view_slo_details"
-                }
-              ]
-            }
-          ]
-        }
-      ]
+                  action_id: "view_slo_details",
+                },
+              ],
+            },
+          ],
+        },
+      ],
     };
 
     try {
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(slackPayload)
+        body: JSON.stringify(slackPayload),
       });
       return response.ok;
     } catch (err) {
@@ -151,14 +153,15 @@ export class DiscordAlertAdapter implements AlertAdapter {
   async send(webhookUrl: string, payload: AlertPayload): Promise<boolean> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const serviceLink = `${appUrl}/dashboard/services/${payload.serviceId}?projectId=${payload.projectId}`;
-    
+
     const config = SEVERITY_COLORS[payload.currentStatus];
     const prevEmoji = SEVERITY_COLORS[payload.previousStatus].emoji;
     const currEmoji = config.emoji;
 
-    const typeLabel = payload.sloType === "latency" 
-      ? `Latency (<${payload.latencyThresholdMs ?? 500}ms)` 
-      : "Availability";
+    const typeLabel =
+      payload.sloType === "latency"
+        ? `Latency (<${payload.latencyThresholdMs ?? 500}ms)`
+        : "Availability";
 
     const discordPayload = {
       embeds: [
@@ -170,21 +173,37 @@ export class DiscordAlertAdapter implements AlertAdapter {
             { name: "SLO Name", value: payload.sloName, inline: true },
             { name: "Type", value: typeLabel, inline: true },
             { name: "Environment", value: payload.environment, inline: true },
-            { name: "Target Compliance", value: `${payload.target}%`, inline: true },
-            { name: "Current Compliance", value: `${payload.compliance}%`, inline: true },
-            { name: "Error Budget Remaining", value: `${payload.budgetRemaining} reqs (${payload.budgetRemainingPercent}%)`, inline: true },
-            { name: "Transition", value: `\`${payload.previousStatus}\` ${prevEmoji} ➡️ **${payload.currentStatus}** ${currEmoji}`, inline: false }
+            {
+              name: "Target Compliance",
+              value: `${payload.target}%`,
+              inline: true,
+            },
+            {
+              name: "Current Compliance",
+              value: `${payload.compliance}%`,
+              inline: true,
+            },
+            {
+              name: "Error Budget Remaining",
+              value: `${payload.budgetRemaining} reqs (${payload.budgetRemainingPercent}%)`,
+              inline: true,
+            },
+            {
+              name: "Transition",
+              value: `\`${payload.previousStatus}\` ${prevEmoji} ➡️ **${payload.currentStatus}** ${currEmoji}`,
+              inline: false,
+            },
           ],
-          timestamp: new Date().toISOString()
-        }
-      ]
+          timestamp: new Date().toISOString(),
+        },
+      ],
     };
 
     try {
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(discordPayload)
+        body: JSON.stringify(discordPayload),
       });
       return response.ok;
     } catch (err) {
@@ -198,51 +217,56 @@ export class TeamsAlertAdapter implements AlertAdapter {
   async send(webhookUrl: string, payload: AlertPayload): Promise<boolean> {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const serviceLink = `${appUrl}/dashboard/services/${payload.serviceId}?projectId=${payload.projectId}`;
-    
+
     const config = SEVERITY_COLORS[payload.currentStatus];
     const prevEmoji = SEVERITY_COLORS[payload.previousStatus].emoji;
     const currEmoji = config.emoji;
 
-    const typeLabel = payload.sloType === "latency" 
-      ? `Latency (<${payload.latencyThresholdMs ?? 500}ms)` 
-      : "Availability";
+    const typeLabel =
+      payload.sloType === "latency"
+        ? `Latency (<${payload.latencyThresholdMs ?? 500}ms)`
+        : "Availability";
 
     const teamsPayload = {
       "@type": "MessageCard",
       "@context": "http://schema.org/extensions",
-      "themeColor": config.cleanHex,
-      "summary": `SLO ${config.label}: ${payload.serviceName}`,
-      "title": `${currEmoji} SLO ${config.label}: ${payload.serviceName}`,
-      "sections": [
+      themeColor: config.cleanHex,
+      summary: `SLO ${config.label}: ${payload.serviceName}`,
+      title: `${currEmoji} SLO ${config.label}: ${payload.serviceName}`,
+      sections: [
         {
-          "facts": [
-            { "name": "SLO Name", "value": payload.sloName },
-            { "name": "Type", "value": typeLabel },
-            { "name": "Environment", "value": payload.environment },
-            { "name": "Target Compliance", "value": `${payload.target}%` },
-            { "name": "Current Compliance", "value": `${payload.compliance}%` },
-            { "name": "Error Budget Remaining", "value": `${payload.budgetRemaining} reqs (${payload.budgetRemainingPercent}%)` },
-            { "name": "Transition", "value": `${payload.previousStatus} ${prevEmoji} ➡️ **${payload.currentStatus}** ${currEmoji}` }
+          facts: [
+            { name: "SLO Name", value: payload.sloName },
+            { name: "Type", value: typeLabel },
+            { name: "Environment", value: payload.environment },
+            { name: "Target Compliance", value: `${payload.target}%` },
+            { name: "Current Compliance", value: `${payload.compliance}%` },
+            {
+              name: "Error Budget Remaining",
+              value: `${payload.budgetRemaining} reqs (${payload.budgetRemainingPercent}%)`,
+            },
+            {
+              name: "Transition",
+              value: `${payload.previousStatus} ${prevEmoji} ➡️ **${payload.currentStatus}** ${currEmoji}`,
+            },
           ],
-          "markdown": true
-        }
+          markdown: true,
+        },
       ],
-      "potentialAction": [
+      potentialAction: [
         {
           "@type": "OpenUri",
-          "name": "Investigate SLO",
-          "targets": [
-            { "os": "default", "uri": serviceLink }
-          ]
-        }
-      ]
+          name: "Investigate SLO",
+          targets: [{ os: "default", uri: serviceLink }],
+        },
+      ],
     };
 
     try {
       const response = await fetch(webhookUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(teamsPayload)
+        body: JSON.stringify(teamsPayload),
       });
       return response.ok;
     } catch (err) {
@@ -255,7 +279,7 @@ export class TeamsAlertAdapter implements AlertAdapter {
 // Unified multi-channel dispatcher helper
 export async function dispatchMultiChannelSloAlert(
   project: IProject,
-  payload: AlertPayload
+  payload: AlertPayload,
 ): Promise<{ slack: boolean; discord: boolean; teams: boolean }> {
   const results = { slack: false, discord: false, teams: false };
 
@@ -264,7 +288,9 @@ export async function dispatchMultiChannelSloAlert(
   if (slackUrl) {
     const adapter = new SlackAlertAdapter();
     results.slack = await adapter.send(slackUrl, payload);
-    console.log(`[Alert Dispatcher] Slack alert status: ${results.slack ? "SUCCESS" : "FAILED"}`);
+    console.log(
+      `[Alert Dispatcher] Slack alert status: ${results.slack ? "SUCCESS" : "FAILED"}`,
+    );
   }
 
   // Dispatch to Discord
@@ -272,7 +298,9 @@ export async function dispatchMultiChannelSloAlert(
   if (discordUrl) {
     const adapter = new DiscordAlertAdapter();
     results.discord = await adapter.send(discordUrl, payload);
-    console.log(`[Alert Dispatcher] Discord alert status: ${results.discord ? "SUCCESS" : "FAILED"}`);
+    console.log(
+      `[Alert Dispatcher] Discord alert status: ${results.discord ? "SUCCESS" : "FAILED"}`,
+    );
   }
 
   // Dispatch to Microsoft Teams
@@ -280,7 +308,9 @@ export async function dispatchMultiChannelSloAlert(
   if (teamsUrl) {
     const adapter = new TeamsAlertAdapter();
     results.teams = await adapter.send(teamsUrl, payload);
-    console.log(`[Alert Dispatcher] Teams alert status: ${results.teams ? "SUCCESS" : "FAILED"}`);
+    console.log(
+      `[Alert Dispatcher] Teams alert status: ${results.teams ? "SUCCESS" : "FAILED"}`,
+    );
   }
 
   return results;
@@ -292,7 +322,12 @@ export async function dispatchMultiChannelIncidentAlert(
   serviceName: string,
   environment: string,
   incidentId: string,
-  analysis: { title: string; summary: string; rootCause: string; suggestedFix: string[] }
+  analysis: {
+    title: string;
+    summary: string;
+    rootCause: string;
+    suggestedFix: string[];
+  },
 ): Promise<{ slack: boolean; discord: boolean; teams: boolean }> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const dashboardLink = `${appUrl}/dashboard/incidents?projectId=${project._id.toString()}&incidentId=${incidentId}`;
@@ -325,11 +360,17 @@ export async function dispatchMultiChannelIncidentAlert(
         },
         {
           type: "section",
-          text: { type: "mrkdwn", text: `*AI Analysis Summary:*\n${analysis.summary}` },
+          text: {
+            type: "mrkdwn",
+            text: `*AI Analysis Summary:*\n${analysis.summary}`,
+          },
         },
         {
           type: "section",
-          text: { type: "mrkdwn", text: `*Root Cause:*\n${analysis.rootCause}` },
+          text: {
+            type: "mrkdwn",
+            text: `*Root Cause:*\n${analysis.rootCause}`,
+          },
         },
         {
           type: "section",
@@ -345,7 +386,11 @@ export async function dispatchMultiChannelIncidentAlert(
           elements: [
             {
               type: "button",
-              text: { type: "plain_text", text: "Investigate Incident", emoji: true },
+              text: {
+                type: "plain_text",
+                text: "Investigate Incident",
+                emoji: true,
+              },
               style: "danger",
               url: dashboardLink,
               action_id: "view_incident_dashboard",
@@ -379,13 +424,15 @@ export async function dispatchMultiChannelIncidentAlert(
           fields: [
             {
               name: "Suggested Troubleshooting Steps",
-              value: analysis.suggestedFix.map((step: string, idx: number) => `${idx + 1}. ${step}`).join("\n"),
-              inline: false
-            }
+              value: analysis.suggestedFix
+                .map((step: string, idx: number) => `${idx + 1}. ${step}`)
+                .join("\n"),
+              inline: false,
+            },
           ],
-          timestamp: new Date().toISOString()
-        }
-      ]
+          timestamp: new Date().toISOString(),
+        },
+      ],
     };
 
     try {
@@ -405,26 +452,26 @@ export async function dispatchMultiChannelIncidentAlert(
     const teamsPayload = {
       "@type": "MessageCard",
       "@context": "http://schema.org/extensions",
-      "themeColor": "E74C3C",
-      "summary": `Incident Alert: ${serviceName}`,
-      "title": `🚨 Incident Alert: ${serviceName} (${environment})`,
-      "sections": [
+      themeColor: "E74C3C",
+      summary: `Incident Alert: ${serviceName}`,
+      title: `🚨 Incident Alert: ${serviceName} (${environment})`,
+      sections: [
         {
-          "activityTitle": analysis.title,
-          "activitySubtitle": `Root Cause: ${analysis.rootCause}`,
-          "text": `**AI Analysis Summary:**\n${analysis.summary}\n\n**Suggested Troubleshooting:**\n${analysis.suggestedFix
+          activityTitle: analysis.title,
+          activitySubtitle: `Root Cause: ${analysis.rootCause}`,
+          text: `**AI Analysis Summary:**\n${analysis.summary}\n\n**Suggested Troubleshooting:**\n${analysis.suggestedFix
             .map((step: string, idx: number) => `${idx + 1}. ${step}`)
             .join("\n")}`,
-          "markdown": true
-        }
+          markdown: true,
+        },
       ],
-      "potentialAction": [
+      potentialAction: [
         {
           "@type": "OpenUri",
-          "name": "Investigate Incident",
-          "targets": [{ "os": "default", "uri": dashboardLink }]
-        }
-      ]
+          name: "Investigate Incident",
+          targets: [{ os: "default", uri: dashboardLink }],
+        },
+      ],
     };
 
     try {

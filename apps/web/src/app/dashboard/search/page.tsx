@@ -35,21 +35,27 @@ export default async function SearchPage({ searchParams }: PageProps) {
   }
 
   const resolvedSearchParams = await searchParams;
-  const projects = await Project.find({ ownerId: user._id }).sort({ createdAt: -1 });
+  const projects = await Project.find({ ownerId: user._id }).sort({
+    createdAt: -1,
+  });
 
   if (projects.length === 0) {
     redirect("/dashboard");
   }
 
-  const activeProjectId = resolvedSearchParams.projectId || projects[0]?._id.toString();
-  const activeProject = projects.find(p => p._id.toString() === activeProjectId) || projects[0];
+  const activeProjectId =
+    resolvedSearchParams.projectId || projects[0]?._id.toString();
+  const activeProject =
+    projects.find((p) => p._id.toString() === activeProjectId) || projects[0];
 
   if (!activeProject) {
     redirect("/dashboard");
   }
 
   // Fetch services to populate filter options
-  const services = await Service.find({ projectId: activeProject._id }).sort({ name: 1 });
+  const services = await Service.find({ projectId: activeProject._id }).sort({
+    name: 1,
+  });
 
   // Fetch default logs for the last 24h to display immediately (limit 100)
   const start24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -68,13 +74,13 @@ export default async function SearchPage({ searchParams }: PageProps) {
     apiKey: activeProject.apiKey,
   };
 
-  const serializedServices = services.map(s => ({
+  const serializedServices = services.map((s) => ({
     id: s._id.toString(),
     name: s.name,
     environment: s.environment,
   }));
 
-  const serializedLogs = initialLogs.map(l => {
+  const serializedLogs = initialLogs.map((l) => {
     const s = l.serviceId as any;
     return {
       id: l._id.toString(),
@@ -83,18 +89,22 @@ export default async function SearchPage({ searchParams }: PageProps) {
       message: l.message,
       traceId: l.traceId || null,
       metadata: l.metadata || {},
-      service: s ? { id: s._id.toString(), name: s.name, environment: s.environment } : null,
+      service: s
+        ? { id: s._id.toString(), name: s.name, environment: s.environment }
+        : null,
     };
   });
 
-  const serializedSavedQueries = activeProject.savedQueries ? activeProject.savedQueries.map(q => ({
-    name: q.name,
-    query: q.query || "",
-    level: q.level || "all",
-    serviceId: q.serviceId || "all",
-    environment: q.environment || "all",
-    timeRange: q.timeRange || "24h",
-  })) : [];
+  const serializedSavedQueries = activeProject.savedQueries
+    ? activeProject.savedQueries.map((q) => ({
+        name: q.name,
+        query: q.query || "",
+        level: q.level || "all",
+        serviceId: q.serviceId || "all",
+        environment: q.environment || "all",
+        timeRange: q.timeRange || "24h",
+      }))
+    : [];
 
   return (
     <SearchView

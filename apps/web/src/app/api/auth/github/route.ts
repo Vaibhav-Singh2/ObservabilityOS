@@ -7,13 +7,15 @@ export async function GET(request: Request) {
   if (!clientId) {
     console.error("Missing GITHUB_CLIENT_ID in environment variables");
     return NextResponse.json(
-      { error: { code: "CONFIGURATION_ERROR", message: "OAuth misconfigured" } },
-      { status: 500 }
+      {
+        error: { code: "CONFIGURATION_ERROR", message: "OAuth misconfigured" },
+      },
+      { status: 500 },
     );
   }
 
   const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
-    redirectUri
+    redirectUri,
   )}&scope=user:email`;
 
   return NextResponse.redirect(githubAuthUrl);

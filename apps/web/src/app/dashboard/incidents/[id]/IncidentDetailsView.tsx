@@ -3,15 +3,15 @@
 import { useState } from "react";
 import NextLink from "next/link";
 import { useRouter } from "next/navigation";
-import { 
-  ArrowLeft, 
-  GitBranch, 
-  GitCommit, 
-  Terminal, 
-  Sparkles, 
-  CheckCircle2, 
-  AlertCircle, 
-  Clock, 
+import {
+  ArrowLeft,
+  GitBranch,
+  GitCommit,
+  Terminal,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
   Cpu,
   ChevronDown,
   ChevronUp,
@@ -21,7 +21,7 @@ import {
   BookOpen,
   ExternalLink,
   MessageSquare,
-  Trash2
+  Trash2,
 } from "lucide-react";
 
 interface LogItem {
@@ -79,20 +79,22 @@ interface CommentItem {
   } | null;
 }
 
-export default function IncidentDetailsView({ 
-  projectId, 
-  incident: initialIncident, 
+export default function IncidentDetailsView({
+  projectId,
+  incident: initialIncident,
   initialLogs,
   comments: initialComments,
-  currentUser
-}: IncidentDetailsProps & { 
+  currentUser,
+}: IncidentDetailsProps & {
   comments: CommentItem[];
-  currentUser: { id: string; username: string; avatarUrl: string | null; };
+  currentUser: { id: string; username: string; avatarUrl: string | null };
 }) {
   const router = useRouter();
   const [incident, setIncident] = useState(initialIncident);
   const [logs] = useState<LogItem[]>(initialLogs);
-  const [actionChecked, setActionChecked] = useState<Record<number, boolean>>({});
+  const [actionChecked, setActionChecked] = useState<Record<number, boolean>>(
+    {},
+  );
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -137,7 +139,7 @@ export default function IncidentDetailsView({
     try {
       const res = await fetch(
         `/api/incidents/comments?projectId=${projectId}&commentId=${commentId}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (res.ok) {
@@ -151,7 +153,9 @@ export default function IncidentDetailsView({
     }
   };
 
-  const updateStatus = async (newStatus: "open" | "investigating" | "resolved") => {
+  const updateStatus = async (
+    newStatus: "open" | "investigating" | "resolved",
+  ) => {
     setIsUpdating(true);
     try {
       const res = await fetch("/api/incidents", {
@@ -168,7 +172,9 @@ export default function IncidentDetailsView({
         setIncident({
           ...incident,
           status: data.incident.status,
-          resolvedAt: data.incident.resolvedAt ? new Date(data.incident.resolvedAt).toISOString() : null,
+          resolvedAt: data.incident.resolvedAt
+            ? new Date(data.incident.resolvedAt).toISOString()
+            : null,
           ttr: data.incident.ttr || null,
         });
         router.refresh();
@@ -194,12 +200,12 @@ export default function IncidentDetailsView({
     setExpandedLogId((prev) => (prev === id ? null : id));
   };
 
-  const statusClass = 
+  const statusClass =
     incident.status === "open"
       ? "bg-rose-500/10 border-rose-500/20 text-rose-400"
       : incident.status === "investigating"
-      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-      : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
+        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+        : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400";
 
   return (
     <div className="space-y-6">
@@ -217,17 +223,21 @@ export default function IncidentDetailsView({
       {/* Incident Header Card */}
       <div className="p-6 rounded-2xl border border-slate-900 bg-slate-950 flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/5 rounded-full blur-[60px] pointer-events-none" />
-        
+
         <div className="space-y-3 flex-1 min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             {/* Status Pill */}
-            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${statusClass}`}>
+            <span
+              className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded border ${statusClass}`}
+            >
               {incident.status}
             </span>
 
             {/* Service & Env Pill */}
             <span className="text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
-              {incident.service ? `${incident.service.name} • ${incident.service.environment.toUpperCase()}` : "unknown service"}
+              {incident.service
+                ? `${incident.service.name} • ${incident.service.environment.toUpperCase()}`
+                : "unknown service"}
             </span>
 
             {/* AI tag */}
@@ -301,7 +311,9 @@ export default function IncidentDetailsView({
                 {incident.summary}
               </p>
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Impact Analysis</h3>
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">
+                  Impact Analysis
+                </h3>
                 <p>{incident.impact}</p>
               </div>
             </div>
@@ -313,8 +325,10 @@ export default function IncidentDetailsView({
               Root Cause & Correlation
             </h2>
             <div className="space-y-4 text-sm">
-              <p className="text-slate-350 leading-relaxed">{incident.rootCause}</p>
-              
+              <p className="text-slate-350 leading-relaxed">
+                {incident.rootCause}
+              </p>
+
               {incident.deploy ? (
                 <div className="p-4 rounded-xl border border-indigo-950/40 bg-indigo-950/10 space-y-3">
                   <div className="flex items-center justify-between">
@@ -323,11 +337,12 @@ export default function IncidentDetailsView({
                     </span>
                     {incident.deploy.deployedAt && (
                       <span className="text-xs text-slate-500">
-                        Deployed {new Date(incident.deploy.deployedAt).toLocaleString()}
+                        Deployed{" "}
+                        {new Date(incident.deploy.deployedAt).toLocaleString()}
                       </span>
                     )}
                   </div>
-                  
+
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-indigo-650/10 border border-indigo-650/30 flex items-center justify-center shrink-0">
                       <GitCommit className="w-4 h-4 text-indigo-400" />
@@ -350,7 +365,8 @@ export default function IncidentDetailsView({
                 </div>
               ) : (
                 <p className="text-xs text-slate-500 italic bg-slate-900/50 p-3 rounded-lg border border-slate-900">
-                  No software deployment events were recorded close to the onset of this anomaly.
+                  No software deployment events were recorded close to the onset
+                  of this anomaly.
                 </p>
               )}
             </div>
@@ -363,32 +379,46 @@ export default function IncidentDetailsView({
               Anomalous Log Stream
             </h2>
             <p className="text-xs text-slate-500">
-              The following {logs.length} error logs occurred in the anomalous window. Click on any log to inspect its metadata.
+              The following {logs.length} error logs occurred in the anomalous
+              window. Click on any log to inspect its metadata.
             </p>
 
             <div className="border border-slate-900 rounded-lg overflow-hidden bg-slate-950/60 font-mono text-xs">
               {logs.map((log) => {
                 const isExpanded = expandedLogId === log.id;
                 const dateStr = new Date(log.timestamp).toLocaleTimeString();
-                
+
                 return (
-                  <div key={log.id} className="border-b border-slate-900 last:border-b-0 hover:bg-slate-900/40 transition-colors">
+                  <div
+                    key={log.id}
+                    className="border-b border-slate-900 last:border-b-0 hover:bg-slate-900/40 transition-colors"
+                  >
                     {/* Log Row Trigger */}
                     <div
                       onClick={() => toggleLogExpand(log.id)}
                       className="p-3 flex items-start gap-3 cursor-pointer select-none"
                     >
-                      <span className="text-slate-600 shrink-0 select-none">{dateStr}</span>
-                      <span className="text-rose-500 font-bold shrink-0 select-none">[ERROR]</span>
+                      <span className="text-slate-600 shrink-0 select-none">
+                        {dateStr}
+                      </span>
+                      <span className="text-rose-500 font-bold shrink-0 select-none">
+                        [ERROR]
+                      </span>
                       {log.traceId && (
                         <span className="text-indigo-400/80 shrink-0 font-semibold select-none">
                           [{log.traceId.slice(0, 8)}]
                         </span>
                       )}
-                      <span className="text-slate-350 truncate flex-1 min-w-0">{log.message}</span>
+                      <span className="text-slate-350 truncate flex-1 min-w-0">
+                        {log.message}
+                      </span>
                       {log.metadata && Object.keys(log.metadata).length > 0 && (
                         <span className="text-slate-600 hover:text-slate-400 shrink-0">
-                          {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                          {isExpanded ? (
+                            <ChevronUp className="w-3.5 h-3.5" />
+                          ) : (
+                            <ChevronDown className="w-3.5 h-3.5" />
+                          )}
                         </span>
                       )}
                     </div>
@@ -396,8 +426,12 @@ export default function IncidentDetailsView({
                     {/* Metadata Panel */}
                     {isExpanded && log.metadata && (
                       <div className="p-3 bg-slate-950 border-t border-slate-900 text-slate-400 overflow-x-auto select-text leading-relaxed">
-                        <span className="block text-slate-600 mb-1 border-b border-slate-900 pb-1 text-[10px] uppercase font-bold tracking-wider">Log Metadata Payload</span>
-                        <pre className="text-indigo-300">{JSON.stringify(log.metadata, null, 2)}</pre>
+                        <span className="block text-slate-600 mb-1 border-b border-slate-900 pb-1 text-[10px] uppercase font-bold tracking-wider">
+                          Log Metadata Payload
+                        </span>
+                        <pre className="text-indigo-300">
+                          {JSON.stringify(log.metadata, null, 2)}
+                        </pre>
                       </div>
                     )}
                   </div>
@@ -424,7 +458,10 @@ export default function IncidentDetailsView({
                   {comments.map((comment) => {
                     const isAuthor = comment.user?.id === currentUser.id;
                     return (
-                      <div key={comment.id} className="flex gap-3 text-xs bg-slate-900/30 border border-slate-900/60 p-4 rounded-xl relative group">
+                      <div
+                        key={comment.id}
+                        className="flex gap-3 text-xs bg-slate-900/30 border border-slate-900/60 p-4 rounded-xl relative group"
+                      >
                         {/* Avatar */}
                         <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/25 flex items-center justify-center shrink-0 font-bold text-indigo-400 uppercase select-none">
                           {comment.user?.username.slice(0, 2) || "SR"}
@@ -433,12 +470,16 @@ export default function IncidentDetailsView({
                         {/* Content */}
                         <div className="flex-1 space-y-1.5 min-w-0">
                           <div className="flex items-center justify-between">
-                            <span className="font-semibold text-slate-200">{comment.user?.username || "Unknown"}</span>
+                            <span className="font-semibold text-slate-200">
+                              {comment.user?.username || "Unknown"}
+                            </span>
                             <span className="text-[10px] text-slate-500">
                               {new Date(comment.createdAt).toLocaleString()}
                             </span>
                           </div>
-                          <p className="text-slate-350 leading-relaxed whitespace-pre-wrap">{comment.content}</p>
+                          <p className="text-slate-350 leading-relaxed whitespace-pre-wrap">
+                            {comment.content}
+                          </p>
                         </div>
 
                         {/* Delete Button */}
@@ -459,8 +500,14 @@ export default function IncidentDetailsView({
             </div>
 
             {/* Add Comment Form */}
-            <form onSubmit={handleAddComment} className="border-t border-slate-900 pt-6 space-y-3">
-              <label htmlFor="newComment" className="block text-[10px] font-bold uppercase tracking-wider text-slate-500">
+            <form
+              onSubmit={handleAddComment}
+              className="border-t border-slate-900 pt-6 space-y-3"
+            >
+              <label
+                htmlFor="newComment"
+                className="block text-[10px] font-bold uppercase tracking-wider text-slate-500"
+              >
                 Add Discussion Note
               </label>
               <textarea
@@ -489,38 +536,44 @@ export default function IncidentDetailsView({
         {/* Right Column (1/3 width) - Plan & Stats */}
         <div className="space-y-6">
           {/* Service Runbook & References */}
-          {incident.service && (incident.service.runbookUrl || incident.service.troubleshootingSteps) && (
-            <div className="rounded-xl border border-indigo-950/40 bg-slate-950 p-6 space-y-4">
-              <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                <BookOpen className="w-4 h-4 text-indigo-400" />
-                Service Runbook
-              </h2>
-              
-              {incident.service.runbookUrl && (
-                <div className="space-y-1.5">
-                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Reference Link</span>
-                  <a
-                    href={incident.service.runbookUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs text-indigo-455 hover:text-indigo-350 font-semibold underline break-all"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    {incident.service.runbookUrl}
-                  </a>
-                </div>
-              )}
+          {incident.service &&
+            (incident.service.runbookUrl ||
+              incident.service.troubleshootingSteps) && (
+              <div className="rounded-xl border border-indigo-950/40 bg-slate-950 p-6 space-y-4">
+                <h2 className="text-sm font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                  <BookOpen className="w-4 h-4 text-indigo-400" />
+                  Service Runbook
+                </h2>
 
-              {incident.service.troubleshootingSteps && (
-                <div className="space-y-2 pt-2 border-t border-slate-900">
-                  <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Troubleshooting Steps</span>
-                  <div className="text-xs text-slate-350 leading-relaxed whitespace-pre-wrap font-sans bg-slate-900/30 p-3 rounded-lg border border-slate-900">
-                    {incident.service.troubleshootingSteps}
+                {incident.service.runbookUrl && (
+                  <div className="space-y-1.5">
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      Reference Link
+                    </span>
+                    <a
+                      href={incident.service.runbookUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-xs text-indigo-455 hover:text-indigo-350 font-semibold underline break-all"
+                    >
+                      <ExternalLink className="w-3.5 h-3.5" />
+                      {incident.service.runbookUrl}
+                    </a>
                   </div>
-                </div>
-              )}
-            </div>
-          )}
+                )}
+
+                {incident.service.troubleshootingSteps && (
+                  <div className="space-y-2 pt-2 border-t border-slate-900">
+                    <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      Troubleshooting Steps
+                    </span>
+                    <div className="text-xs text-slate-350 leading-relaxed whitespace-pre-wrap font-sans bg-slate-900/30 p-3 rounded-lg border border-slate-900">
+                      {incident.service.troubleshootingSteps}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
           {/* Action Checklist */}
           <div className="rounded-xl border border-slate-900 bg-slate-950 p-6 space-y-4">
@@ -559,7 +612,7 @@ export default function IncidentDetailsView({
             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-400">
               Incident Diagnostics
             </h2>
-            
+
             <div className="space-y-3">
               {/* Service */}
               <div className="flex justify-between py-1.5 border-b border-slate-900">
@@ -612,9 +665,12 @@ export default function IncidentDetailsView({
               {/* TTR */}
               {incident.ttr && (
                 <div className="flex justify-between py-1.5 border-b border-slate-900">
-                  <span className="text-slate-500 text-xs">Time-to-Resolve</span>
+                  <span className="text-slate-500 text-xs">
+                    Time-to-Resolve
+                  </span>
                   <span className="text-emerald-400 font-semibold font-mono">
-                    {Math.round(incident.ttr / 1000 / 60)}m {Math.round((incident.ttr / 1000) % 60)}s
+                    {Math.round(incident.ttr / 1000 / 60)}m{" "}
+                    {Math.round((incident.ttr / 1000) % 60)}s
                   </span>
                 </div>
               )}
@@ -627,8 +683,8 @@ export default function IncidentDetailsView({
                 </span>
                 <div className="flex items-center gap-2">
                   <div className="w-full bg-slate-900 rounded-full h-1.5 border border-slate-800">
-                    <div 
-                      className="bg-indigo-500 h-1.5 rounded-full" 
+                    <div
+                      className="bg-indigo-500 h-1.5 rounded-full"
                       style={{ width: `${incident.confidence * 100}%` }}
                     />
                   </div>

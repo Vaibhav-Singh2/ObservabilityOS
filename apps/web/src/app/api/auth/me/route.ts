@@ -11,15 +11,20 @@ export async function GET() {
     if (!token) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       return NextResponse.json(
-        { error: { code: "CONFIGURATION_ERROR", message: "JWT secret not configured" } },
-        { status: 500 }
+        {
+          error: {
+            code: "CONFIGURATION_ERROR",
+            message: "JWT secret not configured",
+          },
+        },
+        { status: 500 },
       );
     }
 
@@ -29,7 +34,7 @@ export async function GET() {
     } catch (e) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Invalid session" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,7 +44,7 @@ export async function GET() {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "User not found" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -47,8 +52,13 @@ export async function GET() {
   } catch (error) {
     console.error("Auth Me API Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Internal server error" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Internal server error",
+        },
+      },
+      { status: 500 },
     );
   }
 }

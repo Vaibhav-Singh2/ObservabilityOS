@@ -15,18 +15,29 @@ export type AuditLogDocument = IAuditLog & Document;
 
 const AuditLogSchema = new Schema<IAuditLog>(
   {
-    projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
-    userId: { type: Schema.Types.ObjectId, ref: "User", required: true, index: true },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+      index: true,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
     action: { type: String, required: true },
     targetEntity: { type: String, required: true },
     targetId: { type: String },
     metadata: { type: Schema.Types.Map, of: Schema.Types.Mixed },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: { createdAt: true, updatedAt: false } },
 );
 
 // Optimize sorting index on projectId and createdAt
 AuditLogSchema.index({ projectId: 1, createdAt: -1 });
 
-export const AuditLog: Model<IAuditLog> = models.AuditLog || model<IAuditLog>("AuditLog", AuditLogSchema);
+export const AuditLog: Model<IAuditLog> =
+  models.AuditLog || model<IAuditLog>("AuditLog", AuditLogSchema);
 export default AuditLog;

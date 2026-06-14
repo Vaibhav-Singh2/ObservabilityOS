@@ -33,28 +33,45 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const rawBody = await request.json();
-    const { projectId, incidentId, content } = commentCreateSchema.parse(rawBody);
+    const { projectId, incidentId, content } =
+      commentCreateSchema.parse(rawBody);
 
     // Tenant check: Ensure user owns this project
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "FORBIDDEN", message: "Forbidden: You do not own this project" } },
-        { status: 403 }
+        {
+          error: {
+            code: "FORBIDDEN",
+            message: "Forbidden: You do not own this project",
+          },
+        },
+        { status: 403 },
       );
     }
 
     // Verify incident belongs to this project
-    const incident = await Incident.findOne({ _id: incidentId, projectId: project._id });
+    const incident = await Incident.findOne({
+      _id: incidentId,
+      projectId: project._id,
+    });
     if (!incident) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Incident not found in this project" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Incident not found in this project",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -66,7 +83,10 @@ export async function POST(request: Request) {
     });
 
     // Populate user info for the response
-    const populated = await Comment.findById(comment._id).populate("userId", "username email avatarUrl");
+    const populated = await Comment.findById(comment._id).populate(
+      "userId",
+      "username email avatarUrl",
+    );
     if (!populated) {
       throw new Error("Failed to retrieve created comment");
     }
@@ -77,12 +97,14 @@ export async function POST(request: Request) {
       incidentId: populated.incidentId.toString(),
       content: populated.content,
       createdAt: populated.createdAt.toISOString(),
-      user: u ? {
-        id: u._id.toString(),
-        username: u.username,
-        email: u.email || null,
-        avatarUrl: u.avatarUrl || null,
-      } : null,
+      user: u
+        ? {
+            id: u._id.toString(),
+            username: u.username,
+            email: u.email || null,
+            avatarUrl: u.avatarUrl || null,
+          }
+        : null,
     };
 
     return NextResponse.json({ comment: serializedComment }, { status: 201 });
@@ -90,13 +112,24 @@ export async function POST(request: Request) {
     console.error("Comment POST Error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "Validation failed", details: error.errors } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Validation failed",
+            details: error.errors,
+          },
+        },
+        { status: 400 },
       );
     }
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to create comment" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create comment",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -107,7 +140,7 @@ export async function DELETE(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -117,17 +150,30 @@ export async function DELETE(request: Request) {
 
     if (!projectId || !commentId) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId and commentId are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId and commentId are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
     // Tenant check: Ensure user owns this project
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "FORBIDDEN", message: "Forbidden: You do not own this project" } },
-        { status: 403 }
+        {
+          error: {
+            code: "FORBIDDEN",
+            message: "Forbidden: You do not own this project",
+          },
+        },
+        { status: 403 },
       );
     }
 
@@ -136,16 +182,24 @@ export async function DELETE(request: Request) {
     if (!comment) {
       return NextResponse.json(
         { error: { code: "NOT_FOUND", message: "Comment not found" } },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     // Verify comment belongs to an incident in this project
-    const incident = await Incident.findOne({ _id: comment.incidentId, projectId: project._id });
+    const incident = await Incident.findOne({
+      _id: comment.incidentId,
+      projectId: project._id,
+    });
     if (!incident) {
       return NextResponse.json(
-        { error: { code: "FORBIDDEN", message: "Forbidden: Comment not associated with this project" } },
-        { status: 403 }
+        {
+          error: {
+            code: "FORBIDDEN",
+            message: "Forbidden: Comment not associated with this project",
+          },
+        },
+        { status: 403 },
       );
     }
 
@@ -155,8 +209,13 @@ export async function DELETE(request: Request) {
 
     if (!isCommentAuthor && !isProjectOwner) {
       return NextResponse.json(
-        { error: { code: "FORBIDDEN", message: "Forbidden: You cannot delete this comment" } },
-        { status: 403 }
+        {
+          error: {
+            code: "FORBIDDEN",
+            message: "Forbidden: You cannot delete this comment",
+          },
+        },
+        { status: 403 },
       );
     }
 
@@ -166,8 +225,13 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error("Comment DELETE Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to delete comment" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete comment",
+        },
+      },
+      { status: 500 },
     );
   }
 }

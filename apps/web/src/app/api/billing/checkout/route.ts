@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     if (!project) {
       return NextResponse.json(
         { error: { code: "NOT_FOUND", message: "Project not found" } },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -59,10 +59,12 @@ export async function POST(request: Request) {
 
     if (gateway === "stripe") {
       const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
-      
+
       // If Stripe API key is not present, mock successful redirect for sandbox testing
       if (!stripeSecretKey) {
-        console.log("[Mock Billing] No Stripe key found. Redirecting to mock success URL.");
+        console.log(
+          "[Mock Billing] No Stripe key found. Redirecting to mock success URL.",
+        );
         return NextResponse.json({
           url: `${origin}/dashboard/billing?projectId=${projectId}&checkout_status=success&gateway=stripe`,
           isMock: true,
@@ -90,7 +92,9 @@ export async function POST(request: Request) {
       const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
 
       if (!razorpayKeyId || !razorpayKeySecret) {
-        console.log("[Mock Billing] No Razorpay keys found. Returning mock subscription payload.");
+        console.log(
+          "[Mock Billing] No Razorpay keys found. Returning mock subscription payload.",
+        );
         return NextResponse.json({
           subscriptionId: `sub_mock_${Math.random().toString(36).substr(2, 9)}`,
           keyId: "rzp_test_mock",
@@ -130,16 +134,23 @@ export async function POST(request: Request) {
         {
           error: {
             code: "BAD_REQUEST",
-            message: "Validation failed: " + error.errors.map((e) => e.message).join(", "),
+            message:
+              "Validation failed: " +
+              error.errors.map((e) => e.message).join(", "),
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to generate billing checkout" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to generate billing checkout",
+        },
+      },
+      { status: 500 },
     );
   }
 }

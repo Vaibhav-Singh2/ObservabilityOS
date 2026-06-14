@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -39,26 +39,47 @@ export async function GET(request: Request) {
 
     if (!projectId || !serviceId) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId and serviceId are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId and serviceId are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
     // Tenant Isolation Check
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
     // Verify service belongs to project
-    const service = await Service.findOne({ _id: serviceId, projectId: project._id });
+    const service = await Service.findOne({
+      _id: serviceId,
+      projectId: project._id,
+    });
     if (!service) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Service not found under this project" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Service not found under this project",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -89,8 +110,8 @@ export async function GET(request: Request) {
         $match: {
           projectId: project._id,
           serviceId: service._id,
-          timestamp: { $gte: startTime }
-        }
+          timestamp: { $gte: startTime },
+        },
       },
       {
         $group: {
@@ -98,17 +119,17 @@ export async function GET(request: Request) {
             $toDate: {
               $subtract: [
                 { $toLong: "$timestamp" },
-                { $mod: [{ $toLong: "$timestamp" }, bucketMs] }
-              ]
-            }
+                { $mod: [{ $toLong: "$timestamp" }, bucketMs] },
+              ],
+            },
           },
           avgCpu: { $avg: "$cpuUsage" },
           avgMemory: { $avg: "$memoryUsage" },
           avgLimit: { $avg: "$memoryLimit" },
-          avgLatency: { $avg: "$latencyMs" }
-        }
+          avgLatency: { $avg: "$latencyMs" },
+        },
       },
-      { $sort: { "_id": 1 } }
+      { $sort: { _id: 1 } },
     ]);
 
     const formattedMetrics = aggregatedData.map((d) => ({
@@ -126,8 +147,13 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Metrics Query GET Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to query system metrics" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to query system metrics",
+        },
+      },
+      { status: 500 },
     );
   }
 }

@@ -17,7 +17,10 @@ export async function POST(request: Request) {
     }
   } catch (err: any) {
     console.error(`[Stripe Webhook] Error:`, err.message);
-    return NextResponse.json({ error: "Webhook signature verification failed" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Webhook signature verification failed" },
+      { status: 400 },
+    );
   }
 
   await connectToDatabase();
@@ -35,7 +38,9 @@ export async function POST(request: Request) {
             stripeCustomerId: session.customer as string,
             stripeSubscriptionId: session.subscription as string,
           });
-          console.log(`[Stripe Webhook] Project ${projectId} upgraded to PRO via Stripe.`);
+          console.log(
+            `[Stripe Webhook] Project ${projectId} upgraded to PRO via Stripe.`,
+          );
         }
         break;
       }
@@ -44,7 +49,7 @@ export async function POST(request: Request) {
         const status = session.status === "active" ? "active" : "past_due";
         await Project.findOneAndUpdate(
           { stripeSubscriptionId: subscriptionId },
-          { subscriptionStatus: status }
+          { subscriptionStatus: status },
         );
         break;
       }
@@ -56,7 +61,7 @@ export async function POST(request: Request) {
             plan: "free",
             subscriptionStatus: "none",
             billingProvider: "none",
-          }
+          },
         );
         break;
       }
@@ -65,9 +70,12 @@ export async function POST(request: Request) {
     }
   } catch (dbErr) {
     console.error("[Stripe Webhook] Database update error:", dbErr);
-    return NextResponse.json({ error: "Database error occurred" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Database error occurred" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ received: true });
 }
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

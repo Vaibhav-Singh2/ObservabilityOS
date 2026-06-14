@@ -11,15 +11,17 @@ export async function GET(request: Request) {
 
     const expectedSecret = process.env.CRON_SECRET || "dev_cron_secret_123";
 
-    const isAuthorized = 
-      authHeader === `Bearer ${expectedSecret}` || 
-      secretParam === expectedSecret || 
+    const isAuthorized =
+      authHeader === `Bearer ${expectedSecret}` ||
+      secretParam === expectedSecret ||
       process.env.NODE_ENV === "development"; // allow open calls in dev mode
 
     if (!isAuthorized) {
       return NextResponse.json(
-        { error: { code: "UNAUTHORIZED", message: "Unauthorized trigger call" } },
-        { status: 401 }
+        {
+          error: { code: "UNAUTHORIZED", message: "Unauthorized trigger call" },
+        },
+        { status: 401 },
       );
     }
 
@@ -43,7 +45,10 @@ export async function GET(request: Request) {
           });
         }
       } catch (err) {
-        console.error(`[Cron Email Digest] Failed for user ${user.username}:`, err);
+        console.error(
+          `[Cron Email Digest] Failed for user ${user.username}:`,
+          err,
+        );
         results.push({
           userId: user._id.toString(),
           email: user.email,
@@ -61,8 +66,13 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Cron Email Digest Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Cron email digest trigger failed" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Cron email digest trigger failed",
+        },
+      },
+      { status: 500 },
     );
   }
 }

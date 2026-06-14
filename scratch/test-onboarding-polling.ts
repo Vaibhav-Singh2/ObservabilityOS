@@ -25,9 +25,13 @@ try {
 async function run() {
   await connectToDatabase();
 
-  const project = await Project.findOne({ apiKey: "obs_sk_test_api_key_987654" });
+  const project = await Project.findOne({
+    apiKey: "obs_sk_test_api_key_987654",
+  });
   if (!project) {
-    console.error("Test project not found. Make sure test-anomaly.ts has been run.");
+    console.error(
+      "Test project not found. Make sure test-anomaly.ts has been run.",
+    );
     process.exit(1);
   }
 
@@ -36,14 +40,18 @@ async function run() {
   // Fetch logs to simulate polling call
   const logs = await Log.find({
     projectId: project._id,
-    timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) }
+    timestamp: { $gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
   }).limit(5);
 
   console.log(`Found ${logs.length} logs in the last 24h.`);
   if (logs.length > 0) {
-    console.log("✅ Live ingestion check simulation successful! Logs detected, wizard polling would unlock Step 5.");
+    console.log(
+      "✅ Live ingestion check simulation successful! Logs detected, wizard polling would unlock Step 5.",
+    );
   } else {
-    console.warn("⚠️ No logs found in last 24h. Poll would remain in 'Awaiting' state.");
+    console.warn(
+      "⚠️ No logs found in last 24h. Poll would remain in 'Awaiting' state.",
+    );
   }
 }
 

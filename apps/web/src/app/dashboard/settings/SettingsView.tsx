@@ -2,24 +2,37 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Settings, 
-  Save, 
-  Check, 
-  Copy, 
-  Eye, 
-  EyeOff, 
-  AlertTriangle, 
+import {
+  Settings,
+  Save,
+  Check,
+  Copy,
+  Eye,
+  EyeOff,
+  AlertTriangle,
   Terminal,
   Volume2,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface SettingsViewProps {
   project: {
@@ -45,7 +58,9 @@ export default function SettingsView({ project }: SettingsViewProps) {
   const fetchAuditLogs = async () => {
     setIsLoadingAudit(true);
     try {
-      const res = await fetch(`/api/projects/audit-logs?projectId=${project.id}`);
+      const res = await fetch(
+        `/api/projects/audit-logs?projectId=${project.id}`,
+      );
       if (res.ok) {
         const data = await res.json();
         setAuditLogs(data.auditLogs || []);
@@ -61,16 +76,26 @@ export default function SettingsView({ project }: SettingsViewProps) {
     fetchAuditLogs();
   }, [project.id]);
 
-  const [slackWebhookUrl, setSlackWebhookUrl] = useState(project.slackWebhookUrl);
-  const [discordWebhookUrl, setDiscordWebhookUrl] = useState(project.discordWebhookUrl || "");
-  const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(project.teamsWebhookUrl || "");
+  const [slackWebhookUrl, setSlackWebhookUrl] = useState(
+    project.slackWebhookUrl,
+  );
+  const [discordWebhookUrl, setDiscordWebhookUrl] = useState(
+    project.discordWebhookUrl || "",
+  );
+  const [teamsWebhookUrl, setTeamsWebhookUrl] = useState(
+    project.teamsWebhookUrl || "",
+  );
   const [minErrorCount, setMinErrorCount] = useState(project.minErrorCount);
-  const [zScoreThreshold, setZScoreThreshold] = useState(project.zScoreThreshold);
+  const [zScoreThreshold, setZScoreThreshold] = useState(
+    project.zScoreThreshold,
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showKey, setShowKey] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">(
+    "idle",
+  );
   const [errorMessage, setErrorMessage] = useState("");
 
   const handleCopyKey = () => {
@@ -130,7 +155,8 @@ export default function SettingsView({ project }: SettingsViewProps) {
           Configuration
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Configure incident detection thresholds, notification integrations, and access credentials.
+          Configure incident detection thresholds, notification integrations,
+          and access credentials.
         </p>
       </div>
 
@@ -139,7 +165,9 @@ export default function SettingsView({ project }: SettingsViewProps) {
         <Card className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
           <CardHeader>
-            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">General Settings</CardTitle>
+            <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-400">
+              General Settings
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 max-w-xl">
             <div className="space-y-2">
@@ -158,14 +186,20 @@ export default function SettingsView({ project }: SettingsViewProps) {
               <div className="flex items-center gap-2">
                 <div className="flex-1 bg-slate-950 border border-slate-850 rounded-lg px-3 py-2 text-xs font-mono text-slate-350 select-all truncate flex items-center justify-between">
                   <span>
-                    {showKey ? project.apiKey : "••••••••••••••••••••••••••••••••••••••••••••••••"}
+                    {showKey
+                      ? project.apiKey
+                      : "••••••••••••••••••••••••••••••••••••••••••••••••"}
                   </span>
                   <button
                     type="button"
                     onClick={() => setShowKey(!showKey)}
                     className="text-slate-500 hover:text-slate-300 ml-2 cursor-pointer"
                   >
-                    {showKey ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                    {showKey ? (
+                      <EyeOff className="w-3.5 h-3.5" />
+                    ) : (
+                      <Eye className="w-3.5 h-3.5" />
+                    )}
                   </button>
                 </div>
                 <Button
@@ -175,11 +209,16 @@ export default function SettingsView({ project }: SettingsViewProps) {
                   onClick={handleCopyKey}
                   className="shrink-0"
                 >
-                  {copiedKey ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  {copiedKey ? (
+                    <Check className="w-4 h-4 text-emerald-400" />
+                  ) : (
+                    <Copy className="w-4 h-4" />
+                  )}
                 </Button>
               </div>
               <p className="text-[10px] text-slate-500 mt-1.5">
-                Use this API key in your customer SDK to route log streams into this project environment.
+                Use this API key in your customer SDK to route log streams into
+                this project environment.
               </p>
             </div>
           </CardContent>
@@ -204,17 +243,23 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 required
                 min="1"
                 value={minErrorCount}
-                onChange={(e) => setMinErrorCount(Math.max(1, parseInt(e.target.value) || 1))}
+                onChange={(e) =>
+                  setMinErrorCount(Math.max(1, parseInt(e.target.value) || 1))
+                }
                 className="font-mono"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                Minimum number of error logs in a 5-minute sliding window required to evaluate for anomalies. Avoids alerting on single noise occurrences.
+                Minimum number of error logs in a 5-minute sliding window
+                required to evaluate for anomalies. Avoids alerting on single
+                noise occurrences.
               </p>
             </div>
 
             {/* Z-Score Sensitivity */}
             <div className="space-y-2">
-              <Label htmlFor="zScoreThreshold">Statistical Sensitivity (Z-Score)</Label>
+              <Label htmlFor="zScoreThreshold">
+                Statistical Sensitivity (Z-Score)
+              </Label>
               <Input
                 id="zScoreThreshold"
                 type="number"
@@ -222,12 +267,20 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 min="1.0"
                 step="0.1"
                 value={zScoreThreshold}
-                onChange={(e) => setZScoreThreshold(Math.max(1.0, parseFloat(e.target.value) || 1.0))}
+                onChange={(e) =>
+                  setZScoreThreshold(
+                    Math.max(1.0, parseFloat(e.target.value) || 1.0),
+                  )
+                }
                 className="font-mono"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                Standard deviations above the historical baseline required to trigger an alert. 
-                <span className="block mt-0.5 text-slate-400">Recommended: 3.0 (higher = less sensitive, lower = more sensitive).</span>
+                Standard deviations above the historical baseline required to
+                trigger an alert.
+                <span className="block mt-0.5 text-slate-400">
+                  Recommended: 3.0 (higher = less sensitive, lower = more
+                  sensitive).
+                </span>
               </p>
             </div>
           </CardContent>
@@ -254,13 +307,16 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 className="font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                Pushes rich diagnostic cards to your Slack channel on incidents and SLO budget status transitions.
+                Pushes rich diagnostic cards to your Slack channel on incidents
+                and SLO budget status transitions.
               </p>
             </div>
 
             {/* Discord */}
             <div className="space-y-2">
-              <Label htmlFor="discordWebhook">Discord Incoming Webhook URL</Label>
+              <Label htmlFor="discordWebhook">
+                Discord Incoming Webhook URL
+              </Label>
               <Input
                 id="discordWebhook"
                 type="url"
@@ -270,7 +326,8 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 className="font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                Pushes embeds to Discord channel webhooks on anomalies and SLO budget changes.
+                Pushes embeds to Discord channel webhooks on anomalies and SLO
+                budget changes.
               </p>
             </div>
 
@@ -286,7 +343,8 @@ export default function SettingsView({ project }: SettingsViewProps) {
                 className="font-mono placeholder:text-slate-700"
               />
               <p className="text-[10px] text-slate-500 mt-1.5 leading-relaxed">
-                Pushes Office 365 Connector cards to Microsoft Teams channel on alerts.
+                Pushes Office 365 Connector cards to Microsoft Teams channel on
+                alerts.
               </p>
             </div>
           </CardContent>
@@ -296,13 +354,19 @@ export default function SettingsView({ project }: SettingsViewProps) {
         <div className="flex items-center justify-between pt-2">
           <div>
             {saveStatus === "success" && (
-              <Badge variant="success" className="px-3 py-1.5 text-xs font-semibold">
+              <Badge
+                variant="success"
+                className="px-3 py-1.5 text-xs font-semibold"
+              >
                 <Check className="w-4 h-4 mr-1.5" />
                 Settings saved successfully
               </Badge>
             )}
             {saveStatus === "error" && (
-              <Badge variant="destructive" className="px-3 py-1.5 text-xs font-semibold">
+              <Badge
+                variant="destructive"
+                className="px-3 py-1.5 text-xs font-semibold"
+              >
                 <AlertTriangle className="w-4 h-4 mr-1.5" />
                 {errorMessage}
               </Badge>
@@ -356,7 +420,9 @@ export default function SettingsView({ project }: SettingsViewProps) {
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-slate-850 bg-slate-900/60 text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    <TableHead className="w-3/12 py-2 px-4">Timestamp</TableHead>
+                    <TableHead className="w-3/12 py-2 px-4">
+                      Timestamp
+                    </TableHead>
                     <TableHead className="w-2/12 py-2 px-4">User</TableHead>
                     <TableHead className="w-3/12 py-2 px-4">Action</TableHead>
                     <TableHead className="w-4/12 py-2 px-4">Details</TableHead>
@@ -385,17 +451,28 @@ export default function SettingsView({ project }: SettingsViewProps) {
                     }
 
                     return (
-                      <TableRow key={log.id} className="hover:bg-slate-900/30 transition-colors text-slate-350">
-                        <TableCell className="py-2.5 px-4 text-slate-500 truncate">{dateStr}</TableCell>
+                      <TableRow
+                        key={log.id}
+                        className="hover:bg-slate-900/30 transition-colors text-slate-350"
+                      >
+                        <TableCell className="py-2.5 px-4 text-slate-500 truncate">
+                          {dateStr}
+                        </TableCell>
                         <TableCell className="py-2.5 px-4 text-slate-300 font-semibold truncate">
                           {log.user?.username || "System"}
                         </TableCell>
                         <TableCell className="py-2.5 px-4">
-                          <Badge variant="outline" className="text-[9px] font-bold border-indigo-500/20 bg-indigo-500/5 text-indigo-400 uppercase tracking-wider font-mono">
+                          <Badge
+                            variant="outline"
+                            className="text-[9px] font-bold border-indigo-500/20 bg-indigo-500/5 text-indigo-400 uppercase tracking-wider font-mono"
+                          >
                             {log.action}
                           </Badge>
                         </TableCell>
-                        <TableCell className="py-2.5 px-4 text-slate-200 truncate max-w-[200px]" title={details}>
+                        <TableCell
+                          className="py-2.5 px-4 text-slate-200 truncate max-w-[200px]"
+                          title={details}
+                        >
                           {details}
                         </TableCell>
                       </TableRow>

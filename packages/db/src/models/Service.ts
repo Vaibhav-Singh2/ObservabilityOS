@@ -29,12 +29,21 @@ const SloSchema = new Schema<ISlo>({
   target: { type: Number, required: true },
   windowDays: { type: Number, required: true, default: 30 },
   latencyThresholdMs: { type: Number },
-  status: { type: String, enum: ["healthy", "warning", "breached"], default: "healthy" },
+  status: {
+    type: String,
+    enum: ["healthy", "warning", "breached"],
+    default: "healthy",
+  },
 });
 
 const ServiceSchema = new Schema<IService>(
   {
-    projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+      index: true,
+    },
     name: { type: String, required: true },
     environment: {
       type: String,
@@ -46,11 +55,15 @@ const ServiceSchema = new Schema<IService>(
     runbookUrl: { type: String, required: false },
     troubleshootingSteps: { type: String, required: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // Ensure name is unique per project and environment
-ServiceSchema.index({ projectId: 1, name: 1, environment: 1 }, { unique: true });
+ServiceSchema.index(
+  { projectId: 1, name: 1, environment: 1 },
+  { unique: true },
+);
 
-export const Service: Model<IService> = models.Service || model<IService>("Service", ServiceSchema);
+export const Service: Model<IService> =
+  models.Service || model<IService>("Service", ServiceSchema);
 export default Service;

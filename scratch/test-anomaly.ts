@@ -2,7 +2,15 @@
 
 import fs from "fs";
 import path from "path";
-import { connectToDatabase, Project, Service, Log, User, Deploy, Incident } from "@repo/db";
+import {
+  connectToDatabase,
+  Project,
+  Service,
+  Log,
+  User,
+  Deploy,
+  Incident,
+} from "@repo/db";
 import { Logger } from "@repo/sdk";
 
 // Manual dotenv loading from the web app workspace
@@ -69,23 +77,31 @@ async function verify() {
     commitSha: "a2c4e6g8h1j3k5l7",
     commitMessage: "Optimize billing webhook transaction speeds",
     branch: "main",
-    metadata: { author: "alice", repo: "ObservabilityOS" }
+    metadata: { author: "alice", repo: "ObservabilityOS" },
   };
 
-  const deployResponse = await fetch("http://127.0.0.1:3000/api/webhooks/github", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "x-api-key": TEST_API_KEY,
+  const deployResponse = await fetch(
+    "http://127.0.0.1:3000/api/webhooks/github",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": TEST_API_KEY,
+      },
+      body: JSON.stringify(deployPayload),
     },
-    body: JSON.stringify(deployPayload),
-  });
+  );
 
   if (deployResponse.ok) {
     const data: any = await deployResponse.json();
-    console.log(`✅ Webhook deployment logged successfully! Deploy ID: ${data.deployId}`);
+    console.log(
+      `✅ Webhook deployment logged successfully! Deploy ID: ${data.deployId}`,
+    );
   } else {
-    console.error(`❌ Webhook deployment logging failed:`, await deployResponse.text());
+    console.error(
+      `❌ Webhook deployment logging failed:`,
+      await deployResponse.text(),
+    );
     process.exit(1);
   }
 
@@ -100,13 +116,18 @@ async function verify() {
       serviceId: service._id,
       timestamp: new Date(now - i * 5 * 60 * 1000 - 1000), // i * 5 mins ago
       level: i === 6 ? "error" : "info", // 1 error log 30 minutes ago
-      message: i === 6 ? "Database connection timed out during handshake" : "Transaction processed successfully",
+      message:
+        i === 6
+          ? "Database connection timed out during handshake"
+          : "Transaction processed successfully",
       environment: "staging",
-      metadata: { latency: i === 6 ? 5000 : 120 }
+      metadata: { latency: i === 6 ? 5000 : 120 },
     });
   }
   await Log.insertMany(historicalLogs);
-  console.log(`Successfully seeded ${historicalLogs.length} historical logs directly in DB.`);
+  console.log(
+    `Successfully seeded ${historicalLogs.length} historical logs directly in DB.`,
+  );
 
   // 4. Ingest high-volume burst of error logs via Logger SDK
   console.log("\n--- [Step 4] Logging a sudden burst of errors via SDK ---");
@@ -119,13 +140,21 @@ async function verify() {
   });
 
   for (let i = 0; i < 5; i++) {
-    console.log(`Sending error log ${i+1}...`);
-    logger.error("Transaction failed: insufficient funds in customer balance account", {
-      metadata: { amount: 500, currency: "USD", errorCode: "ERR_FUNDS", gatewayStatus: 402 },
-      traceId: `trace_anomaly_10${i}`
-    });
+    console.log(`Sending error log ${i + 1}...`);
+    logger.error(
+      "Transaction failed: insufficient funds in customer balance account",
+      {
+        metadata: {
+          amount: 500,
+          currency: "USD",
+          errorCode: "ERR_FUNDS",
+          gatewayStatus: 402,
+        },
+        traceId: `trace_anomaly_10${i}`,
+      },
+    );
     // Wait briefly between calls
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   logger.destroy();
@@ -133,7 +162,7 @@ async function verify() {
 
   // 5. Wait for async anomaly detection process to run
   console.log("\n--- [Step 5] Waiting for async anomaly engine to process ---");
-  await new Promise(resolve => setTimeout(resolve, 3500));
+  await new Promise((resolve) => setTimeout(resolve, 3500));
 
   // 6. Query DB to verify Incident creation
   console.log("\n--- [Step 6] Verifying Incident creation in DB ---");
@@ -147,7 +176,9 @@ async function verify() {
     const commitSha = (inc.deployId as any)?.commitSha;
     console.log(`\n======================================================`);
     console.log(`🚨 INCIDENT DETECTED: [${inc.status.toUpperCase()}]`);
-    console.log(`Service: ${serviceName} (Env: ${inc.serviceId ? (inc.serviceId as any).environment : "N/A"})`);
+    console.log(
+      `Service: ${serviceName} (Env: ${inc.serviceId ? (inc.serviceId as any).environment : "N/A"})`,
+    );
     console.log(`Title: ${inc.title}`);
     console.log(`Confidence: ${Math.round(inc.confidence * 100)}%`);
     console.log(`Time-to-Detect (TTD): ${inc.ttd / 1000}s`);
@@ -162,10 +193,14 @@ async function verify() {
   }
 
   if (incidents.length > 0) {
-    console.log("✅ E2E Anomaly and AI Reasoning pipeline verified successfully!");
+    console.log(
+      "✅ E2E Anomaly and AI Reasoning pipeline verified successfully!",
+    );
     process.exit(0);
   } else {
-    console.log("❌ Failed to detect any incidents. Check anomaly threshold or logs in DB.");
+    console.log(
+      "❌ Failed to detect any incidents. Check anomaly threshold or logs in DB.",
+    );
     process.exit(1);
   }
 }

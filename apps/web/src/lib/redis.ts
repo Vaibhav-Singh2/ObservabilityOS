@@ -21,7 +21,7 @@ export function getRedisClient(): Redis | null {
     const client = new Redis(REDIS_URL, {
       maxRetriesPerRequest: 1,
       connectTimeout: 2000, // 2s timeout
-      lazyConnect: true,   // don't block on startup
+      lazyConnect: true, // don't block on startup
     });
 
     client.on("error", (err) => {
@@ -48,7 +48,11 @@ export async function getCache<T>(key: string): Promise<T | null> {
   }
 }
 
-export async function setCache(key: string, value: any, ttlSeconds = 300): Promise<void> {
+export async function setCache(
+  key: string,
+  value: any,
+  ttlSeconds = 300,
+): Promise<void> {
   const client = getRedisClient();
   if (!client) return;
   try {

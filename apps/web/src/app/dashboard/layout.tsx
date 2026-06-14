@@ -12,7 +12,9 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-export default async function DashboardLayout({ children }: DashboardLayoutProps) {
+export default async function DashboardLayout({
+  children,
+}: DashboardLayoutProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
@@ -38,8 +40,10 @@ export default async function DashboardLayout({ children }: DashboardLayoutProps
     redirect("/");
   }
 
-  const projects = await Project.find({ ownerId: user._id }).sort({ createdAt: -1 });
-  const serializedProjects = projects.map(p => ({
+  const projects = await Project.find({ ownerId: user._id }).sort({
+    createdAt: -1,
+  });
+  const serializedProjects = projects.map((p) => ({
     id: p._id.toString(),
     name: p.name,
     apiKey: p.apiKey,

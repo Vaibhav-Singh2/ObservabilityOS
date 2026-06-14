@@ -8,11 +8,13 @@ export interface RateLimitResult {
 export async function checkRateLimit(
   apiKey: string,
   limit = 100,
-  windowMs = 60000
+  windowMs = 60000,
 ): Promise<RateLimitResult> {
   const redis = getRedisClient();
   if (!redis) {
-    console.warn("Redis client not available, bypassing rate limiting (fail-open).");
+    console.warn(
+      "Redis client not available, bypassing rate limiting (fail-open).",
+    );
     return { allowed: true, count: 0 };
   }
 

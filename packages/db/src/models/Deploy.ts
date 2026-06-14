@@ -20,8 +20,18 @@ export type DeployDocument = IDeploy & Document;
 
 const DeploySchema = new Schema<IDeploy>(
   {
-    projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
-    serviceId: { type: Schema.Types.ObjectId, ref: "Service", required: true, index: true },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+      index: true,
+    },
+    serviceId: {
+      type: Schema.Types.ObjectId,
+      ref: "Service",
+      required: true,
+      index: true,
+    },
     commitSha: { type: String, required: true },
     commitMessage: { type: String, required: true },
     branch: { type: String, required: true },
@@ -34,10 +44,16 @@ const DeploySchema = new Schema<IDeploy>(
     deployedAt: { type: Date, required: true, default: Date.now },
     metadata: { type: Schema.Types.Mixed, default: {} },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-DeploySchema.index({ projectId: 1, serviceId: 1, environment: 1, deployedAt: -1 });
+DeploySchema.index({
+  projectId: 1,
+  serviceId: 1,
+  environment: 1,
+  deployedAt: -1,
+});
 
-export const Deploy: Model<IDeploy> = models.Deploy || model<IDeploy>("Deploy", DeploySchema);
+export const Deploy: Model<IDeploy> =
+  models.Deploy || model<IDeploy>("Deploy", DeploySchema);
 export default Deploy;

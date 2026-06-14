@@ -10,7 +10,11 @@ export async function POST(request: Request) {
   try {
     const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
     if (webhookSecret && signature) {
-      const isValid = Razorpay.validateWebhookSignature(body, signature, webhookSecret);
+      const isValid = Razorpay.validateWebhookSignature(
+        body,
+        signature,
+        webhookSecret,
+      );
       if (!isValid) {
         throw new Error("Invalid signature verify result");
       }
@@ -18,7 +22,10 @@ export async function POST(request: Request) {
     event = JSON.parse(body);
   } catch (err: any) {
     console.error(`[Razorpay Webhook] Error:`, err.message);
-    return NextResponse.json({ error: "Signature verification failed" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Signature verification failed" },
+      { status: 400 },
+    );
   }
 
   await connectToDatabase();
@@ -38,7 +45,9 @@ export async function POST(request: Request) {
             razorpaySubscriptionId: payload.id as string,
             razorpayCustomerId: payload.customer_id as string,
           });
-          console.log(`[Razorpay Webhook] Project ${projectId} upgraded to PRO via Razorpay.`);
+          console.log(
+            `[Razorpay Webhook] Project ${projectId} upgraded to PRO via Razorpay.`,
+          );
         }
         break;
       }
@@ -51,7 +60,7 @@ export async function POST(request: Request) {
             plan: "free",
             subscriptionStatus: "none",
             billingProvider: "none",
-          }
+          },
         );
         break;
       }
@@ -60,9 +69,12 @@ export async function POST(request: Request) {
     }
   } catch (dbErr) {
     console.error("[Razorpay Webhook] Database update error:", dbErr);
-    return NextResponse.json({ error: "Database error occurred" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Database error occurred" },
+      { status: 500 },
+    );
   }
 
   return NextResponse.json({ received: true });
 }
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

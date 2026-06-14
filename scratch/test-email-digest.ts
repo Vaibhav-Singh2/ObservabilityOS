@@ -28,7 +28,9 @@ async function run() {
 
   const user = await User.findOne({ githubId: "dummy_test_user" });
   if (!user) {
-    console.error("Test user 'dummy_test_user' not found. Make sure test-anomaly.ts has been run.");
+    console.error(
+      "Test user 'dummy_test_user' not found. Make sure test-anomaly.ts has been run.",
+    );
     process.exit(1);
   }
 
@@ -46,23 +48,38 @@ async function run() {
   if (result.method === "console" && result.html) {
     console.log("✅ Success: Email template generated successfully!");
     console.log(`Payload length: ${result.html.length} chars.`);
-    
+
     // Quick validation checks on HTML content
     const containsHeader = result.html.includes("Good morning");
-    const containsProject = result.html.includes("E2E Anomaly Verification Project");
+    const containsProject = result.html.includes(
+      "E2E Anomaly Verification Project",
+    );
     const containsService = result.html.includes("payment-service");
-    const containsIncident = result.html.includes("Transaction failed due to insufficient funds");
+    const containsIncident = result.html.includes(
+      "Transaction failed due to insufficient funds",
+    );
 
     console.log("\nHTML Content Checks:");
     console.log(`- Greeting Header: ${containsHeader ? "PASSED" : "FAILED"}`);
     console.log(`- Project Name: ${containsProject ? "PASSED" : "FAILED"}`);
     console.log(`- Service Name: ${containsService ? "PASSED" : "FAILED"}`);
-    console.log(`- Overnight Incident Title: ${containsIncident ? "PASSED" : "FAILED"}`);
+    console.log(
+      `- Overnight Incident Title: ${containsIncident ? "PASSED" : "FAILED"}`,
+    );
 
-    if (containsHeader && containsProject && containsService && containsIncident) {
-      console.log("\n✅ Email digest templates, data aggregation, and AI summaries are 100% verified!");
+    if (
+      containsHeader &&
+      containsProject &&
+      containsService &&
+      containsIncident
+    ) {
+      console.log(
+        "\n✅ Email digest templates, data aggregation, and AI summaries are 100% verified!",
+      );
     } else {
-      console.error("❌ Failed: HTML content is missing key aggregated metrics.");
+      console.error(
+        "❌ Failed: HTML content is missing key aggregated metrics.",
+      );
       process.exit(1);
     }
   } else if (result.method === "resend") {

@@ -10,7 +10,12 @@ import {
   User,
   Metric,
 } from "@repo/db";
-import { getRedisClient, getCache, setCache, delCache } from "../apps/web/src/lib/redis";
+import {
+  getRedisClient,
+  getCache,
+  setCache,
+  delCache,
+} from "../apps/web/src/lib/redis";
 import { checkRateLimit } from "../apps/web/src/lib/rate-limit";
 import { Types } from "mongoose";
 
@@ -40,7 +45,9 @@ async function run() {
 
   const redis = getRedisClient();
   if (!redis) {
-    console.error("❌ Redis is not running or unconfigured. Start Redis to run this test.");
+    console.error(
+      "❌ Redis is not running or unconfigured. Start Redis to run this test.",
+    );
     process.exit(1);
   }
   console.log("✅ Connected to Redis successfully.");
@@ -108,7 +115,9 @@ async function run() {
     searchUsed = true;
     console.log("✅ Success: Atlas Search ($search) completed (Atlas DB).");
   } catch (err: any) {
-    console.log(`ℹ️ Expected failure caught: ${err.message}. Falling back to regex...`);
+    console.log(
+      `ℹ️ Expected failure caught: ${err.message}. Falling back to regex...`,
+    );
   }
 
   if (!searchUsed) {
@@ -117,7 +126,9 @@ async function run() {
       message: { $regex: query, $options: "i" },
     };
     logs = await Log.find(conditions).limit(10);
-    console.log(`✅ Success: Graceful fallback executed. Found ${logs.length} logs via regex.`);
+    console.log(
+      `✅ Success: Graceful fallback executed. Found ${logs.length} logs via regex.`,
+    );
   }
 
   // ==========================================
@@ -125,13 +136,15 @@ async function run() {
   // ==========================================
   console.log("\n--- [Test 2] Redis Caching & Invalidation ---");
   const cacheKey = `metrics:query:${project._id.toString()}:${service._id.toString()}:24h`;
-  
+
   // Clean start
   await delCache(cacheKey);
 
   // Set fake metrics data
-  const testMetrics = [{ timestamp: new Date().toISOString(), cpu: 4.5, memory: 128, latency: 12 }];
-  
+  const testMetrics = [
+    { timestamp: new Date().toISOString(), cpu: 4.5, memory: 128, latency: 12 },
+  ];
+
   // Verify cache miss
   let cached = await getCache<any[]>(cacheKey);
   if (!cached) {
@@ -154,9 +167,15 @@ async function run() {
 
   // Invalidate by simulating ingestion route key removal
   console.log("Simulating metric ingestion cache invalidation...");
-  await delCache(`metrics:query:${project._id.toString()}:${service._id.toString()}:1h`);
-  await delCache(`metrics:query:${project._id.toString()}:${service._id.toString()}:24h`);
-  await delCache(`metrics:query:${project._id.toString()}:${service._id.toString()}:7d`);
+  await delCache(
+    `metrics:query:${project._id.toString()}:${service._id.toString()}:1h`,
+  );
+  await delCache(
+    `metrics:query:${project._id.toString()}:${service._id.toString()}:24h`,
+  );
+  await delCache(
+    `metrics:query:${project._id.toString()}:${service._id.toString()}:7d`,
+  );
 
   cached = await getCache<any[]>(cacheKey);
   if (!cached) {
@@ -173,11 +192,16 @@ async function run() {
   const dashKey = `dashboard:project:${project._id.toString()}`;
   const dummyDash = { services: [], deployments: [] };
 
-  const cacheAndVerify = async (triggerName: string, triggerAction: () => Promise<void>) => {
+  const cacheAndVerify = async (
+    triggerName: string,
+    triggerAction: () => Promise<void>,
+  ) => {
     await setCache(dashKey, dummyDash, 300);
     let check = await getCache(dashKey);
     if (!check) {
-      console.error(`❌ Failed: Could not set dashboard cache for ${triggerName}`);
+      console.error(
+        `❌ Failed: Could not set dashboard cache for ${triggerName}`,
+      );
       process.exit(1);
     }
 
@@ -187,7 +211,9 @@ async function run() {
     if (!check) {
       console.log(`✅ Success: Dashboard cache invalidated by ${triggerName}.`);
     } else {
-      console.error(`❌ Failed: Dashboard cache NOT invalidated by ${triggerName}.`);
+      console.error(
+        `❌ Failed: Dashboard cache NOT invalidated by ${triggerName}.`,
+      );
       process.exit(1);
     }
   };
@@ -229,7 +255,9 @@ async function run() {
   const limit = 5; // Use a low limit of 5 requests for testing
   const windowMs = 5000; // 5-second window
 
-  console.log(`Testing rate limit of ${limit} requests in a ${windowMs}ms window...`);
+  console.log(
+    `Testing rate limit of ${limit} requests in a ${windowMs}ms window...`,
+  );
 
   // Send 5 requests - all should be allowed
   for (let i = 1; i <= limit; i++) {
@@ -245,7 +273,9 @@ async function run() {
   // Send 6th request - should be blocked
   const blockedResult = await checkRateLimit(testApiKey, limit, windowMs);
   if (!blockedResult.allowed) {
-    console.log(`  Request 6: Blocked as expected (count: ${blockedResult.count})`);
+    console.log(
+      `  Request 6: Blocked as expected (count: ${blockedResult.count})`,
+    );
   } else {
     console.error("  ❌ Failed: Request 6 was allowed (rate limiting failed).");
     process.exit(1);
@@ -255,7 +285,9 @@ async function run() {
   await redis.del(rateLimitKey);
   console.log("✅ Success: Sliding-window rate limiter verified!");
 
-  console.log("\n🎉 All Week 10 performance, caching, and rate limiting tests passed successfully!");
+  console.log(
+    "\n🎉 All Week 10 performance, caching, and rate limiting tests passed successfully!",
+  );
 }
 
 run()

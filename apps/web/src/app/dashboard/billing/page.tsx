@@ -35,14 +35,18 @@ export default async function BillingPage({ searchParams }: PageProps) {
   }
 
   const resolvedSearchParams = await searchParams;
-  const projects = await Project.find({ ownerId: user._id }).sort({ createdAt: -1 });
+  const projects = await Project.find({ ownerId: user._id }).sort({
+    createdAt: -1,
+  });
 
   if (projects.length === 0) {
     redirect("/dashboard");
   }
 
-  const activeProjectId = resolvedSearchParams.projectId || projects[0]?._id.toString();
-  const activeProject = projects.find(p => p._id.toString() === activeProjectId) || projects[0];
+  const activeProjectId =
+    resolvedSearchParams.projectId || projects[0]?._id.toString();
+  const activeProject =
+    projects.find((p) => p._id.toString() === activeProjectId) || projects[0];
 
   if (!activeProject) {
     redirect("/dashboard");
@@ -60,9 +64,5 @@ export default async function BillingPage({ searchParams }: PageProps) {
     razorpaySubscriptionId: activeProject.razorpaySubscriptionId || "",
   };
 
-  return (
-    <BillingView
-      project={serializedProject}
-    />
-  );
+  return <BillingView project={serializedProject} />;
 }

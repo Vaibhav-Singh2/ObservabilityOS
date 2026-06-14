@@ -17,10 +17,7 @@ const logItemSchema = z.object({
 });
 
 // Payload can be a single log or an array of logs
-const ingestPayloadSchema = z.union([
-  logItemSchema,
-  z.array(logItemSchema),
-]);
+const ingestPayloadSchema = z.union([logItemSchema, z.array(logItemSchema)]);
 
 export async function POST(request: Request) {
   try {
@@ -34,7 +31,7 @@ export async function POST(request: Request) {
             message: "Missing x-api-key header",
           },
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,7 +48,7 @@ export async function POST(request: Request) {
             message: "Invalid API key",
           },
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -65,7 +62,7 @@ export async function POST(request: Request) {
             message: "Rate limit exceeded. Maximum 100 requests per minute.",
           },
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -74,7 +71,9 @@ export async function POST(request: Request) {
     const validatedData = ingestPayloadSchema.parse(rawBody);
 
     // Standardize to an array of log items
-    const logItems = Array.isArray(validatedData) ? validatedData : [validatedData];
+    const logItems = Array.isArray(validatedData)
+      ? validatedData
+      : [validatedData];
 
     if (logItems.length === 0) {
       return NextResponse.json({ success: true, count: 0 });
@@ -122,7 +121,9 @@ export async function POST(request: Request) {
 
     // 6. Map Logs & Bulk Insert
     const logsToInsert = logItems.map((logItem) => {
-      const serviceId = serviceMap.get(`${logItem.service}-${logItem.environment}`);
+      const serviceId = serviceMap.get(
+        `${logItem.service}-${logItem.environment}`,
+      );
       return {
         projectId: project._id,
         serviceId,
@@ -138,20 +139,30 @@ export async function POST(request: Request) {
     await Log.insertMany(logsToInsert);
 
     // Trigger Anomaly Detection asynchronously for each unique service+environment in the batch
-    const uniqueServiceEnvs = new Map<string, { serviceId: Types.ObjectId; environment: "prod" | "staging" | "dev" }>();
+    const uniqueServiceEnvs = new Map<
+      string,
+      { serviceId: Types.ObjectId; environment: "prod" | "staging" | "dev" }
+    >();
     for (const logItem of logsToInsert) {
       if (logItem.serviceId) {
         const key = `${logItem.serviceId.toString()}-${logItem.environment}`;
-        uniqueServiceEnvs.set(key, { 
-          serviceId: logItem.serviceId as Types.ObjectId, 
-          environment: logItem.environment as "prod" | "staging" | "dev"
+        uniqueServiceEnvs.set(key, {
+          serviceId: logItem.serviceId as Types.ObjectId,
+          environment: logItem.environment as "prod" | "staging" | "dev",
         });
       }
     }
 
     for (const { serviceId, environment } of uniqueServiceEnvs.values()) {
-      triggerAnomalyCheck(project._id.toString(), serviceId.toString(), environment).catch((err) => {
-        console.error(`[Ingest Route] Failed to trigger anomaly check for service ${serviceId}:`, err);
+      triggerAnomalyCheck(
+        project._id.toString(),
+        serviceId.toString(),
+        environment,
+      ).catch((err) => {
+        console.error(
+          `[Ingest Route] Failed to trigger anomaly check for service ${serviceId}:`,
+          err,
+        );
       });
     }
 
@@ -170,7 +181,7 @@ export async function POST(request: Request) {
             message: "Validation failed",
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -178,10 +189,11 @@ export async function POST(request: Request) {
       {
         error: {
           code: "INTERNAL_SERVER_ERROR",
-          message: error instanceof Error ? error.message : "Internal server error",
+          message:
+            error instanceof Error ? error.message : "Internal server error",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

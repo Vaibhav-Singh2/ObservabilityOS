@@ -24,8 +24,18 @@ export type IncidentDocument = IIncident & Document;
 
 const IncidentSchema = new Schema<IIncident>(
   {
-    projectId: { type: Schema.Types.ObjectId, ref: "Project", required: true, index: true },
-    serviceId: { type: Schema.Types.ObjectId, ref: "Service", required: true, index: true },
+    projectId: {
+      type: Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+      index: true,
+    },
+    serviceId: {
+      type: Schema.Types.ObjectId,
+      ref: "Service",
+      required: true,
+      index: true,
+    },
     title: { type: String, required: true },
     summary: { type: String, required: true },
     rootCause: { type: String, required: true },
@@ -39,16 +49,20 @@ const IncidentSchema = new Schema<IIncident>(
       default: "open",
       index: true,
     },
-    relatedLogs: { type: [{ type: Schema.Types.ObjectId, ref: "Log" }], default: [] },
+    relatedLogs: {
+      type: [{ type: Schema.Types.ObjectId, ref: "Log" }],
+      default: [],
+    },
     deployId: { type: Schema.Types.ObjectId, ref: "Deploy", required: false },
     resolvedAt: { type: Date, required: false },
     ttd: { type: Number, required: true },
     ttr: { type: Number, required: false },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 IncidentSchema.index({ projectId: 1, createdAt: -1 });
 
-export const Incident: Model<IIncident> = models.Incident || model<IIncident>("Incident", IncidentSchema);
+export const Incident: Model<IIncident> =
+  models.Incident || model<IIncident>("Incident", IncidentSchema);
 export default Incident;

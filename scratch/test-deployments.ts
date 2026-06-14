@@ -59,12 +59,13 @@ async function verify() {
     service: "payment-service",
     environment: "staging",
     commitSha: "a9bfdc145e67923f114c0a56e9c9d901f654b9d0",
-    commitMessage: "feat(payment): integrate stripe payment checkout intent flow",
+    commitMessage:
+      "feat(payment): integrate stripe payment checkout intent flow",
     branch: "main",
     metadata: {
       ciBuildId: "run_88123",
-      actor: "dev-builder"
-    }
+      actor: "dev-builder",
+    },
   };
 
   const endpoint = "http://127.0.0.1:3000/api/webhooks/github";
@@ -84,10 +85,15 @@ async function verify() {
     console.log("Webhook Response:", JSON.stringify(body, null, 2));
 
     if (!response.ok) {
-      throw new Error(`Webhook returned status ${response.status}: ${JSON.stringify(body)}`);
+      throw new Error(
+        `Webhook returned status ${response.status}: ${JSON.stringify(body)}`,
+      );
     }
   } catch (err) {
-    console.error("Failed to connect to API server. Make sure Next.js dev server is running on port 3000.", err);
+    console.error(
+      "Failed to connect to API server. Make sure Next.js dev server is running on port 3000.",
+      err,
+    );
     process.exit(1);
   }
 
@@ -96,11 +102,15 @@ async function verify() {
   // Allow brief moment to save
   await new Promise((resolve) => setTimeout(resolve, 500));
 
-  const deploys = await Deploy.find({ projectId: project._id }).populate("serviceId");
+  const deploys = await Deploy.find({ projectId: project._id }).populate(
+    "serviceId",
+  );
   console.log(`Found ${deploys.length} deployments in DB:`);
   for (const d of deploys) {
     console.log(`- ID: ${d._id}`);
-    console.log(`  Service: ${(d.serviceId as any)?.name} (Env: ${d.environment})`);
+    console.log(
+      `  Service: ${(d.serviceId as any)?.name} (Env: ${d.environment})`,
+    );
     console.log(`  Commit SHA: ${d.commitSha}`);
     console.log(`  Message: ${d.commitMessage}`);
     console.log(`  Branch: ${d.branch}`);
@@ -108,7 +118,9 @@ async function verify() {
   }
 
   if (deploys.length === 1 && deploys[0]?.commitSha === payload.commitSha) {
-    console.log("\n✅ E2E Webhook Deployment Tracking Verification Successful!");
+    console.log(
+      "\n✅ E2E Webhook Deployment Tracking Verification Successful!",
+    );
   } else {
     console.log("\n❌ E2E Webhook Deployment Tracking Verification Failed.");
   }

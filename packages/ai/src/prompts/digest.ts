@@ -18,7 +18,7 @@ export function generateDigestPrompt(input: DigestPromptInput): string {
       ? input.incidents
           .map(
             (inc) =>
-              `- [${inc.createdAt}] Service: ${inc.serviceName} (${inc.environment}) - Status: ${inc.status}\n  Title: ${inc.title}\n  Root Cause: ${inc.rootCause}`
+              `- [${inc.createdAt}] Service: ${inc.serviceName} (${inc.environment}) - Status: ${inc.status}\n  Title: ${inc.title}\n  Root Cause: ${inc.rootCause}`,
           )
           .join("\n")
       : "No incidents occurred overnight. Everything was fully operational.";

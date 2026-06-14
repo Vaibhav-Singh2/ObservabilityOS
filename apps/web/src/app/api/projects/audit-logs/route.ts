@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -36,16 +36,24 @@ export async function GET(request: Request) {
     if (!projectId) {
       return NextResponse.json(
         { error: { code: "BAD_REQUEST", message: "projectId is required" } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Verify project belongs to user
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -83,8 +91,13 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Audit Logs GET Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to retrieve audit logs" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to retrieve audit logs",
+        },
+      },
+      { status: 500 },
     );
   }
 }

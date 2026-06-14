@@ -13,7 +13,10 @@ import {
   Metric,
 } from "@repo/db";
 import { logAuditEvent } from "../apps/web/src/lib/audit";
-import { exportLogsToCSV, exportLogsToJSON } from "../apps/web/src/lib/log-export";
+import {
+  exportLogsToCSV,
+  exportLogsToJSON,
+} from "../apps/web/src/lib/log-export";
 
 // Manual dotenv loading from the web app workspace
 try {
@@ -65,10 +68,12 @@ async function run() {
   // Test 1: Saved Queries
   // ==========================================
   console.log("\n--- [Test 1] Saved Queries Schema & Operations ---");
-  
+
   // Clear any existing saved queries with test name
   if (project.savedQueries) {
-    project.savedQueries = project.savedQueries.filter(q => q.name !== "Test Query Week 9");
+    project.savedQueries = project.savedQueries.filter(
+      (q) => q.name !== "Test Query Week 9",
+    );
     await project.save();
   }
 
@@ -86,8 +91,10 @@ async function run() {
 
   // Load from DB to verify
   let updatedProject = await Project.findById(project._id);
-  const foundQuery = updatedProject?.savedQueries?.find(q => q.name === "Test Query Week 9");
-  
+  const foundQuery = updatedProject?.savedQueries?.find(
+    (q) => q.name === "Test Query Week 9",
+  );
+
   if (
     foundQuery &&
     foundQuery.query === "error status:500" &&
@@ -95,18 +102,24 @@ async function run() {
     foundQuery.environment === "prod" &&
     foundQuery.timeRange === "1h"
   ) {
-    console.log("✅ Success: Saved query created, persisted, and read successfully!");
+    console.log(
+      "✅ Success: Saved query created, persisted, and read successfully!",
+    );
   } else {
     console.error("❌ Failed: Saved query verification failed.", foundQuery);
     process.exit(1);
   }
 
   // Delete saved query
-  project.savedQueries = project.savedQueries.filter(q => q.name !== "Test Query Week 9");
+  project.savedQueries = project.savedQueries.filter(
+    (q) => q.name !== "Test Query Week 9",
+  );
   await project.save();
 
   updatedProject = await Project.findById(project._id);
-  const deletedQuery = updatedProject?.savedQueries?.find(q => q.name === "Test Query Week 9");
+  const deletedQuery = updatedProject?.savedQueries?.find(
+    (q) => q.name === "Test Query Week 9",
+  );
   if (!deletedQuery) {
     console.log("✅ Success: Saved query deleted and persisted successfully!");
   } else {
@@ -153,12 +166,15 @@ async function run() {
 
   if (auditLogs.length >= 2) {
     console.log("✅ Success: Found logged audit entries.");
-    
+
     // Check serialization pattern matching (like in apps/web/src/app/api/projects/audit-logs/route.ts)
     for (const log of auditLogs) {
       const metadata = log.metadata ? Object.fromEntries(log.metadata) : {};
-      console.log(`- Action: ${log.action}, Target: ${log.targetId}, Metadata:`, metadata);
-      
+      console.log(
+        `- Action: ${log.action}, Target: ${log.targetId}, Metadata:`,
+        metadata,
+      );
+
       if (log.action === "slo.create") {
         if (metadata.type === "latency" && metadata.target === 99.5) {
           console.log("  ✅ slo.create metadata verified successfully!");
@@ -168,7 +184,10 @@ async function run() {
         }
       }
       if (log.action === "webhook.update") {
-        if (metadata.slackChanged === true && metadata.discordChanged === false) {
+        if (
+          metadata.slackChanged === true &&
+          metadata.discordChanged === false
+        ) {
           console.log("  ✅ webhook.update metadata verified successfully!");
         } else {
           console.error("  ❌ webhook.update metadata mismatch!", metadata);
@@ -177,7 +196,9 @@ async function run() {
       }
     }
   } else {
-    console.error(`❌ Failed: Expected at least 2 audit logs, found ${auditLogs.length}`);
+    console.error(
+      `❌ Failed: Expected at least 2 audit logs, found ${auditLogs.length}`,
+    );
     process.exit(1);
   }
 
@@ -198,7 +219,7 @@ async function run() {
     {
       timestamp: new Date("2026-06-13T12:01:00Z"),
       level: "info",
-      message: "User logged in: mathu, \"admin\" role.",
+      message: 'User logged in: mathu, "admin" role.',
       traceId: "tr-9992",
       metadata: { role: "admin" },
       service: { name: "auth-service", environment: "prod" },
@@ -209,12 +230,16 @@ async function run() {
   const csvContent = exportLogsToCSV(sampleLogs);
   console.log("Generated CSV Content:\n" + csvContent);
   if (
-    csvContent.includes("Timestamp,Level,Service,Environment,Message,Trace ID,Metadata") &&
+    csvContent.includes(
+      "Timestamp,Level,Service,Environment,Message,Trace ID,Metadata",
+    ) &&
     csvContent.includes("auth-service") &&
     csvContent.includes("CONN_TIMEOUT") &&
     csvContent.includes('"User logged in: mathu, ""admin"" role."') // Escaped quotes check
   ) {
-    console.log("✅ Success: CSV Log Exporter verified successfully (including escaping)!");
+    console.log(
+      "✅ Success: CSV Log Exporter verified successfully (including escaping)!",
+    );
   } else {
     console.error("❌ Failed: CSV Log Exporter verification failed.");
     process.exit(1);
@@ -223,13 +248,15 @@ async function run() {
   // Test JSON export
   const jsonContent = exportLogsToJSON(sampleLogs);
   const parsedJson = JSON.parse(jsonContent);
-  console.log("Generated JSON Content excerpt:\n" + jsonContent.slice(0, 300) + "...");
+  console.log(
+    "Generated JSON Content excerpt:\n" + jsonContent.slice(0, 300) + "...",
+  );
   if (
     Array.isArray(parsedJson) &&
     parsedJson.length === 2 &&
     parsedJson[0].level === "error" &&
     parsedJson[0].service.name === "auth-service" &&
-    parsedJson[1].message.includes('User logged in: mathu')
+    parsedJson[1].message.includes("User logged in: mathu")
   ) {
     console.log("✅ Success: JSON Log Exporter verified successfully!");
   } else {
@@ -255,7 +282,9 @@ async function run() {
     name: "dummy-delete-service",
     environment: "staging",
   });
-  console.log(`Created dummy service: ${dummyService.name} (${dummyService._id})`);
+  console.log(
+    `Created dummy service: ${dummyService.name} (${dummyService._id})`,
+  );
 
   // Create associated resources
   const dummyIncident = await Incident.create({
@@ -348,16 +377,21 @@ async function run() {
     !checkLog &&
     !checkMetric
   ) {
-    console.log("✅ Success: Service and all associated comments, incidents, deploys, logs, metrics cascaded deleted!");
+    console.log(
+      "✅ Success: Service and all associated comments, incidents, deploys, logs, metrics cascaded deleted!",
+    );
   } else {
-    console.error("❌ Failed: Some associated service resources were not deleted.", {
-      checkService,
-      checkIncident,
-      checkComment,
-      checkDeploy,
-      checkLog,
-      checkMetric,
-    });
+    console.error(
+      "❌ Failed: Some associated service resources were not deleted.",
+      {
+        checkService,
+        checkIncident,
+        checkComment,
+        checkDeploy,
+        checkLog,
+        checkMetric,
+      },
+    );
     process.exit(1);
   }
 
@@ -369,11 +403,18 @@ async function run() {
   });
 
   if (deleteAudit) {
-    const meta = deleteAudit.metadata ? Object.fromEntries(deleteAudit.metadata) : {};
+    const meta = deleteAudit.metadata
+      ? Object.fromEntries(deleteAudit.metadata)
+      : {};
     if (meta.name === serviceName && meta.environment === serviceEnv) {
-      console.log("✅ Success: service.delete audit event logged successfully!");
+      console.log(
+        "✅ Success: service.delete audit event logged successfully!",
+      );
     } else {
-      console.error("❌ Failed: service.delete audit log metadata mismatch!", meta);
+      console.error(
+        "❌ Failed: service.delete audit log metadata mismatch!",
+        meta,
+      );
       process.exit(1);
     }
   } else {
@@ -386,7 +427,9 @@ async function run() {
   await AuditLog.deleteMany({ projectId: project._id });
   console.log("✅ Cleanup complete.");
 
-  console.log("\n🎉 All Week 9 backend integrations and serialization tests passed successfully!");
+  console.log(
+    "\n🎉 All Week 9 backend integrations and serialization tests passed successfully!",
+  );
 }
 
 run()

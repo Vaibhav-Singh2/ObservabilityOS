@@ -26,13 +26,20 @@ try {
 async function run() {
   await connectToDatabase();
 
-  const project = await Project.findOne({ apiKey: "obs_sk_test_api_key_987654" });
+  const project = await Project.findOne({
+    apiKey: "obs_sk_test_api_key_987654",
+  });
   if (!project) {
-    console.error("Test project not found. Make sure test-anomaly.ts has been run.");
+    console.error(
+      "Test project not found. Make sure test-anomaly.ts has been run.",
+    );
     process.exit(1);
   }
 
-  const service = await Service.findOne({ projectId: project._id, name: "payment-service" });
+  const service = await Service.findOne({
+    projectId: project._id,
+    name: "payment-service",
+  });
   if (!service) {
     console.error("Test service not found.");
     process.exit(1);
@@ -48,7 +55,7 @@ async function run() {
   // Insert fresh test logs aligned with current timestamp
   const now = Date.now();
   const logsToInsert = [];
-  
+
   // 12 historical logs
   for (let i = 1; i <= 12; i++) {
     logsToInsert.push({
@@ -56,9 +63,12 @@ async function run() {
       serviceId: service._id,
       timestamp: new Date(now - i * 5 * 60 * 1000 - 1000),
       level: i === 6 ? "error" : "info",
-      message: i === 6 ? "Database connection timed out during handshake" : "Transaction processed successfully",
+      message:
+        i === 6
+          ? "Database connection timed out during handshake"
+          : "Transaction processed successfully",
       environment: "staging",
-      metadata: { latency: i === 6 ? 5000 : 120 }
+      metadata: { latency: i === 6 ? 5000 : 120 },
     });
   }
 
@@ -69,52 +79,80 @@ async function run() {
       serviceId: service._id,
       timestamp: new Date(),
       level: "error",
-      message: "Transaction failed: insufficient funds in customer balance account",
+      message:
+        "Transaction failed: insufficient funds in customer balance account",
       environment: "staging",
-      metadata: { amount: 500, currency: "USD", errorCode: "ERR_FUNDS", gatewayStatus: 402 },
-      traceId: `trace_anomaly_10${i}`
+      metadata: {
+        amount: 500,
+        currency: "USD",
+        errorCode: "ERR_FUNDS",
+        gatewayStatus: 402,
+      },
+      traceId: `trace_anomaly_10${i}`,
     });
   }
 
   await Log.insertMany(logsToInsert);
 
   // 1. Set minErrorCount to 10 (which is higher than the 5 errors we have logged)
-  console.log("\n--- [Test 1] Setting minErrorCount = 10 (expecting NO anomalies) ---");
+  console.log(
+    "\n--- [Test 1] Setting minErrorCount = 10 (expecting NO anomalies) ---",
+  );
   project.minErrorCount = 10;
   project.zScoreThreshold = 3.0;
   await project.save();
 
   console.log("Running processAnomalyDetection...");
-  await processAnomalyDetection(project._id.toString(), service._id.toString(), "staging");
+  await processAnomalyDetection(
+    project._id.toString(),
+    service._id.toString(),
+    "staging",
+  );
 
   let incidents = await Incident.find({ projectId: project._id });
   console.log(`Incidents found: ${incidents.length} (Expected: 0)`);
   if (incidents.length !== 0) {
-    console.error("❌ Failed: Incidents were created despite minErrorCount = 10.");
+    console.error(
+      "❌ Failed: Incidents were created despite minErrorCount = 10.",
+    );
     process.exit(1);
   } else {
-    console.log("✅ Success: No incidents created when error count < threshold.");
+    console.log(
+      "✅ Success: No incidents created when error count < threshold.",
+    );
   }
 
   // 2. Set minErrorCount to 2 (which is lower than the 5 errors we have logged)
-  console.log("\n--- [Test 2] Setting minErrorCount = 2 (expecting anomaly alert) ---");
+  console.log(
+    "\n--- [Test 2] Setting minErrorCount = 2 (expecting anomaly alert) ---",
+  );
   project.minErrorCount = 2;
   project.zScoreThreshold = 1.5;
   await project.save();
 
   console.log("Running processAnomalyDetection...");
-  await processAnomalyDetection(project._id.toString(), service._id.toString(), "staging");
+  await processAnomalyDetection(
+    project._id.toString(),
+    service._id.toString(),
+    "staging",
+  );
 
   incidents = await Incident.find({ projectId: project._id });
   console.log(`Incidents found: ${incidents.length} (Expected: 1)`);
   if (incidents.length === 0) {
-    console.error("❌ Failed: No incidents created when thresholds were exceeded.");
+    console.error(
+      "❌ Failed: No incidents created when thresholds were exceeded.",
+    );
     process.exit(1);
   } else {
-    console.log(`✅ Success: Incident created successfully! Title: ${incidents[0].title}`);
+    console.log(
+      `✅ Success: Incident created successfully! Title: ${incidents[0].title}`,
+    );
   }
 
-  console.log("\n✅ All Alert Settings configuration tests passed successfully!");
+  console.log(
+    "\n✅ All Alert Settings configuration tests passed successfully!",
+  );
 }
 
 run()

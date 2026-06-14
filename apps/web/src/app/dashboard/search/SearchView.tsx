@@ -1,27 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  Search as SearchIcon, 
-  Clock, 
-  Terminal, 
-  ChevronDown, 
-  ChevronRight, 
-  Copy, 
-  Check, 
-  X, 
+import {
+  Search as SearchIcon,
+  Clock,
+  Terminal,
+  ChevronDown,
+  ChevronRight,
+  Copy,
+  Check,
+  X,
   RefreshCw,
   Database,
   Download,
   Bookmark,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -70,7 +77,12 @@ interface SearchViewProps {
   savedQueries: SavedQuery[];
 }
 
-export default function SearchView({ project, services, initialLogs, savedQueries: initialSavedQueries }: SearchViewProps) {
+export default function SearchView({
+  project,
+  services,
+  initialLogs,
+  savedQueries: initialSavedQueries,
+}: SearchViewProps) {
   const [logs, setLogs] = useState<SerializedLog[]>(initialLogs);
   const [query, setQuery] = useState("");
   const [level, setLevel] = useState("all");
@@ -82,7 +94,8 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
   const [copiedLogId, setCopiedLogId] = useState<string | null>(null);
 
   // Saved searches states
-  const [savedQueries, setSavedQueries] = useState<SavedQuery[]>(initialSavedQueries);
+  const [savedQueries, setSavedQueries] =
+    useState<SavedQuery[]>(initialSavedQueries);
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [isSavingQuery, setIsSavingQuery] = useState(false);
@@ -175,12 +188,13 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
 
   const handleDeleteSavedQuery = async (e: React.MouseEvent, name: string) => {
     e.stopPropagation();
-    if (!confirm(`Are you sure you want to delete the saved search "${name}"?`)) return;
+    if (!confirm(`Are you sure you want to delete the saved search "${name}"?`))
+      return;
 
     try {
       const res = await fetch(
         `/api/projects/saved-queries?projectId=${project.id}&queryName=${encodeURIComponent(name)}`,
-        { method: "DELETE" }
+        { method: "DELETE" },
       );
 
       if (res.ok) {
@@ -201,7 +215,7 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
     setServiceId(q.serviceId || "all");
     setEnvironment(q.environment || "all");
     setTimeRange(q.timeRange || "24h");
-    
+
     // Trigger search in next tick
     setTimeout(() => {
       const searchBtn = document.getElementById("search-trigger-btn");
@@ -242,7 +256,8 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
             Log Search
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Perform indexed queries and full-text searches across all ingested service logs.
+            Perform indexed queries and full-text searches across all ingested
+            service logs.
           </p>
         </div>
 
@@ -282,7 +297,8 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
           <div className="space-y-2 max-h-[300px] lg:max-h-[500px] overflow-y-auto pr-1">
             {savedQueries.length === 0 ? (
               <p className="text-xs text-slate-600 italic py-4 text-center">
-                No saved searches yet. Run a query and click "Save Search" to list here.
+                No saved searches yet. Run a query and click "Save Search" to
+                list here.
               </p>
             ) : (
               savedQueries.map((q) => (
@@ -316,7 +332,10 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
         {/* Right Content Area */}
         <div className="lg:col-span-3 space-y-6">
           {/* Search & Filter Form */}
-          <form onSubmit={handleSearch} className="bg-slate-900/40 border border-slate-900 rounded-xl p-5 space-y-4">
+          <form
+            onSubmit={handleSearch}
+            className="bg-slate-900/40 border border-slate-900 rounded-xl p-5 space-y-4"
+          >
             {/* Search Input Bar */}
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
@@ -336,7 +355,11 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                   disabled={isSearching}
                   className="flex-1 sm:flex-initial bg-indigo-600 hover:bg-indigo-500 text-white font-bold"
                 >
-                  {isSearching ? <RefreshCw className="w-4 h-4 animate-spin mr-1" /> : <SearchIcon className="w-4 h-4 mr-1" />}
+                  {isSearching ? (
+                    <RefreshCw className="w-4 h-4 animate-spin mr-1" />
+                  ) : (
+                    <SearchIcon className="w-4 h-4 mr-1" />
+                  )}
                   Search
                 </Button>
                 <Button
@@ -356,7 +379,10 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
               {/* Service */}
               <div className="space-y-1.5">
                 <Label className="text-[10px] text-slate-500">Service</Label>
-                <Select value={serviceId} onValueChange={(val) => setServiceId(val)}>
+                <Select
+                  value={serviceId}
+                  onValueChange={(val) => setServiceId(val)}
+                >
                   <SelectTrigger className="text-xs">
                     <SelectValue placeholder="All Services" />
                   </SelectTrigger>
@@ -373,8 +399,13 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
 
               {/* Environment */}
               <div className="space-y-1.5">
-                <Label className="text-[10px] text-slate-500">Environment</Label>
-                <Select value={environment} onValueChange={(val) => setEnvironment(val)}>
+                <Label className="text-[10px] text-slate-500">
+                  Environment
+                </Label>
+                <Select
+                  value={environment}
+                  onValueChange={(val) => setEnvironment(val)}
+                >
                   <SelectTrigger className="text-xs">
                     <SelectValue placeholder="All Environments" />
                   </SelectTrigger>
@@ -407,7 +438,10 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
               {/* Time Range */}
               <div className="space-y-1.5">
                 <Label className="text-[10px] text-slate-500">Time Range</Label>
-                <Select value={timeRange} onValueChange={(val) => setTimeRange(val)}>
+                <Select
+                  value={timeRange}
+                  onValueChange={(val) => setTimeRange(val)}
+                >
                   <SelectTrigger className="text-xs">
                     <SelectValue placeholder="Last 24 Hours" />
                   </SelectTrigger>
@@ -421,7 +455,9 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
 
               {/* Reset Filters */}
               <div className="space-y-1.5">
-                <Label className="text-[10px] opacity-0 select-none block">Reset</Label>
+                <Label className="text-[10px] opacity-0 select-none block">
+                  Reset
+                </Label>
                 <Button
                   type="button"
                   variant="outline"
@@ -452,45 +488,80 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
             {logs.length === 0 ? (
               <div className="p-16 text-center">
                 <Database className="w-10 h-10 text-slate-700 mx-auto mb-3" />
-                <h3 className="text-sm font-bold text-slate-300 mb-1">No logs found</h3>
+                <h3 className="text-sm font-bold text-slate-300 mb-1">
+                  No logs found
+                </h3>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-                  No matching log records were found for the selected filter criteria and search query in the last {timeRange === "1h" ? "hour" : timeRange === "24h" ? "24 hours" : "7 days"}.
+                  No matching log records were found for the selected filter
+                  criteria and search query in the last{" "}
+                  {timeRange === "1h"
+                    ? "hour"
+                    : timeRange === "24h"
+                      ? "24 hours"
+                      : "7 days"}
+                  .
                 </p>
               </div>
             ) : (
               <div className="divide-y divide-slate-900/60 font-mono text-[11px] text-slate-350">
                 {logs.map((log) => {
                   const isExpanded = expandedLogId === log.id;
-                  const formattedDate = new Date(log.timestamp).toLocaleString("en-US", {
-                    hour12: false,
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    second: "2-digit",
-                  });
+                  const formattedDate = new Date(log.timestamp).toLocaleString(
+                    "en-US",
+                    {
+                      hour12: false,
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    },
+                  );
 
                   return (
-                    <div key={log.id} className={`transition-colors ${isExpanded ? "bg-slate-900/20" : "hover:bg-slate-900/10"}`}>
+                    <div
+                      key={log.id}
+                      className={`transition-colors ${isExpanded ? "bg-slate-900/20" : "hover:bg-slate-900/10"}`}
+                    >
                       {/* Row */}
                       <div
                         onClick={() => toggleLogExpand(log.id)}
                         className="grid grid-cols-12 gap-4 px-6 py-3 items-center cursor-pointer select-none"
                       >
                         <div className="col-span-3 text-slate-500 flex items-center gap-2.5 truncate">
-                          {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-indigo-500 shrink-0" /> : <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />}
+                          {isExpanded ? (
+                            <ChevronDown className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                          ) : (
+                            <ChevronRight className="w-3.5 h-3.5 text-slate-600 shrink-0" />
+                          )}
                           {formattedDate}
                         </div>
                         <div className="col-span-1">
-                          <Badge variant={log.level === "error" ? "destructive" : log.level === "warn" ? "warning" : log.level === "info" ? "default" : "outline"} className="text-[9px] font-bold">
+                          <Badge
+                            variant={
+                              log.level === "error"
+                                ? "destructive"
+                                : log.level === "warn"
+                                  ? "warning"
+                                  : log.level === "info"
+                                    ? "default"
+                                    : "outline"
+                            }
+                            className="text-[9px] font-bold"
+                          >
                             {log.level}
                           </Badge>
                         </div>
                         <div className="col-span-2 truncate text-slate-400 font-semibold">
-                          {log.service ? `${log.service.name} (${log.service.environment})` : "unknown"}
+                          {log.service
+                            ? `${log.service.name} (${log.service.environment})`
+                            : "unknown"}
                         </div>
-                        <div className="col-span-6 truncate text-slate-200" title={log.message}>
+                        <div
+                          className="col-span-6 truncate text-slate-200"
+                          title={log.message}
+                        >
                           {log.message}
                         </div>
                       </div>
@@ -502,7 +573,10 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                             {/* Copy & Trace */}
                             <div className="absolute right-3 top-3 flex items-center gap-2">
                               {log.traceId && (
-                                <Badge variant="outline" className="text-[10px] font-mono text-indigo-400">
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] font-mono text-indigo-400"
+                                >
                                   Trace ID: {log.traceId}
                                 </Badge>
                               )}
@@ -510,14 +584,21 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                                 variant="secondary"
                                 size="icon"
                                 className="h-7 w-7"
-                                onClick={() => handleCopyMetadata(log.id, {
-                                  message: log.message,
-                                  level: log.level,
-                                  timestamp: log.timestamp,
-                                  service: log.service ? { name: log.service.name, environment: log.service.environment } : null,
-                                  traceId: log.traceId,
-                                  metadata: log.metadata,
-                                })}
+                                onClick={() =>
+                                  handleCopyMetadata(log.id, {
+                                    message: log.message,
+                                    level: log.level,
+                                    timestamp: log.timestamp,
+                                    service: log.service
+                                      ? {
+                                          name: log.service.name,
+                                          environment: log.service.environment,
+                                        }
+                                      : null,
+                                    traceId: log.traceId,
+                                    metadata: log.metadata,
+                                  })
+                                }
                                 title="Copy JSON Payload"
                               >
                                 {copiedLogId === log.id ? (
@@ -536,26 +617,46 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
                             {/* Info grid */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans text-slate-400 mb-4 pt-1">
                               <div>
-                                <span className="font-semibold text-slate-500 font-sans">Service:</span>{" "}
-                                <span className="font-mono text-slate-350">{log.service ? `${log.service.name} [${log.service.environment}]` : "unknown"}</span>
+                                <span className="font-semibold text-slate-500 font-sans">
+                                  Service:
+                                </span>{" "}
+                                <span className="font-mono text-slate-350">
+                                  {log.service
+                                    ? `${log.service.name} [${log.service.environment}]`
+                                    : "unknown"}
+                                </span>
                               </div>
                               <div>
-                                <span className="font-semibold text-slate-500 font-sans">Log level:</span>{" "}
-                                <span className="font-mono text-slate-350 capitalize">{log.level}</span>
+                                <span className="font-semibold text-slate-500 font-sans">
+                                  Log level:
+                                </span>{" "}
+                                <span className="font-mono text-slate-350 capitalize">
+                                  {log.level}
+                                </span>
                               </div>
                               <div>
-                                <span className="font-semibold text-slate-500 font-sans">Timestamp:</span>{" "}
-                                <span className="font-mono text-slate-350">{log.timestamp}</span>
+                                <span className="font-semibold text-slate-500 font-sans">
+                                  Timestamp:
+                                </span>{" "}
+                                <span className="font-mono text-slate-350">
+                                  {log.timestamp}
+                                </span>
                               </div>
                               <div>
-                                <span className="font-semibold text-slate-500 font-sans">Trace ID:</span>{" "}
-                                <span className="font-mono text-slate-350">{log.traceId || "none"}</span>
+                                <span className="font-semibold text-slate-500 font-sans">
+                                  Trace ID:
+                                </span>{" "}
+                                <span className="font-mono text-slate-350">
+                                  {log.traceId || "none"}
+                                </span>
                               </div>
                             </div>
 
                             {/* JSON metadata payload */}
                             <div>
-                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Metadata Object</div>
+                              <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">
+                                Metadata Object
+                              </div>
                               <pre className="text-[11px] bg-slate-950/80 border border-slate-900 rounded p-3 overflow-x-auto text-indigo-300 font-mono">
                                 {JSON.stringify(log.metadata, null, 2)}
                               </pre>
@@ -598,12 +699,29 @@ export default function SearchView({ project, services, initialLogs, savedQuerie
 
               {/* Current params preview */}
               <div className="bg-slate-950 border border-slate-900 p-3 rounded-lg text-[10px] space-y-1.5 font-mono text-slate-400">
-                <span className="block font-bold text-slate-500 uppercase pb-1 border-b border-slate-900">Current Query Filter Parameters</span>
-                {query.trim() && <div><span className="text-slate-650">Query:</span> "{query}"</div>}
-                <div><span className="text-slate-650">Level:</span> {level}</div>
-                <div><span className="text-slate-650">Service:</span> {serviceId === "all" ? "All" : services.find(s => s.id === serviceId)?.name}</div>
-                <div><span className="text-slate-650">Env:</span> {environment}</div>
-                <div><span className="text-slate-650">Time:</span> {timeRange}</div>
+                <span className="block font-bold text-slate-500 uppercase pb-1 border-b border-slate-900">
+                  Current Query Filter Parameters
+                </span>
+                {query.trim() && (
+                  <div>
+                    <span className="text-slate-650">Query:</span> "{query}"
+                  </div>
+                )}
+                <div>
+                  <span className="text-slate-650">Level:</span> {level}
+                </div>
+                <div>
+                  <span className="text-slate-650">Service:</span>{" "}
+                  {serviceId === "all"
+                    ? "All"
+                    : services.find((s) => s.id === serviceId)?.name}
+                </div>
+                <div>
+                  <span className="text-slate-650">Env:</span> {environment}
+                </div>
+                <div>
+                  <span className="text-slate-650">Time:</span> {timeRange}
+                </div>
               </div>
             </div>
 

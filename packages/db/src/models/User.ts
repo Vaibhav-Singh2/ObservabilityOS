@@ -19,8 +19,9 @@ const UserSchema = new Schema<IUser>(
     email: { type: String },
     avatarUrl: { type: String },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export const User: Model<IUser> = models.User || model<IUser>("User", UserSchema);
+export const User: Model<IUser> =
+  models.User || model<IUser>("User", UserSchema);
 export default User;

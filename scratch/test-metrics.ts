@@ -46,7 +46,11 @@ async function verify() {
     apiKey: TEST_API_KEY,
   });
 
-  let service = await Service.findOne({ projectId: project._id, name: "payment-service", environment: "staging" });
+  let service = await Service.findOne({
+    projectId: project._id,
+    name: "payment-service",
+    environment: "staging",
+  });
   if (!service) {
     service = await Service.create({
       projectId: project._id,
@@ -86,7 +90,9 @@ async function verify() {
   console.log(`Successfully seeded ${metricsToSeed.length} metrics documents.`);
 
   // 4. Test Ingestion API Endpoint
-  console.log("\n--- [Step 3] Testing Ingestion API Endpoint (/api/metrics/ingest) ---");
+  console.log(
+    "\n--- [Step 3] Testing Ingestion API Endpoint (/api/metrics/ingest) ---",
+  );
   const livePayload = {
     service: "payment-service",
     environment: "staging",
@@ -111,45 +117,61 @@ async function verify() {
     console.log("Ingestion Response:", JSON.stringify(body, null, 2));
 
     if (!response.ok) {
-      throw new Error(`Ingestion endpoint returned status ${response.status}: ${JSON.stringify(body)}`);
+      throw new Error(
+        `Ingestion endpoint returned status ${response.status}: ${JSON.stringify(body)}`,
+      );
     }
   } catch (err) {
-    console.error("Failed to connect to dev server on port 3000. Start it in watch mode before testing.", err);
+    console.error(
+      "Failed to connect to dev server on port 3000. Start it in watch mode before testing.",
+      err,
+    );
     process.exit(1);
   }
 
   // 5. Test Query / Aggregation API Endpoint
-  console.log("\n--- [Step 4] Testing Aggregation Query API Endpoint (/api/metrics/query) ---");
+  console.log(
+    "\n--- [Step 4] Testing Aggregation Query API Endpoint (/api/metrics/query) ---",
+  );
   const queryUrl = `http://127.0.0.1:3000/api/metrics/query?projectId=${project._id}&serviceId=${service._id}&timeRange=24h`;
-  
+
   // Create a session cookie by logging in (since query API checks for cookies session JWT)
   // To bypass browser auth during testing, we can write a quick dev bypass option or sign a token using jwt
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     throw new Error("JWT_SECRET is missing from environment variables.");
   }
-  const token = require("jsonwebtoken").sign({ userId: project.ownerId.toString() }, jwtSecret);
+  const token = require("jsonwebtoken").sign(
+    { userId: project.ownerId.toString() },
+    jwtSecret,
+  );
 
   try {
     const response = await fetch(queryUrl, {
       method: "GET",
       headers: {
-        "Cookie": `session=${token}`,
+        Cookie: `session=${token}`,
       },
     });
 
     const body = await response.json();
     if (!response.ok) {
-      throw new Error(`Query endpoint returned status ${response.status}: ${JSON.stringify(body)}`);
+      throw new Error(
+        `Query endpoint returned status ${response.status}: ${JSON.stringify(body)}`,
+      );
     }
 
     console.log(`Aggregation returned ${body.metrics.length} query intervals.`);
     console.log("Sample point:", JSON.stringify(body.metrics[0], null, 2));
 
     if (body.metrics.length > 0) {
-      console.log("\n✅ E2E System Metrics Ingestion & Query Verification Successful!");
+      console.log(
+        "\n✅ E2E System Metrics Ingestion & Query Verification Successful!",
+      );
     } else {
-      console.log("\n❌ E2E System Metrics Verification Failed: Empty aggregation returned.");
+      console.log(
+        "\n❌ E2E System Metrics Verification Failed: Empty aggregation returned.",
+      );
     }
   } catch (err) {
     console.error("Aggregation Query request failed:", err);

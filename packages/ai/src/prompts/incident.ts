@@ -28,7 +28,7 @@ export function generateIncidentPrompt(input: IncidentPromptInput): string {
       (l) =>
         `[${l.timestamp}] [${l.level.toUpperCase()}] ${l.message} (Trace ID: ${
           l.traceId || "N/A"
-        }) Metadata: ${JSON.stringify(l.metadata || {})}`
+        }) Metadata: ${JSON.stringify(l.metadata || {})}`,
     )
     .join("\n");
 
@@ -39,8 +39,8 @@ export function generateIncidentPrompt(input: IncidentPromptInput): string {
             (d) =>
               `- [${d.deployedAt}] Branch: ${d.branch}, Commit: ${d.commitSha.slice(
                 0,
-                7
-              )}, Message: "${d.commitMessage}"`
+                7,
+              )}, Message: "${d.commitMessage}"`,
           )
           .join("\n")
       : "No recent deployments detected in the window preceding this anomaly.";

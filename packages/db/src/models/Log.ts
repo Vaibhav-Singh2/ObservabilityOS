@@ -40,7 +40,7 @@ const LogSchema = new Schema<ILog>(
       metaField: "projectId",
       granularity: "seconds",
     },
-  }
+  },
 );
 
 // Define secondary compound indexes for optimized queries (supported in MongoDB 6.0+)

@@ -1,6 +1,13 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Service, Deploy, Incident } from "@repo/db";
+import {
+  connectToDatabase,
+  User,
+  Project,
+  Service,
+  Deploy,
+  Incident,
+} from "@repo/db";
 import jwt from "jsonwebtoken";
 import ServiceDetailView from "./ServiceDetailView";
 
@@ -9,7 +16,10 @@ interface PageProps {
   searchParams: Promise<{ projectId?: string }>;
 }
 
-export default async function ServiceDetailPage({ params, searchParams }: PageProps) {
+export default async function ServiceDetailPage({
+  params,
+  searchParams,
+}: PageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
 
@@ -37,7 +47,7 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
 
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
-  
+
   const serviceId = resolvedParams.id;
   const projectId = resolvedSearchParams.projectId;
 
@@ -52,7 +62,10 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
   }
 
   // Fetch the Service
-  const service = await Service.findOne({ _id: serviceId, projectId: project._id });
+  const service = await Service.findOne({
+    _id: serviceId,
+    projectId: project._id,
+  });
   if (!service) {
     redirect(`/dashboard?projectId=${project._id}`);
   }
@@ -77,7 +90,7 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
     troubleshootingSteps: service.troubleshootingSteps || null,
   };
 
-  const serializedDeployments = deployments.map(d => ({
+  const serializedDeployments = deployments.map((d) => ({
     id: d._id.toString(),
     commitSha: d.commitSha,
     commitMessage: d.commitMessage,
@@ -85,7 +98,7 @@ export default async function ServiceDetailPage({ params, searchParams }: PagePr
     deployedAt: d.deployedAt ? d.deployedAt.toISOString() : null,
   }));
 
-  const serializedIncidents = incidents.map(i => ({
+  const serializedIncidents = incidents.map((i) => ({
     id: i._id.toString(),
     title: i.title,
     status: i.status,

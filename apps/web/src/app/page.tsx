@@ -3,7 +3,8 @@ import { Github, Activity, Shield, Terminal, Zap } from "lucide-react";
 
 export const metadata = {
   title: "ObservabilityOS — AI-Native DevOps Intelligence Platform",
-  description: "Transform raw logs into structured AI post-mortems, detect anomalies instantly, and solve incidents 10x faster.",
+  description:
+    "Transform raw logs into structured AI post-mortems, detect anomalies instantly, and solve incidents 10x faster.",
 };
 
 export default function LandingPage() {
@@ -52,15 +53,20 @@ export default function LandingPage() {
           </h1>
 
           <p className="text-lg text-slate-400 max-w-2xl leading-relaxed mb-10">
-            ObservabilityOS ingests structured logs, detects statistical anomalies in real time, and automatically compiles root-cause summaries that save hours of debugging.
+            ObservabilityOS ingests structured logs, detects statistical
+            anomalies in real time, and automatically compiles root-cause
+            summaries that save hours of debugging.
           </p>
 
           {/* Call to Action Card */}
           <div className="bg-slate-900/40 border border-slate-900 rounded-2xl p-8 backdrop-blur-sm max-w-md w-full shadow-2xl relative">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-2xl pointer-events-none" />
-            <h2 className="text-xl font-bold text-slate-200 mb-2">Get Started Free</h2>
+            <h2 className="text-xl font-bold text-slate-200 mb-2">
+              Get Started Free
+            </h2>
             <p className="text-sm text-slate-400 mb-6">
-              Connect your GitHub account to set up your first project and receive your ingestion keys.
+              Connect your GitHub account to set up your first project and
+              receive your ingestion keys.
             </p>
             <a
               id="landing_github_oauth_btn"
@@ -75,7 +81,8 @@ export default function LandingPage() {
                 <Shield className="w-3 h-3 text-emerald-500" /> Secure OAuth
               </span>
               <span className="flex items-center gap-1">
-                <Terminal className="w-3 h-3 text-indigo-500" /> One-line SDK config
+                <Terminal className="w-3 h-3 text-indigo-500" /> One-line SDK
+                config
               </span>
             </div>
           </div>
@@ -87,9 +94,13 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-4">
               <Terminal className="w-5 h-5 text-indigo-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-200 mb-2">High-Throughput SDK</h3>
+            <h3 className="text-lg font-bold text-slate-200 mb-2">
+              High-Throughput SDK
+            </h3>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Log directly from your services with a zero-dependency package. Features memory-buffered background batching and fail-safe flushes.
+              Log directly from your services with a zero-dependency package.
+              Features memory-buffered background batching and fail-safe
+              flushes.
             </p>
           </div>
 
@@ -97,9 +108,12 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
               <Activity className="w-5 h-5 text-emerald-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-200 mb-2">Anomaly Detection</h3>
+            <h3 className="text-lg font-bold text-slate-200 mb-2">
+              Anomaly Detection
+            </h3>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Detect sudden latency spikes or surge in error rates automatically without manual threshold settings using statistical modeling.
+              Detect sudden latency spikes or surge in error rates automatically
+              without manual threshold settings using statistical modeling.
             </p>
           </div>
 
@@ -107,9 +121,13 @@ export default function LandingPage() {
             <div className="w-10 h-10 rounded-lg bg-purple-500/10 border border-purple-500/20 flex items-center justify-center mb-4">
               <Zap className="w-5 h-5 text-purple-400" />
             </div>
-            <h3 className="text-lg font-bold text-slate-200 mb-2">AI Incident Reports</h3>
+            <h3 className="text-lg font-bold text-slate-200 mb-2">
+              AI Incident Reports
+            </h3>
             <p className="text-sm text-slate-400 leading-relaxed">
-              Recieve instant Slack notifications containing clear, concise, and structured summaries of what went wrong, why, and which endpoints were affected.
+              Recieve instant Slack notifications containing clear, concise, and
+              structured summaries of what went wrong, why, and which endpoints
+              were affected.
             </p>
           </div>
         </section>
@@ -119,12 +137,19 @@ export default function LandingPage() {
       <footer className="border-t border-slate-900 bg-slate-950/40 py-8 mt-20">
         <div className="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>
-            &copy; {new Date().getFullYear()} ObservabilityOS. All rights reserved.
+            &copy; {new Date().getFullYear()} ObservabilityOS. All rights
+            reserved.
           </div>
           <div className="flex gap-6">
-            <a href="#" className="hover:text-slate-300">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-300">Terms of Service</a>
-            <a href="#" className="hover:text-slate-300">Documentation</a>
+            <a href="#" className="hover:text-slate-300">
+              Privacy Policy
+            </a>
+            <a href="#" className="hover:text-slate-300">
+              Terms of Service
+            </a>
+            <a href="#" className="hover:text-slate-300">
+              Documentation
+            </a>
           </div>
         </div>
       </footer>

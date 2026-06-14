@@ -10,7 +10,10 @@ const metricItemSchema = z.object({
   service: z.string().min(1, "Service name is required"),
   environment: z.enum(["prod", "staging", "dev"]),
   timestamp: z.string().datetime().optional(),
-  cpuUsage: z.number().min(0, "CPU usage must be at least 0").max(100, "CPU usage cannot exceed 100"),
+  cpuUsage: z
+    .number()
+    .min(0, "CPU usage must be at least 0")
+    .max(100, "CPU usage cannot exceed 100"),
   memoryUsage: z.number().min(0, "Memory usage must be at least 0"),
   memoryLimit: z.number().min(0, "Memory limit must be at least 0"),
   latencyMs: z.number().min(0, "Latency must be at least 0"),
@@ -34,7 +37,7 @@ export async function POST(request: Request) {
             message: "Missing x-api-key header",
           },
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -51,7 +54,7 @@ export async function POST(request: Request) {
             message: "Invalid API key",
           },
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -65,7 +68,7 @@ export async function POST(request: Request) {
             message: "Rate limit exceeded. Maximum 100 requests per minute.",
           },
         },
-        { status: 429 }
+        { status: 429 },
       );
     }
 
@@ -74,7 +77,9 @@ export async function POST(request: Request) {
     const validatedData = ingestPayloadSchema.parse(rawBody);
 
     // Standardize to an array
-    const metricItems = Array.isArray(validatedData) ? validatedData : [validatedData];
+    const metricItems = Array.isArray(validatedData)
+      ? validatedData
+      : [validatedData];
 
     if (metricItems.length === 0) {
       return NextResponse.json({ success: true, count: 0 });
@@ -168,7 +173,7 @@ export async function POST(request: Request) {
             details: error.errors,
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -176,10 +181,11 @@ export async function POST(request: Request) {
       {
         error: {
           code: "INTERNAL_SERVER_ERROR",
-          message: error instanceof Error ? error.message : "Internal server error",
+          message:
+            error instanceof Error ? error.message : "Internal server error",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -24,7 +24,7 @@ export async function POST(request: Request) {
             message: "Missing x-api-key header",
           },
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
             message: "Invalid API key",
           },
         },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
             details: error.errors,
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -104,10 +104,11 @@ export async function POST(request: Request) {
       {
         error: {
           code: "INTERNAL_SERVER_ERROR",
-          message: error instanceof Error ? error.message : "Internal server error",
+          message:
+            error instanceof Error ? error.message : "Internal server error",
         },
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

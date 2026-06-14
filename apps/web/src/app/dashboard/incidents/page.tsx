@@ -35,21 +35,27 @@ export default async function IncidentsPage({ searchParams }: PageProps) {
   }
 
   const resolvedSearchParams = await searchParams;
-  const projects = await Project.find({ ownerId: user._id }).sort({ createdAt: -1 });
+  const projects = await Project.find({ ownerId: user._id }).sort({
+    createdAt: -1,
+  });
 
   if (projects.length === 0) {
     redirect("/dashboard");
   }
 
-  const activeProjectId = resolvedSearchParams.projectId || projects[0]?._id.toString();
-  const activeProject = projects.find(p => p._id.toString() === activeProjectId) || projects[0];
+  const activeProjectId =
+    resolvedSearchParams.projectId || projects[0]?._id.toString();
+  const activeProject =
+    projects.find((p) => p._id.toString() === activeProjectId) || projects[0];
 
   if (!activeProject) {
     redirect("/dashboard");
   }
 
   // Fetch services to populate filter options
-  const services = await Service.find({ projectId: activeProject._id }).sort({ name: 1 });
+  const services = await Service.find({ projectId: activeProject._id }).sort({
+    name: 1,
+  });
 
   // Fetch incidents, populating service and deploy relations
   const incidents = await Incident.find({ projectId: activeProject._id })
@@ -64,13 +70,13 @@ export default async function IncidentsPage({ searchParams }: PageProps) {
     apiKey: activeProject.apiKey,
   };
 
-  const serializedServices = services.map(s => ({
+  const serializedServices = services.map((s) => ({
     id: s._id.toString(),
     name: s.name,
     environment: s.environment,
   }));
 
-  const serializedIncidents = incidents.map(inc => {
+  const serializedIncidents = incidents.map((inc) => {
     const serviceObj = inc.serviceId as any;
     const deployObj = inc.deployId as any;
 

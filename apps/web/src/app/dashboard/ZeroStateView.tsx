@@ -49,9 +49,12 @@ export default function ZeroStateView() {
       </div>
 
       <div className="text-center mb-10">
-        <h2 className="text-2xl font-extrabold text-white tracking-tight mb-2">Create your first project</h2>
+        <h2 className="text-2xl font-extrabold text-white tracking-tight mb-2">
+          Create your first project
+        </h2>
         <p className="text-sm text-slate-400 max-w-sm mx-auto leading-relaxed">
-          Projects group your microservices, API credentials, and log ingestion streams. Let's name your first project.
+          Projects group your microservices, API credentials, and log ingestion
+          streams. Let's name your first project.
         </p>
       </div>
 
@@ -80,7 +83,9 @@ export default function ZeroStateView() {
               className="w-full inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white font-semibold h-11 rounded-xl transition-all duration-200 cursor-pointer shadow-lg shadow-indigo-600/10 hover:shadow-indigo-500/20"
             >
               <Plus className="w-4 h-4" />
-              {isSubmitting ? "Creating Project..." : "Create Project & Generate API Key"}
+              {isSubmitting
+                ? "Creating Project..."
+                : "Create Project & Generate API Key"}
             </Button>
           </form>
         </CardContent>
@@ -89,15 +94,21 @@ export default function ZeroStateView() {
       {/* Onboarding steps preview */}
       <div className="mt-12 grid grid-cols-3 gap-6 text-center text-xs text-slate-500 w-full max-w-lg">
         <div className="flex flex-col items-center">
-          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-semibold text-slate-400 mb-2">1</div>
+          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-semibold text-slate-400 mb-2">
+            1
+          </div>
           <span>Create Project</span>
         </div>
         <div className="flex flex-col items-center">
-          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-semibold text-slate-400 mb-2">2</div>
+          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-semibold text-slate-400 mb-2">
+            2
+          </div>
           <span>Copy API Key</span>
         </div>
         <div className="flex flex-col items-center">
-          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-semibold text-slate-400 mb-2">3</div>
+          <div className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center font-semibold text-slate-400 mb-2">
+            3
+          </div>
           <span>Ship Logs via SDK</span>
         </div>
       </div>

@@ -25,16 +25,16 @@ Deploy the Next.js frontend (`apps/web`) to **Vercel**:
 3. In the **Configure Project** step:
    - **Framework Preset**: Next.js
    - **Root Directory**: `apps/web` (Leave unchecked to run from monorepo root, or select `apps/web` if your setup allows workspace builds).
-     - *Recommended Monorepo settings*: Keep the root directory as the repo root, and configure:
+     - _Recommended Monorepo settings_: Keep the root directory as the repo root, and configure:
        - **Build Command**: `npx turbo run build --filter=web`
        - **Output Directory**: `apps/web/.next`
        - **Install Command**: `yarn install`
 4. Add the following **Environment Variables**:
-   - `MONGODB_URI`: *Your Railway connection string*
-   - `JWT_SECRET`: *A secure random string for JWT session signing*
-   - `GITHUB_CLIENT_ID`: *Your production GitHub OAuth app Client ID*
-   - `GITHUB_CLIENT_SECRET`: *Your production GitHub OAuth app Client Secret*
-   - `NEXT_PUBLIC_APP_URL`: *Your production Vercel deployment URL* (e.g. `https://your-app.vercel.app`)
+   - `MONGODB_URI`: _Your Railway connection string_
+   - `JWT_SECRET`: _A secure random string for JWT session signing_
+   - `GITHUB_CLIENT_ID`: _Your production GitHub OAuth app Client ID_
+   - `GITHUB_CLIENT_SECRET`: _Your production GitHub OAuth app Client Secret_
+   - `NEXT_PUBLIC_APP_URL`: _Your production Vercel deployment URL_ (e.g. `https://your-app.vercel.app`)
 5. Click **Deploy**.
 
 ---

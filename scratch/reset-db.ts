@@ -13,7 +13,9 @@ try {
       if (!trimmed || trimmed.startsWith("#")) continue;
       const index = trimmed.indexOf("=");
       if (index > 0) {
-        process.env[trimmed.slice(0, index).trim()] = trimmed.slice(index + 1).trim();
+        process.env[trimmed.slice(0, index).trim()] = trimmed
+          .slice(index + 1)
+          .trim();
       }
     }
   }
@@ -30,4 +32,6 @@ async function run() {
     console.log("Failed or not found:", e);
   }
 }
-run().then(() => process.exit(0)).catch(() => process.exit(1));
+run()
+  .then(() => process.exit(0))
+  .catch(() => process.exit(1));

@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -38,26 +38,42 @@ export async function GET(request: Request) {
     if (!projectId) {
       return NextResponse.json(
         { error: { code: "BAD_REQUEST", message: "projectId is required" } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     // Verify project belongs to user
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
-    const services = await Service.find({ projectId: project._id }).sort({ name: 1, environment: 1 });
+    const services = await Service.find({ projectId: project._id }).sort({
+      name: 1,
+      environment: 1,
+    });
     return NextResponse.json({ services });
   } catch (error) {
     console.error("Services GET Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to retrieve services" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to retrieve services",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -68,31 +84,46 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const { projectId, name, environment } = await request.json();
     if (!projectId || !name || !environment) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId, name, and environment are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId, name, and environment are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
     if (!["prod", "staging", "dev"].includes(environment)) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "Invalid environment value" } },
-        { status: 400 }
+        {
+          error: { code: "BAD_REQUEST", message: "Invalid environment value" },
+        },
+        { status: 400 },
       );
     }
 
     // Verify project belongs to user
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -105,8 +136,13 @@ export async function POST(request: Request) {
 
     if (existing) {
       return NextResponse.json(
-        { error: { code: "CONFLICT", message: "Service already exists with this name and environment" } },
-        { status: 409 }
+        {
+          error: {
+            code: "CONFLICT",
+            message: "Service already exists with this name and environment",
+          },
+        },
+        { status: 409 },
       );
     }
 
@@ -123,8 +159,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Services POST Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to create service" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create service",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -135,32 +176,54 @@ export async function PATCH(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const { projectId, serviceId, runbookUrl, troubleshootingSteps } = await request.json();
+    const { projectId, serviceId, runbookUrl, troubleshootingSteps } =
+      await request.json();
     if (!projectId || !serviceId) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId and serviceId are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId and serviceId are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
     // Verify project belongs to user
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
-    const service = await Service.findOne({ _id: serviceId, projectId: project._id });
+    const service = await Service.findOne({
+      _id: serviceId,
+      projectId: project._id,
+    });
     if (!service) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Service not found in this project" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Service not found in this project",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -177,8 +240,13 @@ export async function PATCH(request: Request) {
   } catch (error) {
     console.error("Services PATCH Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to update service" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update service",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -189,7 +257,7 @@ export async function DELETE(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -199,25 +267,46 @@ export async function DELETE(request: Request) {
 
     if (!projectId || !serviceId) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId and serviceId are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId and serviceId are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
     // Verify project belongs to user
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
-    const service = await Service.findOne({ _id: serviceId, projectId: project._id });
+    const service = await Service.findOne({
+      _id: serviceId,
+      projectId: project._id,
+    });
     if (!service) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Service not found in this project" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Service not found in this project",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -230,7 +319,7 @@ export async function DELETE(request: Request) {
     // Clean up associated resources in background or sequentially
     // In Mongoose / MongoDB Atlas, we delete documents matching the serviceId.
     const { Incident, Deploy, Log, Comment, Metric } = require("@repo/db");
-    
+
     // Find all incidents to clean up their comments
     const incidentDocs = await Incident.find({ serviceId: service._id });
     const incidentIds = incidentDocs.map((inc: any) => inc._id);
@@ -261,10 +350,13 @@ export async function DELETE(request: Request) {
   } catch (error) {
     console.error("Services DELETE Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to delete service" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete service",
+        },
+      },
+      { status: 500 },
     );
   }
 }
-
-

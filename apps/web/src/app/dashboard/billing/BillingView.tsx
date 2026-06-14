@@ -2,19 +2,19 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { 
-  CreditCard, 
-  Check, 
-  HelpCircle, 
-  Sparkles, 
-  ArrowRight, 
-  ShieldCheck, 
-  Zap, 
+import {
+  CreditCard,
+  Check,
+  HelpCircle,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
   AlertCircle,
   TrendingUp,
   Cpu,
   Globe2,
-  DollarSign
+  DollarSign,
 } from "lucide-react";
 
 interface BillingViewProps {
@@ -40,10 +40,14 @@ export default function BillingView({ project }: BillingViewProps) {
     const status = searchParams.get("checkout_status");
     const gatewayParam = searchParams.get("gateway");
     if (status === "success") {
-      setSuccessMsg(`Congratulations! Your subscription upgrade via ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"} was processed successfully.`);
+      setSuccessMsg(
+        `Congratulations! Your subscription upgrade via ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"} was processed successfully.`,
+      );
       router.replace(`/dashboard/billing?projectId=${project.id}`);
     } else if (status === "cancel") {
-      setErrorMsg("Checkout was cancelled. Please try again when you are ready.");
+      setErrorMsg(
+        "Checkout was cancelled. Please try again when you are ready.",
+      );
       router.replace(`/dashboard/billing?projectId=${project.id}`);
     }
   }, [searchParams]);
@@ -89,7 +93,9 @@ export default function BillingView({ project }: BillingViewProps) {
         // Razorpay checkout flow
         if (data.isMock) {
           // Simulate the popup & automatically trigger manual override upgrade for local developer convenience
-          setSuccessMsg("Initiating Mock Razorpay Checkout... (Upgrading account in sandbox mode)");
+          setSuccessMsg(
+            "Initiating Mock Razorpay Checkout... (Upgrading account in sandbox mode)",
+          );
           setTimeout(async () => {
             await handleSandboxOverride("pro");
           }, 1500);
@@ -107,7 +113,9 @@ export default function BillingView({ project }: BillingViewProps) {
             name: data.name,
             description: data.description,
             handler: async function (response: any) {
-              setSuccessMsg("Razorpay authorization approved! Reloading settings...");
+              setSuccessMsg(
+                "Razorpay authorization approved! Reloading settings...",
+              );
               // We'll update the plan manually or reload to fetch webhook result
               // Wait 1.5 seconds then reload
               setTimeout(() => {
@@ -130,7 +138,9 @@ export default function BillingView({ project }: BillingViewProps) {
       }
     } catch (err: any) {
       console.error(err);
-      setErrorMsg(err.message || "An unexpected error occurred during checkout");
+      setErrorMsg(
+        err.message || "An unexpected error occurred during checkout",
+      );
       setIsSubmitting(false);
     }
   };
@@ -152,10 +162,14 @@ export default function BillingView({ project }: BillingViewProps) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error?.message || "Failed to trigger sandbox override");
+        throw new Error(
+          data.error?.message || "Failed to trigger sandbox override",
+        );
       }
 
-      setSuccessMsg(`Plan successfully changed to ${targetPlan.toUpperCase()} via Dev Override.`);
+      setSuccessMsg(
+        `Plan successfully changed to ${targetPlan.toUpperCase()} via Dev Override.`,
+      );
       router.refresh();
     } catch (err: any) {
       setErrorMsg(err.message || "Dev override failed");
@@ -176,7 +190,8 @@ export default function BillingView({ project }: BillingViewProps) {
           Billing Management
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Scale your project's limits. Upgrade to unlock advanced anomaly alerts, webhook integration channels, and team notifications.
+          Scale your project's limits. Upgrade to unlock advanced anomaly
+          alerts, webhook integration channels, and team notifications.
         </p>
       </div>
 
@@ -197,35 +212,50 @@ export default function BillingView({ project }: BillingViewProps) {
       {/* Current Subscription Status */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent pointer-events-none" />
-        
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
           <div>
-            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">Active Project: {project.name}</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-500">
+              Active Project: {project.name}
+            </span>
             <div className="flex items-baseline gap-2 mt-1">
               <span className="text-lg text-slate-350">Current Plan:</span>
-              <span className={`text-2xl font-black uppercase tracking-wide ${
-                project.plan === "pro" ? "bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent" : "text-white"
-              }`}>
+              <span
+                className={`text-2xl font-black uppercase tracking-wide ${
+                  project.plan === "pro"
+                    ? "bg-gradient-to-r from-violet-400 to-indigo-400 bg-clip-text text-transparent"
+                    : "text-white"
+                }`}
+              >
                 {project.plan === "pro" ? "Pro Tier" : "Free Tier"}
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              {project.plan === "pro" 
+              {project.plan === "pro"
                 ? `Active subscription managed via ${project.billingProvider.toUpperCase()}`
                 : "Limited to 10,000 log events per month & statistical alerts."}
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
-              project.subscriptionStatus === "active" 
-                ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20" 
-                : "text-slate-400 bg-slate-950 border border-slate-850"
-            }`}>
-              <span className={`w-1.5 h-1.5 rounded-full ${
-                project.subscriptionStatus === "active" ? "bg-emerald-400 animate-pulse" : "bg-slate-600"
-              }`} />
-              Status: {project.subscriptionStatus === "active" ? "Active" : "None / Unpaid"}
+            <span
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
+                project.subscriptionStatus === "active"
+                  ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                  : "text-slate-400 bg-slate-950 border border-slate-850"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  project.subscriptionStatus === "active"
+                    ? "bg-emerald-400 animate-pulse"
+                    : "bg-slate-600"
+                }`}
+              />
+              Status:{" "}
+              {project.subscriptionStatus === "active"
+                ? "Active"
+                : "None / Unpaid"}
             </span>
           </div>
         </div>
@@ -239,13 +269,17 @@ export default function BillingView({ project }: BillingViewProps) {
             <div className="flex justify-between items-start">
               <div>
                 <h3 className="text-lg font-bold text-white">Free Developer</h3>
-                <p className="text-xs text-slate-500 mt-1">Ideal for side projects & local testing.</p>
+                <p className="text-xs text-slate-500 mt-1">
+                  Ideal for side projects & local testing.
+                </p>
               </div>
             </div>
-            
+
             <div className="mt-6 flex items-baseline gap-1">
               <span className="text-4xl font-extrabold text-white">$0</span>
-              <span className="text-slate-500 text-xs font-medium">/ month</span>
+              <span className="text-slate-500 text-xs font-medium">
+                / month
+              </span>
             </div>
 
             <ul className="mt-8 space-y-4 text-sm text-slate-400">
@@ -273,7 +307,7 @@ export default function BillingView({ project }: BillingViewProps) {
           </div>
 
           <div className="mt-8">
-            <button 
+            <button
               disabled={project.plan === "free"}
               onClick={() => handleSandboxOverride("free")}
               className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all border ${
@@ -300,19 +334,25 @@ export default function BillingView({ project }: BillingViewProps) {
                   Pro Production
                   <Sparkles className="w-4 h-4 text-indigo-400 animate-pulse" />
                 </h3>
-                <p className="text-xs text-slate-400 mt-1">For professional apps running in production.</p>
+                <p className="text-xs text-slate-400 mt-1">
+                  For professional apps running in production.
+                </p>
               </div>
             </div>
 
             <div className="mt-6 flex items-baseline gap-1">
               <span className="text-4xl font-extrabold text-white">$49</span>
-              <span className="text-slate-400 text-xs font-medium">/ month</span>
+              <span className="text-slate-400 text-xs font-medium">
+                / month
+              </span>
             </div>
 
             <ul className="mt-8 space-y-4 text-sm text-slate-350">
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>Unlimited</strong> log aggregation</span>
+                <span>
+                  <strong>Unlimited</strong> log aggregation
+                </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -320,7 +360,9 @@ export default function BillingView({ project }: BillingViewProps) {
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>30-day</strong> secure data retention</span>
+                <span>
+                  <strong>30-day</strong> secure data retention
+                </span>
               </li>
               <li className="flex items-center gap-2.5">
                 <Check className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -328,7 +370,10 @@ export default function BillingView({ project }: BillingViewProps) {
               </li>
               <li className="flex items-center gap-2.5 text-indigo-400">
                 <Zap className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>AI SRE Analyst:</strong> Automates incident diagnostics</span>
+                <span>
+                  <strong>AI SRE Analyst:</strong> Automates incident
+                  diagnostics
+                </span>
               </li>
             </ul>
           </div>
@@ -338,7 +383,9 @@ export default function BillingView({ project }: BillingViewProps) {
               <>
                 {/* Gateway Selection */}
                 <div className="space-y-2">
-                  <span className="block text-[10px] uppercase font-bold tracking-widest text-slate-500">Choose Gateway Method</span>
+                  <span className="block text-[10px] uppercase font-bold tracking-widest text-slate-500">
+                    Choose Gateway Method
+                  </span>
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -353,9 +400,11 @@ export default function BillingView({ project }: BillingViewProps) {
                         <Globe2 className="w-3.5 h-3.5" />
                         Stripe
                       </span>
-                      <span className="text-[9px] text-slate-500 mt-0.5">International Cards</span>
+                      <span className="text-[9px] text-slate-500 mt-0.5">
+                        International Cards
+                      </span>
                     </button>
-                    
+
                     <button
                       type="button"
                       onClick={() => setGateway("razorpay")}
@@ -369,17 +418,21 @@ export default function BillingView({ project }: BillingViewProps) {
                         <DollarSign className="w-3.5 h-3.5" />
                         Razorpay
                       </span>
-                      <span className="text-[9px] text-slate-500 mt-0.5">UPI, Net Banking, Wallets</span>
+                      <span className="text-[9px] text-slate-500 mt-0.5">
+                        UPI, Net Banking, Wallets
+                      </span>
                     </button>
                   </div>
                 </div>
 
-                <button 
+                <button
                   onClick={handleCheckout}
                   disabled={isSubmitting}
                   className="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-850 text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
                 >
-                  {isSubmitting ? "Proceeding..." : `Upgrade via ${gateway === "stripe" ? "Stripe" : "Razorpay"}`}
+                  {isSubmitting
+                    ? "Proceeding..."
+                    : `Upgrade via ${gateway === "stripe" ? "Stripe" : "Razorpay"}`}
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </>
@@ -397,24 +450,29 @@ export default function BillingView({ project }: BillingViewProps) {
       <section className="bg-slate-900 border border-dashed border-slate-800 rounded-2xl p-6">
         <div className="flex items-center gap-2.5 mb-2.5">
           <Cpu className="w-4 h-4 text-indigo-400" />
-          <h4 className="text-sm font-bold uppercase tracking-wider text-slate-350">Developer Sandbox Bypass</h4>
+          <h4 className="text-sm font-bold uppercase tracking-wider text-slate-350">
+            Developer Sandbox Bypass
+          </h4>
         </div>
         <p className="text-xs text-slate-500 leading-relaxed mb-4">
-          Local sandbox environment detected. Use the quick toggle below to simulate Stripe/Razorpay webhook outcomes instantly without configuring keys.
+          Local sandbox environment detected. Use the quick toggle below to
+          simulate Stripe/Razorpay webhook outcomes instantly without
+          configuring keys.
         </p>
 
         <div className="flex items-center gap-3">
           <button
-            onClick={() => handleSandboxOverride(project.plan === "pro" ? "free" : "pro")}
+            onClick={() =>
+              handleSandboxOverride(project.plan === "pro" ? "free" : "pro")
+            }
             disabled={isSandboxUpdating}
             className="px-4 py-2 bg-slate-950 border border-slate-800 hover:border-slate-750 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer"
           >
-            {isSandboxUpdating 
-              ? "Updating..." 
-              : project.plan === "pro" 
-                ? "Simulate Free Downgrade" 
-                : "Simulate Pro Upgrade"
-            }
+            {isSandboxUpdating
+              ? "Updating..."
+              : project.plan === "pro"
+                ? "Simulate Free Downgrade"
+                : "Simulate Pro Upgrade"}
           </button>
         </div>
       </section>

@@ -40,7 +40,8 @@ export default function ProjectSelector({ projects }: ProjectSelectorProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const activeProjectId = searchParams.get("projectId") || projects[0]?.id;
-  const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
+  const activeProject =
+    projects.find((p) => p.id === activeProjectId) || projects[0];
 
   const handleSelect = (id: string) => {
     const params = new URLSearchParams(window.location.search);
@@ -94,21 +95,31 @@ export default function ProjectSelector({ projects }: ProjectSelectorProps) {
           </Button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent id="project_selector_dropdown" align="start" className="w-56">
+        <DropdownMenuContent
+          id="project_selector_dropdown"
+          align="start"
+          className="w-56"
+        >
           <div className="max-h-60 overflow-y-auto p-1">
             {projects.length === 0 ? (
-              <div className="px-3 py-2 text-xs text-slate-500 italic">No projects found</div>
+              <div className="px-3 py-2 text-xs text-slate-500 italic">
+                No projects found
+              </div>
             ) : (
-              projects.map(p => (
+              projects.map((p) => (
                 <DropdownMenuItem
                   key={p.id}
                   onClick={() => handleSelect(p.id)}
                   className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-lg hover:bg-slate-800/60 transition-colors text-left cursor-pointer ${
-                    p.id === activeProject?.id ? "text-indigo-400 font-medium" : "text-slate-300"
+                    p.id === activeProject?.id
+                      ? "text-indigo-400 font-medium"
+                      : "text-slate-300"
                   }`}
                 >
                   <span className="truncate">{p.name}</span>
-                  {p.id === activeProject?.id && <Check className="w-4 h-4 text-indigo-400" />}
+                  {p.id === activeProject?.id && (
+                    <Check className="w-4 h-4 text-indigo-400" />
+                  )}
                 </DropdownMenuItem>
               ))
             )}

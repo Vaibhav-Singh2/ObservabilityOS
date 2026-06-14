@@ -43,18 +43,21 @@ export interface PostMortemComment {
 export function generatePostMortemMarkdown(
   incident: PostMortemIncident,
   logs: PostMortemLog[],
-  comments: PostMortemComment[]
+  comments: PostMortemComment[],
 ): string {
   const createdDate = new Date(incident.createdAt).toLocaleString();
-  const resolvedDate = incident.resolvedAt ? new Date(incident.resolvedAt).toLocaleString() : "Unresolved";
+  const resolvedDate = incident.resolvedAt
+    ? new Date(incident.resolvedAt).toLocaleString()
+    : "Unresolved";
   const detectionDelay = `${Math.round(incident.ttd / 1000)} seconds`;
   const resolutionTime = incident.ttr
     ? `${Math.round(incident.ttr / 1000 / 60)} minutes ${Math.round((incident.ttr / 1000) % 60)} seconds`
     : "N/A";
 
-  const suggestedFixes = incident.suggestedFix.length > 0
-    ? incident.suggestedFix.map((step) => `- [ ] ${step}`).join("\n")
-    : "*No suggested fixes provided by AI.*";
+  const suggestedFixes =
+    incident.suggestedFix.length > 0
+      ? incident.suggestedFix.map((step) => `- [ ] ${step}`).join("\n")
+      : "*No suggested fixes provided by AI.*";
 
   const deploymentsInfo = incident.deploy
     ? `### Deployment Details
@@ -64,28 +67,32 @@ export function generatePostMortemMarkdown(
 - **Deployed At**: ${incident.deploy.deployedAt ? new Date(incident.deploy.deployedAt).toLocaleString() : "N/A"}`
     : "*No software deployment events were recorded close to the onset of this anomaly.*";
 
-  const logRows = logs.length > 0
-    ? logs
-        .map((log) => {
-          const logTime = new Date(log.timestamp).toLocaleTimeString();
-          const traceStr = log.traceId ? `\`${log.traceId.slice(0, 8)}\`` : "-";
-          // Escape markdown pipes in messages
-          const cleanMessage = log.message.replace(/\|/g, "\\|");
-          return `| ${logTime} | ${log.level.toUpperCase()} | ${traceStr} | ${cleanMessage} |`;
-        })
-        .join("\n")
-    : "| - | - | - | No anomalous logs recorded |";
+  const logRows =
+    logs.length > 0
+      ? logs
+          .map((log) => {
+            const logTime = new Date(log.timestamp).toLocaleTimeString();
+            const traceStr = log.traceId
+              ? `\`${log.traceId.slice(0, 8)}\``
+              : "-";
+            // Escape markdown pipes in messages
+            const cleanMessage = log.message.replace(/\|/g, "\\|");
+            return `| ${logTime} | ${log.level.toUpperCase()} | ${traceStr} | ${cleanMessage} |`;
+          })
+          .join("\n")
+      : "| - | - | - | No anomalous logs recorded |";
 
-  const commentsTimeline = comments.length > 0
-    ? comments
-        .map((c) => {
-          const author = c.user ? c.user.username : "Unknown User";
-          const emailStr = c.user?.email ? ` (${c.user.email})` : "";
-          const commentTime = new Date(c.createdAt).toLocaleString();
-          return `### ${author}${emailStr} — *${commentTime}*\n${c.content}`;
-        })
-        .join("\n\n---\n\n")
-    : "*No collaboration comments have been posted on this incident.*";
+  const commentsTimeline =
+    comments.length > 0
+      ? comments
+          .map((c) => {
+            const author = c.user ? c.user.username : "Unknown User";
+            const emailStr = c.user?.email ? ` (${c.user.email})` : "";
+            const commentTime = new Date(c.createdAt).toLocaleString();
+            return `### ${author}${emailStr} — *${commentTime}*\n${c.content}`;
+          })
+          .join("\n\n---\n\n")
+      : "*No collaboration comments have been posted on this incident.*";
 
   return `# Post-Mortem Report: ${incident.title}
 

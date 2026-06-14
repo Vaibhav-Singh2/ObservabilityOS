@@ -64,7 +64,7 @@ export class Logger {
   public log(
     level: "error" | "warn" | "info" | "debug",
     message: string,
-    options?: LogOptions
+    options?: LogOptions,
   ): void {
     const logEntry: QueuedLog = {
       service: options?.service || this.defaultService,
@@ -135,13 +135,16 @@ export class Logger {
           const errorText = await response.text();
           console.error(
             `[ObservabilityOS SDK] Ingestion API returned ${response.status}:`,
-            errorText
+            errorText,
           );
           // Put logs back in the queue to try again
           this.queue.unshift(...itemsToSend);
         }
       } catch (err) {
-        console.error("[ObservabilityOS SDK] Connection error during flush:", err);
+        console.error(
+          "[ObservabilityOS SDK] Connection error during flush:",
+          err,
+        );
         // Put logs back in the queue to try again
         this.queue.unshift(...itemsToSend);
       }

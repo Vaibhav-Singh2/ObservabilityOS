@@ -1,6 +1,14 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Service, Log, Incident, Deploy } from "@repo/db";
+import {
+  connectToDatabase,
+  User,
+  Project,
+  Service,
+  Log,
+  Incident,
+  Deploy,
+} from "@repo/db";
 import jwt from "jsonwebtoken";
 import ProjectDashboardView from "./ProjectDashboardView";
 import ZeroStateView from "./ZeroStateView";
@@ -38,21 +46,28 @@ export default async function DashboardPage({ searchParams }: PageProps) {
 
   // Await searchParams as required by Next 15+
   const resolvedSearchParams = await searchParams;
-  const projects = await Project.find({ ownerId: user._id }).sort({ createdAt: -1 });
+  const projects = await Project.find({ ownerId: user._id }).sort({
+    createdAt: -1,
+  });
 
   if (projects.length === 0) {
     return <ZeroStateView />;
   }
 
-  const activeProjectId = resolvedSearchParams.projectId || projects[0]?._id.toString();
-  const activeProject = projects.find(p => p._id.toString() === activeProjectId) || projects[0];
+  const activeProjectId =
+    resolvedSearchParams.projectId || projects[0]?._id.toString();
+  const activeProject =
+    projects.find((p) => p._id.toString() === activeProjectId) || projects[0];
 
   if (!activeProject) {
     return <ZeroStateView />;
   }
 
   const cacheKey = `dashboard:project:${activeProjectId}`;
-  const cachedDashboard = await getCache<{ services: any[]; deployments: any[] }>(cacheKey);
+  const cachedDashboard = await getCache<{
+    services: any[];
+    deployments: any[];
+  }>(cacheKey);
 
   let serializedServices: any[] = [];
   let serializedDeployments: any[] = [];
@@ -62,7 +77,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     serializedDeployments = cachedDashboard.deployments;
   } else {
     // Fetch all services for the active project
-    const services = await Service.find({ projectId: activeProject._id }).sort({ name: 1, environment: 1 });
+    const services = await Service.find({ projectId: activeProject._id }).sort({
+      name: 1,
+      environment: 1,
+    });
 
     // Calculate 24h statistics using aggregation
     const start24h = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -70,8 +88,8 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       {
         $match: {
           projectId: activeProject._id,
-          timestamp: { $gte: start24h }
-        }
+          timestamp: { $gte: start24h },
+        },
       },
       {
         $group: {
@@ -79,22 +97,22 @@ export default async function DashboardPage({ searchParams }: PageProps) {
           totalLogs: { $sum: 1 },
           errorLogs: {
             $sum: {
-              $cond: [{ $eq: ["$level", "error"] }, 1, 0]
-            }
+              $cond: [{ $eq: ["$level", "error"] }, 1, 0],
+            },
           },
           avgLatency: {
             $avg: {
-              $ifNull: ["$metadata.latencyMs", "$metadata.latency"]
-            }
-          }
-        }
-      }
+              $ifNull: ["$metadata.latencyMs", "$metadata.latency"],
+            },
+          },
+        },
+      },
     ]);
 
     // Fetch open/investigating incidents for this project
     const openIncidents = await Incident.find({
       projectId: activeProject._id,
-      status: { $in: ["open", "investigating"] }
+      status: { $in: ["open", "investigating"] },
     });
 
     // Fetch recent deployments
@@ -104,18 +122,27 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       .limit(10);
 
     // Create maps for efficient lookups
-    const statsMap = new Map(stats.map(s => [s._id.toString(), s]));
-    const openIncidentsServiceIds = new Set(openIncidents.map(inc => inc.serviceId.toString()));
+    const statsMap = new Map(stats.map((s) => [s._id.toString(), s]));
+    const openIncidentsServiceIds = new Set(
+      openIncidents.map((inc) => inc.serviceId.toString()),
+    );
 
-    serializedServices = services.map(s => {
-      const serviceStats = statsMap.get(s._id.toString()) || { totalLogs: 0, errorLogs: 0, avgLatency: null };
+    serializedServices = services.map((s) => {
+      const serviceStats = statsMap.get(s._id.toString()) || {
+        totalLogs: 0,
+        errorLogs: 0,
+        avgLatency: null,
+      };
       const totalLogs = serviceStats.totalLogs;
       const errorLogs = serviceStats.errorLogs;
       const errorRate = totalLogs > 0 ? (errorLogs / totalLogs) * 100 : 0;
-      const availability = totalLogs > 0 ? ((totalLogs - errorLogs) / totalLogs) * 100 : 100;
-      const avgLatency = serviceStats.avgLatency !== null && serviceStats.avgLatency !== undefined
-        ? Math.round(serviceStats.avgLatency as number)
-        : null;
+      const availability =
+        totalLogs > 0 ? ((totalLogs - errorLogs) / totalLogs) * 100 : 100;
+      const avgLatency =
+        serviceStats.avgLatency !== null &&
+        serviceStats.avgLatency !== undefined
+          ? Math.round(serviceStats.avgLatency as number)
+          : null;
 
       // Determine health status:
       // Incident (red) if there is an active open incident for this service
@@ -141,10 +168,10 @@ export default async function DashboardPage({ searchParams }: PageProps) {
       };
     });
 
-    serializedDeployments = recentDeploys.map(d => {
+    serializedDeployments = recentDeploys.map((d) => {
       const serviceName = (d.serviceId as any)?.name || "unknown-service";
-      const serviceIdStr = (d.serviceId as any)?._id 
-        ? (d.serviceId as any)._id.toString() 
+      const serviceIdStr = (d.serviceId as any)?._id
+        ? (d.serviceId as any)._id.toString()
         : d.serviceId?.toString() || "";
       return {
         id: d._id.toString(),
@@ -159,7 +186,11 @@ export default async function DashboardPage({ searchParams }: PageProps) {
     });
 
     // Cache the serialized results for 5 minutes (300 seconds)
-    await setCache(cacheKey, { services: serializedServices, deployments: serializedDeployments }, 300);
+    await setCache(
+      cacheKey,
+      { services: serializedServices, deployments: serializedDeployments },
+      300,
+    );
   }
 
   const serializedProject = {

@@ -27,17 +27,24 @@ export async function GET() {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
-    const projects = await Project.find({ ownerId: user._id }).sort({ createdAt: -1 });
+    const projects = await Project.find({ ownerId: user._id }).sort({
+      createdAt: -1,
+    });
     return NextResponse.json({ projects });
   } catch (error) {
     console.error("Projects GET Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to retrieve projects" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to retrieve projects",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -48,7 +55,7 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -56,7 +63,7 @@ export async function POST(request: Request) {
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
         { error: { code: "BAD_REQUEST", message: "Project name is required" } },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -71,8 +78,13 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Projects POST Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to create project" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to create project",
+        },
+      },
+      { status: 500 },
     );
   }
 }

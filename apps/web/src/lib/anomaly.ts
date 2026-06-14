@@ -1,4 +1,11 @@
-import { connectToDatabase, Log, Service, Deploy, Incident, Project } from "@repo/db";
+import {
+  connectToDatabase,
+  Log,
+  Service,
+  Deploy,
+  Incident,
+  Project,
+} from "@repo/db";
 import { generateIncidentAnalysis, LogContext, DeployContext } from "@repo/ai";
 import { Types } from "mongoose";
 import { dispatchMultiChannelIncidentAlert } from "./alerts";
@@ -14,7 +21,7 @@ async function initQueue() {
     try {
       const { Queue, Worker } = await import("bullmq");
       const { default: IORedis } = await import("ioredis");
-      
+
       const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
       queue = new Queue("anomaly-detection-queue", { connection });
 
@@ -29,9 +36,11 @@ async function initQueue() {
             throw err;
           }
         },
-        { connection }
+        { connection },
       );
-      console.log("[Anomaly Queue] BullMQ Queue and Worker initialized successfully.");
+      console.log(
+        "[Anomaly Queue] BullMQ Queue and Worker initialized successfully.",
+      );
     } catch (err) {
       console.error("[Anomaly Queue] Failed to initialize BullMQ worker:", err);
     }
@@ -39,7 +48,7 @@ async function initQueue() {
 }
 
 // Proactively run initialization
-initQueue().catch(err => console.error("Failed to initialize queue:", err));
+initQueue().catch((err) => console.error("Failed to initialize queue:", err));
 
 /**
  * Triggers anomaly check asynchronously, offloading to BullMQ if Redis is configured
@@ -48,22 +57,30 @@ initQueue().catch(err => console.error("Failed to initialize queue:", err));
 export async function triggerAnomalyCheck(
   projectId: string,
   serviceId: string,
-  environment: string
+  environment: string,
 ): Promise<void> {
   await initQueue();
   if (queue) {
     try {
       await queue.add("check-anomaly", { projectId, serviceId, environment });
-      console.log(`[Anomaly Queue] Enqueued anomaly check job for service ${serviceId}`);
+      console.log(
+        `[Anomaly Queue] Enqueued anomaly check job for service ${serviceId}`,
+      );
       return;
     } catch (err) {
-      console.warn("[Anomaly Queue] Failed to add job to queue, falling back to inline background run...", err);
+      console.warn(
+        "[Anomaly Queue] Failed to add job to queue, falling back to inline background run...",
+        err,
+      );
     }
   }
 
   // Fallback: run in background promise without awaiting
   processAnomalyDetection(projectId, serviceId, environment).catch((err) => {
-    console.error("[Anomaly Detection Fallback] Background execution failed:", err);
+    console.error(
+      "[Anomaly Detection Fallback] Background execution failed:",
+      err,
+    );
   });
 }
 
@@ -74,7 +91,7 @@ export async function triggerAnomalyCheck(
 export async function processAnomalyDetection(
   projectId: string,
   serviceId: string,
-  environment: string
+  environment: string,
 ): Promise<void> {
   await connectToDatabase();
 
@@ -86,7 +103,7 @@ export async function processAnomalyDetection(
   const now = new Date();
   const nowMs = now.getTime();
   const currentWindowStart = nowMs - 5 * 60 * 1000; // Last 5 minutes
-  const sixtyFiveMinsAgo = nowMs - 65 * 60 * 1000;   // 65 minutes ago
+  const sixtyFiveMinsAgo = nowMs - 65 * 60 * 1000; // 65 minutes ago
 
   // 1. Fetch error logs for this service in the last 65 minutes
   const errorLogs = await Log.find({
@@ -103,13 +120,13 @@ export async function processAnomalyDetection(
 
   // 2. Count current window errors
   const currentCount = errorLogs.filter(
-    (l) => l.timestamp.getTime() >= currentWindowStart
+    (l) => l.timestamp.getTime() >= currentWindowStart,
   ).length;
 
   // Anomaly baseline: require at least minErrorCount errors in the current 5 min window to trigger.
   // This avoids spamming alerts on isolated occurrences.
   if (currentCount < minErrorCount) {
-    return; 
+    return;
   }
 
   // 3. Segment historical data into 12 blocks of 5 minutes
@@ -118,7 +135,7 @@ export async function processAnomalyDetection(
     const start = nowMs - (i + 2) * 5 * 60 * 1000;
     const end = nowMs - (i + 1) * 5 * 60 * 1000;
     const count = errorLogs.filter(
-      (l) => l.timestamp.getTime() >= start && l.timestamp.getTime() < end
+      (l) => l.timestamp.getTime() >= start && l.timestamp.getTime() < end,
     ).length;
     historicalCounts.push(count);
   }
@@ -153,8 +170,8 @@ export async function processAnomalyDetection(
 
   console.log(
     `[Anomaly Detected] Project: ${projectId}, Service: ${serviceId}, Env: ${environment}. Z-Score: ${zScore.toFixed(
-      2
-    )} (Errors: ${currentCount}, Historical Avg: ${mean.toFixed(2)})`
+      2,
+    )} (Errors: ${currentCount}, Historical Avg: ${mean.toFixed(2)})`,
   );
 
   // 5. Deduplication check: Is there already an open/investigating incident created recently?
@@ -166,18 +183,22 @@ export async function processAnomalyDetection(
   });
 
   const currentWindowLogs = errorLogs.filter(
-    (l) => l.timestamp.getTime() >= currentWindowStart
+    (l) => l.timestamp.getTime() >= currentWindowStart,
   );
 
   if (recentIncident) {
-    console.log(`[Anomaly Engine] Appending logs to existing incident: ${recentIncident._id}`);
-    
-    // Add new log IDs to relatedLogs array
-    const existingLogIds = recentIncident.relatedLogs.map((id) => id.toString());
-    const newLogIds = currentWindowLogs.map((l) => l._id.toString());
-    const mergedLogIds = Array.from(new Set([...existingLogIds, ...newLogIds])).map(
-      (id) => new Types.ObjectId(id)
+    console.log(
+      `[Anomaly Engine] Appending logs to existing incident: ${recentIncident._id}`,
     );
+
+    // Add new log IDs to relatedLogs array
+    const existingLogIds = recentIncident.relatedLogs.map((id) =>
+      id.toString(),
+    );
+    const newLogIds = currentWindowLogs.map((l) => l._id.toString());
+    const mergedLogIds = Array.from(
+      new Set([...existingLogIds, ...newLogIds]),
+    ).map((id) => new Types.ObjectId(id));
 
     recentIncident.relatedLogs = mergedLogIds;
     await recentIncident.save();
@@ -226,13 +247,19 @@ export async function processAnomalyDetection(
       deploys: deployContexts,
     });
   } catch (err) {
-    console.error("[Anomaly Engine] LLM Incident reasoning failed, creating baseline fallback...", err);
+    console.error(
+      "[Anomaly Engine] LLM Incident reasoning failed, creating baseline fallback...",
+      err,
+    );
     analysis = {
       title: `High error volume in ${serviceName}`,
       summary: `The service "${serviceName}" encountered an unexpected error spike of ${currentCount} issues in 5 minutes.`,
       rootCause: `Exception rate exceeded normal baseline threshold.`,
       impact: `Affected service operations in ${environment} environment.`,
-      suggestedFix: ["Inspect recent error logs for service exceptions.", "Verify server availability."],
+      suggestedFix: [
+        "Inspect recent error logs for service exceptions.",
+        "Verify server availability.",
+      ],
       confidence: 0.5,
     };
   }
@@ -256,23 +283,36 @@ export async function processAnomalyDetection(
   // Invalidate dashboard cache
   await delCache(`dashboard:project:${projectId}`);
 
-  console.log(`[Anomaly Engine] Created Incident: ${incident._id} - ${analysis.title}`);
+  console.log(
+    `[Anomaly Engine] Created Incident: ${incident._id} - ${analysis.title}`,
+  );
 
   // 9. Dispatch Multi-channel Webhook Alerts (Slack, Discord, MS Teams)
   if (projectDoc) {
-    const slackUrl = projectDoc.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL;
+    const slackUrl =
+      projectDoc.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL;
     const discordUrl = projectDoc.discordWebhookUrl;
     const teamsUrl = projectDoc.teamsWebhookUrl;
 
     if (!slackUrl && !discordUrl && !teamsUrl) {
-      console.log("\n--- [Incident Alert Payload Logged (No Webhooks Configured)] ---");
+      console.log(
+        "\n--- [Incident Alert Payload Logged (No Webhooks Configured)] ---",
+      );
       console.log(`Incident ID: ${incident._id}`);
       console.log(`Title: ${analysis.title}`);
       console.log(`Summary: ${analysis.summary}`);
       console.log(`Root Cause: ${analysis.rootCause}`);
-      console.log("--------------------------------------------------------------\n");
+      console.log(
+        "--------------------------------------------------------------\n",
+      );
     } else {
-      await dispatchMultiChannelIncidentAlert(projectDoc, serviceName, environment, incident._id.toString(), analysis);
+      await dispatchMultiChannelIncidentAlert(
+        projectDoc,
+        serviceName,
+        environment,
+        incident._id.toString(),
+        analysis,
+      );
     }
   }
 }

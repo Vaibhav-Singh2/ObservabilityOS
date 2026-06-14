@@ -2,16 +2,16 @@
 
 import { useState, useMemo } from "react";
 import NextLink from "next/link";
-import { 
-  Search, 
-  AlertCircle, 
-  CheckCircle2, 
-  Clock, 
-  ArrowRight, 
-  Filter, 
-  Sparkles, 
-  Activity, 
-  RefreshCw 
+import {
+  Search,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
+  Filter,
+  Sparkles,
+  Activity,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -68,8 +68,13 @@ interface IncidentsViewProps {
   initialIncidents: SerializedIncident[];
 }
 
-export default function IncidentsView({ project, services, initialIncidents }: IncidentsViewProps) {
-  const [incidents, setIncidents] = useState<SerializedIncident[]>(initialIncidents);
+export default function IncidentsView({
+  project,
+  services,
+  initialIncidents,
+}: IncidentsViewProps) {
+  const [incidents, setIncidents] =
+    useState<SerializedIncident[]>(initialIncidents);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [serviceFilter, setServiceFilter] = useState<string>("all");
@@ -94,7 +99,9 @@ export default function IncidentsView({ project, services, initialIncidents }: I
             status: inc.status,
             createdAt: new Date(inc.createdAt).toISOString(),
             updatedAt: new Date(inc.updatedAt).toISOString(),
-            resolvedAt: inc.resolvedAt ? new Date(inc.resolvedAt).toISOString() : null,
+            resolvedAt: inc.resolvedAt
+              ? new Date(inc.resolvedAt).toISOString()
+              : null,
             ttd: inc.ttd,
             ttr: inc.ttr || null,
             service: inc.serviceId
@@ -125,15 +132,16 @@ export default function IncidentsView({ project, services, initialIncidents }: I
 
   const filteredIncidents = useMemo(() => {
     return incidents.filter((inc) => {
-      const matchesSearch = 
+      const matchesSearch =
         inc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         inc.summary.toLowerCase().includes(searchQuery.toLowerCase());
-      
-      const matchesStatus = 
+
+      const matchesStatus =
         statusFilter === "all" || inc.status === statusFilter;
-      
-      const matchesService = 
-        serviceFilter === "all" || (inc.service && inc.service.name === serviceFilter);
+
+      const matchesService =
+        serviceFilter === "all" ||
+        (inc.service && inc.service.name === serviceFilter);
 
       return matchesSearch && matchesStatus && matchesService;
     });
@@ -156,13 +164,17 @@ export default function IncidentsView({ project, services, initialIncidents }: I
             Incident Console
           </h1>
           <p className="text-slate-400 text-sm mt-1">
-            Review and investigate anomalies detected by the statistical engine and parsed by AI.
+            Review and investigate anomalies detected by the statistical engine
+            and parsed by AI.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           {openCount > 0 ? (
-            <Badge variant="destructive" className="px-3 py-1.5 text-xs font-bold">
+            <Badge
+              variant="destructive"
+              className="px-3 py-1.5 text-xs font-bold"
+            >
               <AlertCircle className="w-4 h-4 mr-1.5 text-rose-450" />
               {openCount} Active {openCount === 1 ? "Incident" : "Incidents"}
             </Badge>
@@ -181,7 +193,9 @@ export default function IncidentsView({ project, services, initialIncidents }: I
             className="shrink-0"
             title="Refresh Incidents"
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`w-4 h-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
           </Button>
         </div>
       </div>
@@ -205,23 +219,31 @@ export default function IncidentsView({ project, services, initialIncidents }: I
           {/* Service filter */}
           <div className="flex items-center gap-2">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <Select value={serviceFilter} onValueChange={(val) => setServiceFilter(val)}>
+            <Select
+              value={serviceFilter}
+              onValueChange={(val) => setServiceFilter(val)}
+            >
               <SelectTrigger className="w-40 text-xs">
                 <SelectValue placeholder="All Services" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Services</SelectItem>
-                {Array.from(new Set(services.map((s) => s.name))).map((serviceName) => (
-                  <SelectItem key={serviceName} value={serviceName}>
-                    {serviceName}
-                  </SelectItem>
-                ))}
+                {Array.from(new Set(services.map((s) => s.name))).map(
+                  (serviceName) => (
+                    <SelectItem key={serviceName} value={serviceName}>
+                      {serviceName}
+                    </SelectItem>
+                  ),
+                )}
               </SelectContent>
             </Select>
           </div>
 
           {/* Status filter */}
-          <Select value={statusFilter} onValueChange={(val) => setStatusFilter(val)}>
+          <Select
+            value={statusFilter}
+            onValueChange={(val) => setStatusFilter(val)}
+          >
             <SelectTrigger className="w-36 text-xs">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
@@ -243,9 +265,12 @@ export default function IncidentsView({ project, services, initialIncidents }: I
             <div className="w-12 h-12 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-center mb-4 text-slate-500 shadow-inner">
               <CheckCircle2 className="w-6 h-6 text-indigo-500/60" />
             </div>
-            <h3 className="text-base font-bold text-white mb-1.5">No Incidents Found</h3>
+            <h3 className="text-base font-bold text-white mb-1.5">
+              No Incidents Found
+            </h3>
             <p className="text-slate-500 text-sm max-w-sm">
-              Everything looks completely quiet. There are no active anomalies or incident reports matching your filter configuration.
+              Everything looks completely quiet. There are no active anomalies
+              or incident reports matching your filter configuration.
             </p>
           </CardContent>
         </Card>
@@ -253,12 +278,12 @@ export default function IncidentsView({ project, services, initialIncidents }: I
         <div className="grid grid-cols-1 gap-4">
           {filteredIncidents.map((inc) => {
             const dateVal = new Date(inc.createdAt).toLocaleString();
-            const badgeVariant = 
+            const badgeVariant =
               inc.status === "open"
                 ? ("destructive" as const)
                 : inc.status === "investigating"
-                ? ("warning" as const)
-                : ("success" as const);
+                  ? ("warning" as const)
+                  : ("success" as const);
 
             return (
               <Card
@@ -267,9 +292,11 @@ export default function IncidentsView({ project, services, initialIncidents }: I
               >
                 {/* Visual Accent for Open Incidents */}
                 {inc.status !== "resolved" && (
-                  <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl ${
-                    inc.status === "open" ? "bg-rose-500" : "bg-amber-500"
-                  }`} />
+                  <div
+                    className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-l-xl ${
+                      inc.status === "open" ? "bg-rose-500" : "bg-amber-500"
+                    }`}
+                  />
                 )}
 
                 <CardContent className="p-5 md:p-6 flex flex-col md:flex-row md:items-start justify-between gap-6">
@@ -282,11 +309,16 @@ export default function IncidentsView({ project, services, initialIncidents }: I
 
                       {/* Service & Env Pill */}
                       <Badge variant="outline">
-                        {inc.service ? `${inc.service.name} • ${inc.service.environment.toUpperCase()}` : "unknown service"}
+                        {inc.service
+                          ? `${inc.service.name} • ${inc.service.environment.toUpperCase()}`
+                          : "unknown service"}
                       </Badge>
 
                       {/* AI Tag */}
-                      <Badge variant="secondary" className="text-indigo-400 border border-indigo-500/15 flex items-center gap-1">
+                      <Badge
+                        variant="secondary"
+                        className="text-indigo-400 border border-indigo-500/15 flex items-center gap-1"
+                      >
                         <Sparkles className="w-2.5 h-2.5" />
                         AI Summary ({Math.round(inc.confidence * 100)}%)
                       </Badge>
@@ -317,11 +349,7 @@ export default function IncidentsView({ project, services, initialIncidents }: I
                   </div>
 
                   <div className="flex items-center self-end md:self-center shrink-0">
-                    <Button
-                      asChild
-                      variant="secondary"
-                      size="sm"
-                    >
+                    <Button asChild variant="secondary" size="sm">
                       <NextLink
                         href={`/dashboard/incidents/${inc.id}?projectId=${project.id}`}
                         className="flex items-center gap-1.5"

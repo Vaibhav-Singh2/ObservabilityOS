@@ -5,7 +5,7 @@ const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET || "mock_secret";
 
 if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
   console.warn(
-    "[ObservabilityOS Razorpay] Warning: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is not configured in environment variables. Razorpay features will run in mock mode."
+    "[ObservabilityOS Razorpay] Warning: RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET is not configured in environment variables. Razorpay features will run in mock mode.",
   );
 }
 

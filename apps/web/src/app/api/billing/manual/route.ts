@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -48,8 +48,13 @@ export async function POST(request: Request) {
 
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -80,16 +85,23 @@ export async function POST(request: Request) {
         {
           error: {
             code: "BAD_REQUEST",
-            message: "Validation failed: " + error.errors.map((e) => e.message).join(", "),
+            message:
+              "Validation failed: " +
+              error.errors.map((e) => e.message).join(", "),
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to perform manual plan change" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to perform manual plan change",
+        },
+      },
+      { status: 500 },
     );
   }
 }

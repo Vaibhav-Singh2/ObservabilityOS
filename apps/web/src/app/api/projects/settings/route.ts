@@ -11,8 +11,13 @@ const settingsUpdateSchema = z.object({
   slackWebhookUrl: z.string().optional().or(z.literal("")),
   discordWebhookUrl: z.string().optional().or(z.literal("")),
   teamsWebhookUrl: z.string().optional().or(z.literal("")),
-  minErrorCount: z.number().int().min(1, "Minimum error count must be at least 1"),
-  zScoreThreshold: z.number().min(1.0, "Z-Score threshold must be at least 1.0"),
+  minErrorCount: z
+    .number()
+    .int()
+    .min(1, "Minimum error count must be at least 1"),
+  zScoreThreshold: z
+    .number()
+    .min(1.0, "Z-Score threshold must be at least 1.0"),
 });
 
 async function getAuthenticatedUser() {
@@ -38,7 +43,7 @@ export async function PATCH(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -53,15 +58,24 @@ export async function PATCH(request: Request) {
 
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
     // Check if webhooks changed
-    const slackChanged = project.slackWebhookUrl !== (validatedData.slackWebhookUrl?.trim() || "");
-    const discordChanged = project.discordWebhookUrl !== (validatedData.discordWebhookUrl?.trim() || "");
-    const teamsChanged = project.teamsWebhookUrl !== (validatedData.teamsWebhookUrl?.trim() || "");
+    const slackChanged =
+      project.slackWebhookUrl !== (validatedData.slackWebhookUrl?.trim() || "");
+    const discordChanged =
+      project.discordWebhookUrl !==
+      (validatedData.discordWebhookUrl?.trim() || "");
+    const teamsChanged =
+      project.teamsWebhookUrl !== (validatedData.teamsWebhookUrl?.trim() || "");
     const webhookUpdated = slackChanged || discordChanged || teamsChanged;
 
     // Update settings
@@ -110,16 +124,23 @@ export async function PATCH(request: Request) {
         {
           error: {
             code: "BAD_REQUEST",
-            message: "Validation failed: " + error.errors.map((e) => e.message).join(", "),
+            message:
+              "Validation failed: " +
+              error.errors.map((e) => e.message).join(", "),
           },
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to update project settings" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to update project settings",
+        },
+      },
+      { status: 500 },
     );
   }
 }

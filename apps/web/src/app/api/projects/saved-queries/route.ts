@@ -37,18 +37,26 @@ export async function POST(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
     const rawBody = await request.json();
     const validated = savedQuerySchema.parse(rawBody);
 
-    const project = await Project.findOne({ _id: validated.projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: validated.projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -58,12 +66,17 @@ export async function POST(request: Request) {
 
     // Check if a saved query with the same name already exists
     const exists = project.savedQueries.some(
-      (q) => q.name.toLowerCase() === validated.name.trim().toLowerCase()
+      (q) => q.name.toLowerCase() === validated.name.trim().toLowerCase(),
     );
     if (exists) {
       return NextResponse.json(
-        { error: { code: "CONFLICT", message: "A saved query with this name already exists" } },
-        { status: 409 }
+        {
+          error: {
+            code: "CONFLICT",
+            message: "A saved query with this name already exists",
+          },
+        },
+        { status: 409 },
       );
     }
 
@@ -78,18 +91,32 @@ export async function POST(request: Request) {
 
     await project.save();
 
-    return NextResponse.json({ success: true, savedQueries: project.savedQueries });
+    return NextResponse.json({
+      success: true,
+      savedQueries: project.savedQueries,
+    });
   } catch (error) {
     console.error("Saved Queries POST Error:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "Validation failed", details: error.errors } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Validation failed",
+            details: error.errors,
+          },
+        },
+        { status: 400 },
       );
     }
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to save query" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to save query",
+        },
+      },
+      { status: 500 },
     );
   }
 }
@@ -100,7 +127,7 @@ export async function DELETE(request: Request) {
     if (!user) {
       return NextResponse.json(
         { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -110,16 +137,29 @@ export async function DELETE(request: Request) {
 
     if (!projectId || !queryName) {
       return NextResponse.json(
-        { error: { code: "BAD_REQUEST", message: "projectId and queryName are required" } },
-        { status: 400 }
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "projectId and queryName are required",
+          },
+        },
+        { status: 400 },
       );
     }
 
-    const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
     if (!project) {
       return NextResponse.json(
-        { error: { code: "NOT_FOUND", message: "Project not found or access denied" } },
-        { status: 404 }
+        {
+          error: {
+            code: "NOT_FOUND",
+            message: "Project not found or access denied",
+          },
+        },
+        { status: 404 },
       );
     }
 
@@ -128,17 +168,25 @@ export async function DELETE(request: Request) {
     }
 
     project.savedQueries = project.savedQueries.filter(
-      (q) => q.name.toLowerCase() !== queryName.toLowerCase()
+      (q) => q.name.toLowerCase() !== queryName.toLowerCase(),
     );
 
     await project.save();
 
-    return NextResponse.json({ success: true, savedQueries: project.savedQueries });
+    return NextResponse.json({
+      success: true,
+      savedQueries: project.savedQueries,
+    });
   } catch (error) {
     console.error("Saved Queries DELETE Error:", error);
     return NextResponse.json(
-      { error: { code: "INTERNAL_SERVER_ERROR", message: "Failed to delete saved query" } },
-      { status: 500 }
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to delete saved query",
+        },
+      },
+      { status: 500 },
     );
   }
 }
