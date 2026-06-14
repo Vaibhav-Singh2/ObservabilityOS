@@ -113,6 +113,18 @@ const DOCS_MAP: Record<
     defaultTitle: "Release Changelog",
     defaultDesc: "Release tags mapping completed features and visual layouts.",
   },
+  license: {
+    filePath: "../../LICENSE",
+    category: "Community & Releases",
+    defaultTitle: "Source License",
+    defaultDesc: "ObservabilityOS Source Available License Agreement.",
+  },
+  "commercial-license": {
+    filePath: "../../COMMERCIAL_LICENSE.md",
+    category: "Community & Releases",
+    defaultTitle: "Commercial License",
+    defaultDesc: "Commercial licensing terms and enterprise SLA support.",
+  },
 };
 
 /**

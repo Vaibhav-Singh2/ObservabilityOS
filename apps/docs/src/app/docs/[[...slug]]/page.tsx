@@ -10,7 +10,7 @@ import {
 import DocsLayoutClient from "@/components/DocsLayoutClient";
 import { ArrowLeft, ArrowRight, Edit3, ChevronRight, Hash } from "lucide-react";
 
-// Configure marked with a custom renderer for heading IDs to match our TOC IDs
+// Configure marked with a custom renderer for heading IDs to match our TOC IDs and convert document links
 const renderer = new marked.Renderer();
 renderer.heading = function (arg1: unknown, arg2?: unknown, arg3?: unknown) {
   let text = "";
@@ -35,6 +35,60 @@ renderer.heading = function (arg1: unknown, arg2?: unknown, arg3?: unknown) {
     .replace(/\s+/g, "-");
 
   return `<h${depth} id="${id}" class="group scroll-mt-20"><a href="#${id}" class="absolute -ml-6 pr-2 opacity-0 group-hover:opacity-100 transition-opacity text-slate-500 font-normal select-none">#</a>${text}</h${depth}>`;
+};
+
+renderer.link = function (arg1: unknown, arg2?: unknown, arg3?: unknown) {
+  let href = "";
+  let title = "";
+  let text = "";
+
+  if (typeof arg1 === "object" && arg1 !== null) {
+    const obj = arg1 as Record<string, unknown>;
+    href = String(obj.href || "");
+    title = String(obj.title || "");
+    text = String(obj.text || "");
+  } else {
+    href = String(arg1 || "");
+    title = String(arg2 || "");
+    text = String(arg3 || "");
+  }
+
+  // Resolve internal markdown links to docs route paths
+  let resolvedHref = href;
+  if (
+    !href.startsWith("http://") &&
+    !href.startsWith("https://") &&
+    !href.startsWith("#") &&
+    !href.startsWith("mailto:")
+  ) {
+    const cleanHref = href.replace(/\\/g, "/");
+
+    if (cleanHref.endsWith("packages/sdk/LICENSE")) {
+      resolvedHref =
+        "https://github.com/Vaibhav-Singh2/ObservabilityOS/blob/main/packages/sdk/LICENSE";
+    } else if (cleanHref === "LICENSE" || cleanHref.endsWith("/LICENSE")) {
+      resolvedHref = "/docs/license";
+    } else if (cleanHref.toLowerCase().includes("commercial_license.md")) {
+      resolvedHref = "/docs/commercial-license";
+    } else if (cleanHref.endsWith(".md")) {
+      const match =
+        cleanHref.match(/\/([^/]+)\.md$/) || cleanHref.match(/^([^/]+)\.md$/);
+      if (match) {
+        resolvedHref = `/docs/${match[1].toLowerCase()}`;
+      }
+    } else if (!cleanHref.startsWith("/")) {
+      resolvedHref = `https://github.com/Vaibhav-Singh2/ObservabilityOS/blob/main/${cleanHref}`;
+    }
+  }
+
+  const titleAttr = title ? ` title="${title}"` : "";
+  const isExternal =
+    resolvedHref.startsWith("http://") || resolvedHref.startsWith("https://");
+  const targetAttr = isExternal
+    ? ' target="_blank" rel="noopener noreferrer"'
+    : "";
+
+  return `<a href="${resolvedHref}"${titleAttr}${targetAttr}>${text}</a>`;
 };
 
 marked.use({ renderer });
@@ -191,7 +245,11 @@ export default async function Page({ params }: PageProps) {
   const repoFilePath =
     doc.slug === "introduction"
       ? "README.md"
-      : `docs/${doc.slug.toUpperCase() === "ROADMAP" ? "ROADMAP.md" : doc.slug.toUpperCase() === "QUICKSTART" ? "QUICKSTART.md" : doc.slug.toUpperCase() === "INSTALLATION" ? "INSTALLATION.md" : doc.slug.toUpperCase() === "DEVELOPMENT" ? "DEVELOPMENT.md" : doc.slug.toUpperCase() === "ARCHITECTURE" ? "ARCHITECTURE.md" : doc.slug.toUpperCase() === "DATABASE" ? "DATABASE.md" : doc.slug.toUpperCase() === "SECURITY" ? "SECURITY.md" : doc.slug.toUpperCase() === "API" ? "API.md" : doc.slug.toUpperCase() === "DEPLOYMENT" ? "DEPLOYMENT.md" : doc.slug.toUpperCase() === "TROUBLESHOOTING" ? "TROUBLESHOOTING.md" : doc.slug.toUpperCase() === "FAQ" ? "FAQ.md" : doc.slug.toUpperCase() === "CONTRIBUTING" ? "CONTRIBUTING.md" : doc.slug.toUpperCase() === "CHANGELOG" ? "CHANGELOG.md" : `${doc.slug}.md`}`;
+      : doc.slug === "license"
+        ? "LICENSE"
+        : doc.slug === "commercial-license"
+          ? "COMMERCIAL_LICENSE.md"
+          : `docs/${doc.slug.toUpperCase() === "ROADMAP" ? "ROADMAP.md" : doc.slug.toUpperCase() === "QUICKSTART" ? "QUICKSTART.md" : doc.slug.toUpperCase() === "INSTALLATION" ? "INSTALLATION.md" : doc.slug.toUpperCase() === "DEVELOPMENT" ? "DEVELOPMENT.md" : doc.slug.toUpperCase() === "ARCHITECTURE" ? "ARCHITECTURE.md" : doc.slug.toUpperCase() === "DATABASE" ? "DATABASE.md" : doc.slug.toUpperCase() === "SECURITY" ? "SECURITY.md" : doc.slug.toUpperCase() === "API" ? "API.md" : doc.slug.toUpperCase() === "DEPLOYMENT" ? "DEPLOYMENT.md" : doc.slug.toUpperCase() === "TROUBLESHOOTING" ? "TROUBLESHOOTING.md" : doc.slug.toUpperCase() === "FAQ" ? "FAQ.md" : doc.slug.toUpperCase() === "CONTRIBUTING" ? "CONTRIBUTING.md" : doc.slug.toUpperCase() === "CHANGELOG" ? "CHANGELOG.md" : `${doc.slug}.md`}`;
   const githubEditUrl = `https://github.com/Vaibhav-Singh2/ObservabilityOS/edit/main/${repoFilePath}`;
 
   const searchIndex = getAllDocsForSearch();

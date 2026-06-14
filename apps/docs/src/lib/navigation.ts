@@ -63,6 +63,8 @@ const SIDEBAR_NAV: SidebarCategory[] = [
       { title: "Contributing Guide", slug: "contributing" },
       { title: "Product Roadmap", slug: "roadmap" },
       { title: "Changelog", slug: "changelog" },
+      { title: "Source License", slug: "license" },
+      { title: "Commercial License", slug: "commercial-license" },
     ],
   },
 ];
