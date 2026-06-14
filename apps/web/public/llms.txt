@@ -1,0 +1,25 @@
+# ObservabilityOS — AI-Native DevOps Intelligence & Log Analytics
+
+ObservabilityOS is an open-source, developer-first observability and log analytics platform that automatically scrubs PII data locally, analyzes error rates and response latency using standard deviation Z-Scores in real-time, and compiles AI incident post-mortems using LLMs (GPT-4 and Claude).
+
+## Core System Architecture
+
+- **Ingestion Protocol**: Compliant with OpenTelemetry (OTLP) HTTP/JSON standards.
+- **Local Scrubbing**: PII scrubbing is executed on client machines using standard patterns (redacts passwords, tokens, auth headers, credit cards, custom regex) before telemetry is transmitted.
+- **Storage Strategy**: Structured telemetry log lines are written to a MongoDB database (backed by indexing for high-speed retrieval), and Redis serves as a rate-limiting and metadata caching layer.
+- **Incident Correlator**: Subscribes to GitHub release webhooks to match deployment events (author, commit SHA, files changed) to the exact timestamp of Z-score anomaly spikes.
+
+## Integration & Getting Started
+
+Refer to the main documentation hosted at https://docs.observabilityos.com.
+
+### JavaScript/TypeScript SDK Integration
+```typescript
+import { logger } from "@observability-os/sdk";
+
+// Automatically begins local batching ring-buffer operations
+logger.info("Service initialized", { environment: "production" });
+```
+
+### Docker sidecar Configuration
+For non-JS environments, mount local logs or redirect container standard out (stdout) streams into the sidecar daemon.
