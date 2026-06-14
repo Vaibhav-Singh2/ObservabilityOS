@@ -18,11 +18,27 @@ export function getRedisClient(): Redis | null {
   }
 
   try {
-    const client = new Redis(REDIS_URL, {
-      maxRetriesPerRequest: 1,
-      connectTimeout: 2000, // 2s timeout
-      lazyConnect: true, // don't block on startup
-    });
+    let client: Redis;
+    try {
+      const parsed = new URL(REDIS_URL);
+      const options = {
+        host: parsed.hostname,
+        port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+        username: parsed.username || undefined,
+        password: parsed.password || undefined,
+        db: parsed.pathname && parsed.pathname !== "/" ? parseInt(parsed.pathname.substring(1), 10) : 0,
+        maxRetriesPerRequest: 1,
+        connectTimeout: 2000,
+        lazyConnect: true,
+      };
+      client = new Redis(options);
+    } catch {
+      client = new Redis(REDIS_URL, {
+        maxRetriesPerRequest: 1,
+        connectTimeout: 2000,
+        lazyConnect: true,
+      });
+    }
 
     client.on("error", (err) => {
       console.warn("Redis client connection error:", err.message);
@@ -76,9 +92,23 @@ export async function delCache(key: string): Promise<void> {
 export function createNewRedisClient(): Redis | null {
   const REDIS_URL = process.env.REDIS_URL || "redis://127.0.0.1:6379";
   try {
-    const client = new Redis(REDIS_URL, {
-      maxRetriesPerRequest: null,
-    });
+    let client: Redis;
+    try {
+      const parsed = new URL(REDIS_URL);
+      const options = {
+        host: parsed.hostname,
+        port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+        username: parsed.username || undefined,
+        password: parsed.password || undefined,
+        db: parsed.pathname && parsed.pathname !== "/" ? parseInt(parsed.pathname.substring(1), 10) : 0,
+        maxRetriesPerRequest: null,
+      };
+      client = new Redis(options);
+    } catch {
+      client = new Redis(REDIS_URL, {
+        maxRetriesPerRequest: null,
+      });
+    }
     client.on("error", (err) => {
       console.warn("New Redis client connection error:", err.message);
     });

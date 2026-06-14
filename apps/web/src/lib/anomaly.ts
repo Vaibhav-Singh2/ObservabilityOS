@@ -25,7 +25,21 @@ async function initQueue() {
       const { Queue, Worker } = await import("bullmq");
       const { default: IORedis } = await import("ioredis");
 
-      const connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
+      let connection;
+      try {
+        const parsed = new URL(REDIS_URL);
+        const options = {
+          host: parsed.hostname,
+          port: parsed.port ? parseInt(parsed.port, 10) : 6379,
+          username: parsed.username || undefined,
+          password: parsed.password || undefined,
+          db: parsed.pathname && parsed.pathname !== "/" ? parseInt(parsed.pathname.substring(1), 10) : 0,
+          maxRetriesPerRequest: null,
+        };
+        connection = new IORedis(options);
+      } catch {
+        connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
+      }
       queue = new Queue("anomaly-detection-queue", { connection });
 
       new Worker(
