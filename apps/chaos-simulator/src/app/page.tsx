@@ -107,6 +107,12 @@ export default function ChaosSimulatorPage() {
   // Preset status
   const [activePreset, setActivePreset] = useState<string | null>(null);
 
+  // Custom SDK config states
+  const [customApiKey, setCustomApiKey] = useState("");
+  const [customEndpoint, setCustomEndpoint] = useState("");
+  const [customMetricsEndpoint, setCustomMetricsEndpoint] = useState("");
+  const [isConfiguringCustom, setIsConfiguringCustom] = useState(false);
+
   // Terminal logs state
   const [terminalLogs, setTerminalLogs] = useState<
     Array<{
@@ -133,6 +139,9 @@ export default function ChaosSimulatorPage() {
       const data: SetupInfo = await res.json();
       if (data.success) {
         setSetup(data);
+        setCustomApiKey(data.apiKey);
+        setCustomEndpoint(data.endpoint);
+        setCustomMetricsEndpoint(data.metricsEndpoint);
         telemetryClient.init({
           apiKey: data.apiKey,
           logsEndpoint: data.endpoint,
@@ -428,54 +437,132 @@ export default function ChaosSimulatorPage() {
             </span>
           </div>
         ) : setup ? (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl glass-panel">
-            <div className="flex items-center gap-2.5">
-              <Server className="w-4 h-4 text-emerald-500 shrink-0" />
-              <div className="truncate">
-                <p className="text-xs text-slate-500 font-medium uppercase">
-                  Sandbox DB Project
-                </p>
-                <p className="text-sm font-semibold text-slate-200 truncate">
-                  {setup.projectName}
-                </p>
+          <div className="flex flex-col gap-4 p-4 bg-slate-900/40 border border-slate-800/80 rounded-xl glass-panel">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                <span className="text-sm font-bold text-slate-200">
+                  SDK Settings Config
+                </span>
               </div>
+              <button
+                onClick={() => setIsConfiguringCustom(!isConfiguringCustom)}
+                className="px-2.5 py-1 text-[11px] font-semibold bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded text-slate-300"
+              >
+                {isConfiguringCustom
+                  ? "Cancel"
+                  : "Use Custom API Key / Endpoints"}
+              </button>
             </div>
-            <div className="flex items-center gap-2.5">
-              <Key className="w-4 h-4 text-indigo-400 shrink-0" />
-              <div className="truncate">
-                <p className="text-xs text-slate-500 font-medium uppercase">
-                  Client SDK API Key
-                </p>
-                <p className="text-sm font-mono text-indigo-300 truncate">
-                  {setup.apiKey}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <Globe className="w-4 h-4 text-indigo-400 shrink-0" />
-              <div className="truncate">
-                <p className="text-xs text-slate-500 font-medium uppercase">
-                  Ingest Endpoint
-                </p>
-                <p className="text-sm font-mono text-slate-300 truncate">
-                  {setup.endpoint}
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2.5">
-              <Radio className="w-4 h-4 text-emerald-500 shrink-0" />
-              <div>
-                <p className="text-xs text-slate-500 font-medium uppercase">
-                  Simulator Ingestion Status
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-                  <span className="text-sm font-medium text-emerald-400">
-                    Online & Ready
-                  </span>
+
+            {isConfiguringCustom ? (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-400">
+                    Custom API Key
+                  </label>
+                  <input
+                    type="text"
+                    value={customApiKey}
+                    onChange={(e) => setCustomApiKey(e.target.value)}
+                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-indigo-300 focus:outline-none focus:border-indigo-500"
+                    placeholder="obs_sk_..."
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-400">
+                    Logs Ingest Endpoint
+                  </label>
+                  <input
+                    type="text"
+                    value={customEndpoint}
+                    onChange={(e) => setCustomEndpoint(e.target.value)}
+                    className="w-full text-xs bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-slate-400">
+                    Metrics Ingest Endpoint
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customMetricsEndpoint}
+                      onChange={(e) => setCustomMetricsEndpoint(e.target.value)}
+                      className="w-full text-xs bg-slate-950 border border-slate-800 rounded px-2.5 py-1.5 font-mono text-slate-300 focus:outline-none focus:border-indigo-500"
+                    />
+                    <button
+                      onClick={() => {
+                        telemetryClient.init({
+                          apiKey: customApiKey,
+                          logsEndpoint: customEndpoint,
+                          metricsEndpoint: customMetricsEndpoint,
+                          defaultService: SERVICES.GATEWAY,
+                          defaultEnv: environment,
+                        });
+                        addTerminalLog(
+                          "success",
+                          `Custom SDK configs applied. API Key: ${customApiKey.slice(0, 15)}...`,
+                        );
+                        setIsConfiguringCustom(false);
+                      }}
+                      className="px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded text-xs select-none shrink-0"
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="flex items-center gap-2.5">
+                  <Server className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <div className="truncate">
+                    <p className="text-xs text-slate-500 font-medium uppercase">
+                      Sandbox DB Project
+                    </p>
+                    <p className="text-sm font-semibold text-slate-200 truncate">
+                      {customApiKey === setup.apiKey
+                        ? setup.projectName
+                        : "Custom Client Integration"}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Key className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <div className="truncate">
+                    <p className="text-xs text-slate-500 font-medium uppercase">
+                      Client SDK API Key
+                    </p>
+                    <p className="text-sm font-mono text-indigo-300 truncate">
+                      {customApiKey}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Globe className="w-4 h-4 text-indigo-400 shrink-0" />
+                  <div className="truncate">
+                    <p className="text-xs text-slate-500 font-medium uppercase">
+                      Ingest Endpoint
+                    </p>
+                    <p className="text-sm font-mono text-slate-300 truncate">
+                      {customEndpoint}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Radio className="w-4 h-4 text-emerald-500 shrink-0" />
+                  <div>
+                    <p className="text-xs text-slate-500 font-medium uppercase">
+                      Simulator Ingestion Status
+                    </p>
+                    <div className="flex items-center gap-1.5 font-medium text-emerald-400 text-sm">
+                      Online & Ready
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex items-center gap-2.5 p-3 bg-red-950/30 border border-red-900/60 text-red-300 rounded-xl">
