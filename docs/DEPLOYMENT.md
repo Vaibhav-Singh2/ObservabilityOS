@@ -99,7 +99,7 @@ Vercel has first-class support for **Turborepo** monorepos. It automatically det
 | **Framework Preset** | Next.js                           | Auto-detected from `apps/web/next.config.ts`                   |
 | **Build Command**    | `npx turbo build --filter=web...` | The `...` suffix includes **all** upstream dependencies        |
 | **Output Directory** | `apps/web/.next`                  | Auto-detected                                                  |
-| **Install Command**  | `yarn install --frozen-lockfile`  | Ensures reproducible installs                                  |
+| **Install Command**  | `yarn install --immutable`        | Yarn v4 equivalent of `--frozen-lockfile`                      |
 
 ### ⚠️ Critical Setting: The `--filter` Suffix
 
@@ -149,7 +149,7 @@ After setting the root directory, Vercel will show the **Framework** section wit
 | **Framework Preset**    | `Next.js` (Vercel auto-detects this once root is set to `/`)     |
 | **Build Command**       | `npx turbo build --filter=web...`                                |
 | **Output Directory**    | `apps/web/.next` (usually auto-detected)                         |
-| **Install Command**     | `yarn install --frozen-lockfile`                                 |
+| **Install Command**     | `yarn install --immutable`                                       |
 | **Development Command** | Leave empty (or `next dev` if required — not used in production) |
 
 **Explanation of each field:**
@@ -157,8 +157,20 @@ After setting the root directory, Vercel will show the **Framework** section wit
 - **Framework Preset** — Vercel uses this to know the framework conventions. Set to `Next.js`.
 - **Build Command** — What Vercel runs to produce the production build. The `--filter=web...` (with three dots) tells Turborepo to build `web` and all its `@repo/*` dependency packages in the correct order.
 - **Output Directory** — Where the built files will be located. Next.js outputs to `apps/web/.next` by default. Vercel should auto-detect this once root is `/`.
-- **Install Command** — How to install dependencies. `yarn install --frozen-lockfile` ensures the exact versions from `yarn.lock` are used (recommended for production/CI).
+- **Install Command** — How to install dependencies. `yarn install --immutable` ensures the exact versions from `yarn.lock` are used (Yarn v4 equivalent of the old `--frozen-lockfile` flag). See the **Yarn v4 on Vercel** note below for the required companion setting.
 - **Development Command** — The command used for local development preview on Vercel (not needed for production deployment; can be left blank).
+
+> **❗ Yarn v4 on Vercel — Required Environment Variable**
+>
+> This project uses **Yarn v4** (`"packageManager": "yarn@4.16.0"`) but Vercel's default build image ships with **Yarn v1** (`yarn install v1.22.19`). If you use `yarn install --immutable` without Corepack, Vercel will run Yarn v1 and fail because the lockfile is in Yarn v4 format.
+>
+> **Fix:** Add the following **Environment Variable** in your Vercel project settings under _Settings → Environment Variables_:
+>
+> | Key                            | Value |
+> | ------------------------------ | ----- |
+> | `ENABLE_EXPERIMENTAL_COREPACK` | `1`   |
+>
+> This tells Vercel to use [Corepack](https://nodejs.org/api/corepack.html), which reads the `"packageManager"` field in `package.json` and automatically downloads and uses the correct version of Yarn (v4.16.0). Without this, the install command will fail with a lockfile mismatch error.
 
 #### Step 4 — Environment Variables
 
