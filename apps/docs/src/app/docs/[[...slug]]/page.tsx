@@ -449,8 +449,9 @@ export default async function Page({ params }: PageProps) {
 
         {/* Right Sidebar: Table of Contents */}
         {doc.headings.length > 0 && (
-          <aside className="hidden xl:block w-56 shrink-0 sticky top-24 self-start max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 pb-6 scrollbar-none">
-            <div className="space-y-4">
+          <aside className="hidden xl:flex w-56 shrink-0 sticky top-24 self-start max-h-[calc(100vh-8rem)] flex-col justify-between pb-6 pr-2">
+            {/* Scrollable Headings List */}
+            <div className="flex-1 overflow-y-auto scrollbar-none space-y-4 pr-1">
               <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono flex items-center gap-1.5">
                 <Hash className="w-3.5 h-3.5 text-slate-500" />
                 On this page
@@ -474,9 +475,10 @@ export default async function Page({ params }: PageProps) {
                   </li>
                 ))}
               </ul>
+            </div>
 
-              <div className="border-t border-slate-900/60 my-4 pt-4" />
-
+            {/* Fixed Edit Link */}
+            <div className="mt-4 pt-4 border-t border-slate-900/60 shrink-0">
               <a
                 href={githubEditUrl}
                 target="_blank"

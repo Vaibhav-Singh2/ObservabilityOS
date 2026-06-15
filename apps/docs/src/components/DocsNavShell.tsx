@@ -25,7 +25,7 @@ export default function DocsNavShell({
   }, []);
 
   return (
-    <div className="flex h-dvh max-h-dvh min-h-0 flex-col overflow-hidden bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
+    <div className="flex min-h-screen flex-col bg-slate-950 text-slate-100 selection:bg-indigo-500 selection:text-white">
       {/* Sticky Header */}
       <DocsHeader
         sidebarOpen={sidebarOpen}
@@ -33,7 +33,7 @@ export default function DocsNavShell({
         onSearchOpen={() => setSearchOpen(true)}
       />
 
-      <div className="mx-auto flex min-h-0 w-full max-w-360 flex-1 overflow-hidden px-4 sm:px-6">
+      <div className="mx-auto flex w-full max-w-360 flex-1 px-4 sm:px-6">
         {/* Navigation Sidebar */}
         <DocsSidebar
           isOpen={sidebarOpen}
@@ -41,7 +41,7 @@ export default function DocsNavShell({
         />
 
         {/* Page Content Panel */}
-        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain scroll-smooth">
+        <main className="min-w-0 flex-1">
           <div className="mx-auto w-full max-w-5xl px-1 py-10 md:px-10 md:py-14">
             {children}
           </div>

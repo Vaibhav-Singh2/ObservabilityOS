@@ -456,8 +456,8 @@ export default function BillingView({ project, usage }: BillingViewProps) {
 
       <div className="pt-2" />
 
-      {/* Pricing Cards — responsive 1→2→4 column grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+      {/* Pricing Cards — responsive 1→3 column grid aligned with usage stats */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {PLANS.map((plan) => {
           const price = formatPrice(plan);
           const isCurrent = isCurrentPlan(plan);
@@ -530,9 +530,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
                       <Check
                         className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
                           feature.included
-                            ? plan.id === "free"
-                              ? "text-indigo-400"
-                              : "text-emerald-400"
+                            ? "text-emerald-400"
                             : "text-slate-700"
                         }`}
                       />
@@ -570,7 +568,10 @@ export default function BillingView({ project, usage }: BillingViewProps) {
                   </button>
                 ) : plan.id === "self-host" ? (
                   <a
-                    href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+                    href={`${
+                      process.env.NEXT_PUBLIC_DOCS_URL ||
+                      "http://localhost:3001"
+                    }/docs/deployment`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="w-full flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-xl text-[11px] font-bold border border-slate-750 transition-all cursor-pointer text-center"

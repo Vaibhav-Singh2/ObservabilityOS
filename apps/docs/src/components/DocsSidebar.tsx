@@ -80,7 +80,7 @@ export default function DocsSidebar({
           "scrollbar-none flex h-full w-64 shrink-0 flex-col gap-7 overflow-y-auto border-r border-slate-900 bg-slate-950 px-4 py-7 transition-transform duration-300 ease-out md:translate-x-0",
           isOpen
             ? "fixed top-16 bottom-0 left-0 z-40 w-[260px] translate-x-0 shadow-2xl shadow-black/80"
-            : "fixed top-16 bottom-0 -translate-x-full md:relative md:top-0 md:h-full md:translate-x-0",
+            : "fixed top-16 bottom-0 -translate-x-full md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0",
           className,
         )}
       >

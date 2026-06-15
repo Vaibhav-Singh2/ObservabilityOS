@@ -289,7 +289,9 @@ export default async function LandingPage() {
               AI-Native DevOps Intelligence
             </div>
             <a
-              href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+              href={`${
+                process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"
+              }/docs/deployment`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/15 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
@@ -332,7 +334,9 @@ export default async function LandingPage() {
               </a>
             )}
             <a
-              href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+              href={`${
+                process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"
+              }/docs/deployment`}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 text-slate-200 font-semibold h-12 px-6 rounded-xl transition-all duration-200 cursor-pointer"
@@ -1235,7 +1239,9 @@ export default async function LandingPage() {
                 </ul>
               </div>
               <a
-                href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+                href={`${
+                  process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"
+                }/docs/deployment`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-6 w-full inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold h-10 rounded-lg text-xs transition-colors cursor-pointer text-center"
