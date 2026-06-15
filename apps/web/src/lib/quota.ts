@@ -90,11 +90,14 @@ export async function checkQuotaLimits(
   // 1. Check Log Volume
   const currentVolume = await getLogVolumeUsage(projectId);
   const logVolumeExceeded =
-    currentVolume + bytesToAdd > limits.maxLogVolumeBytes;
+    plan === "self-host"
+      ? false
+      : currentVolume + bytesToAdd > limits.maxLogVolumeBytes;
 
   // 2. Check Service Count
   const serviceCount = await Service.countDocuments({ projectId });
-  const serviceCountExceeded = serviceCount > limits.maxServices;
+  const serviceCountExceeded =
+    plan === "self-host" ? false : serviceCount > limits.maxServices;
 
   return {
     logVolume: {

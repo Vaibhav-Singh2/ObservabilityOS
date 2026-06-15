@@ -29,7 +29,7 @@ interface BillingViewProps {
 
 import { PLANS, PlanDetails as Plan } from "@/lib/plans";
 
-const PLAN_ORDER = ["free", "starter", "team", "scale"];
+const PLAN_ORDER = ["free", "pro", "self-host"];
 
 export default function BillingView({ project, usage }: BillingViewProps) {
   const router = useRouter();
@@ -294,8 +294,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
 
   /** Map backend plan name to our UI plan id */
   const currentPlanId = (): string => {
-    if (currentPlan === "pro") return "starter";
-    return currentPlan; // "free" | "team" | "scale"
+    return currentPlan;
   };
 
   const isCurrentPlan = (plan: Plan) => plan.id === currentPlanId();
@@ -306,7 +305,8 @@ export default function BillingView({ project, usage }: BillingViewProps) {
   };
 
   const currentDisplayName = () => {
-    if (currentPlan === "pro") return "Starter";
+    if (currentPlan === "pro") return "Pro Cloud";
+    if (currentPlan === "self-host") return "Self-Host OSS";
     if (currentPlan === "free") return "Free Tier";
     return currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
   };
@@ -461,9 +461,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
         {PLANS.map((plan) => {
           const price = formatPrice(plan);
           const isCurrent = isCurrentPlan(plan);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const upgrade = isUpgrade(plan);
-          const isHighlighted = plan.id === "starter";
+          const isHighlighted = plan.id === "pro";
 
           return (
             <div
@@ -490,10 +488,10 @@ export default function BillingView({ project, usage }: BillingViewProps) {
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-1.5">
                   {plan.name}
-                  {plan.id === "starter" && (
+                  {plan.id === "pro" && (
                     <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
                   )}
-                  {plan.id === "scale" && (
+                  {plan.id === "self-host" && (
                     <Zap className="w-3.5 h-3.5 text-amber-400" />
                   )}
                 </h3>
@@ -558,7 +556,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
                     <Check className="w-3.5 h-3.5" />
                     Current Plan
                   </div>
-                ) : plan.id !== "free" ? (
+                ) : plan.id === "pro" ? (
                   <button
                     onClick={() =>
                       router.push(
@@ -570,6 +568,16 @@ export default function BillingView({ project, usage }: BillingViewProps) {
                     Select Plan
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
+                ) : plan.id === "self-host" ? (
+                  <a
+                    href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-xl text-[11px] font-bold border border-slate-750 transition-all cursor-pointer text-center"
+                  >
+                    Deploy Now
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
                 ) : (
                   <button
                     onClick={() => handleSandboxOverride("free")}
@@ -614,7 +622,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
         </p>
 
         <div className="flex flex-wrap items-center gap-2">
-          {["free", "pro", "team", "scale"].map((p) => {
+          {["free", "pro", "self-host"].map((p) => {
             if (p === currentPlan) return null;
             return (
               <button
@@ -625,7 +633,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
                 disabled={isSandboxUpdating}
                 className="px-3.5 py-2 bg-slate-955 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer uppercase"
               >
-                Set to {p}
+                Set to {p === "self-host" ? "self-host" : p}
               </button>
             );
           })}

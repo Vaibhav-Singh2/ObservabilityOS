@@ -216,10 +216,10 @@ export default function CheckoutView({ project, planId }: CheckoutViewProps) {
             </span>
             <h2 className="text-xl font-bold text-white flex items-center gap-1.5 mt-1">
               {plan.name}
-              {plan.id === "starter" && (
+              {plan.id === "pro" && (
                 <Sparkles className="w-4 h-4 text-indigo-400" />
               )}
-              {plan.id === "scale" && (
+              {plan.id === "self-host" && (
                 <Zap className="w-4 h-4 text-amber-400" />
               )}
             </h2>

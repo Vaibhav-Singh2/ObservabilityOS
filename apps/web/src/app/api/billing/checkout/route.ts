@@ -19,7 +19,7 @@ interface RazorpayPlan {
 const checkoutSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
   gateway: z.enum(["razorpay"]), // Stripe is disabled
-  planId: z.enum(["starter", "team", "scale"]),
+  planId: z.enum(["pro"]),
 });
 
 export async function POST(request: Request) {

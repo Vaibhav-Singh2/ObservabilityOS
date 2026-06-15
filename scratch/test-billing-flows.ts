@@ -65,25 +65,21 @@ async function verify() {
       "\n--- [Test 1] Verifying PLAN_LIMITS matches PLANS single source of truth ---",
     );
     try {
-      const planStarter = PLANS.find((p) => p.id === "starter");
-      const planTeam = PLANS.find((p) => p.id === "team");
-      const planScale = PLANS.find((p) => p.id === "scale");
+      const planPro = PLANS.find((p) => p.id === "pro");
+      const planSelfHost = PLANS.find((p) => p.id === "self-host");
 
-      const starterOk =
-        PLAN_LIMITS.pro.maxServices === planStarter?.maxServices &&
-        PLAN_LIMITS.pro.maxLogVolumeBytes === planStarter?.maxLogVolumeBytes;
-      const teamOk =
-        PLAN_LIMITS.team.maxServices === planTeam?.maxServices &&
-        PLAN_LIMITS.team.maxLogVolumeBytes === planTeam?.maxLogVolumeBytes;
-      const scaleOk =
-        PLAN_LIMITS.scale.maxServices === planScale?.maxServices &&
-        PLAN_LIMITS.scale.maxLogVolumeBytes === planScale?.maxLogVolumeBytes;
+      const proOk =
+        PLAN_LIMITS.pro.maxServices === planPro?.maxServices &&
+        PLAN_LIMITS.pro.maxLogVolumeBytes === planPro?.maxLogVolumeBytes;
+      const selfHostOk =
+        PLAN_LIMITS["self-host"].maxServices === planSelfHost?.maxServices &&
+        PLAN_LIMITS["self-host"].maxLogVolumeBytes ===
+          planSelfHost?.maxLogVolumeBytes;
 
       results["test_1_limits_config_matching"] = {
-        passed: !!(starterOk && teamOk && scaleOk),
-        starterOk,
-        teamOk,
-        scaleOk,
+        passed: !!(proOk && selfHostOk),
+        proOk,
+        selfHostOk,
       };
       console.log(
         `Result: ${results["test_1_limits_config_matching"].passed ? "PASSED" : "FAILED"}`,
@@ -103,7 +99,7 @@ async function verify() {
       "\n--- [Test 2] Verifying Checkout Details resolved in PLANS ---",
     );
     try {
-      const testPlanIds = ["starter", "team", "scale"];
+      const testPlanIds = ["pro"];
       const checkoutDetails: Record<string, any> = {};
       let checkoutPassed = true;
 
@@ -140,7 +136,7 @@ async function verify() {
     // Test 3: Manual override simulation
     console.log("\n--- [Test 3] Verifying Manual Override simulation ---");
     try {
-      const plansToTest = ["free", "pro", "team", "scale"] as const;
+      const plansToTest = ["free", "pro", "self-host"] as const;
       const manualOverrideResults: Record<string, any> = {};
 
       for (const targetPlan of plansToTest) {
@@ -193,15 +189,10 @@ async function verify() {
       "\n--- [Test 4] Verifying Webhook Upgrade logic processing ---",
     );
     try {
-      const webhookPayloads = [
-        { plan: "pro", expectedPlan: "pro" },
-        { plan: "team", expectedPlan: "team" },
-        { plan: "scale", expectedPlan: "scale" },
-      ];
+      const webhookPayloads = [{ plan: "pro", expectedPlan: "pro" }];
       const webhookResults: Record<string, any> = {};
 
       for (const { plan, expectedPlan } of webhookPayloads) {
-        // Mimic Razorpay Webhook DB update logic in route.ts
         const payload = {
           id: `sub_test_${plan}`,
           customer_id: "cust_test_123",
@@ -259,10 +250,12 @@ async function verify() {
     try {
       const quotaResults: Record<string, any> = {};
 
-      for (const plan of ["free", "pro", "team", "scale"]) {
+      for (const plan of ["free", "pro", "self-host"]) {
         const limits = await checkQuotaLimits(projectId, plan);
         const configLimits =
           PLANS.find((p) => p.backendPlan === plan) || PLANS[0];
+
+        // Note: For self-host plan, exceeded is bypassed/hardcoded to false in checkQuotaLimits
         const isCorrect =
           limits.services.limit === configLimits.maxServices &&
           limits.logVolume.limit === configLimits.maxLogVolumeBytes;

@@ -21,7 +21,7 @@ export interface IProject {
   teamsWebhookUrl?: string;
   minErrorCount?: number;
   zScoreThreshold?: number;
-  plan: "free" | "pro" | "team" | "scale";
+  plan: "free" | "pro" | "self-host";
   subscriptionStatus: "active" | "trialing" | "past_due" | "canceled" | "none";
   billingProvider: "stripe" | "razorpay" | "manual" | "none";
   stripeCustomerId?: string;
@@ -57,11 +57,7 @@ const ProjectSchema = new Schema<IProject>(
     teamsWebhookUrl: { type: String, default: "" },
     minErrorCount: { type: Number, default: 3 },
     zScoreThreshold: { type: Number, default: 3.0 },
-    plan: {
-      type: String,
-      enum: ["free", "pro", "team", "scale"],
-      default: "free",
-    },
+    plan: { type: String, enum: ["free", "pro", "self-host"], default: "free" },
     subscriptionStatus: {
       type: String,
       enum: ["active", "trialing", "past_due", "canceled", "none"],

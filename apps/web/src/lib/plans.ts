@@ -4,13 +4,13 @@ export interface PlanFeature {
 }
 
 export interface PlanDetails {
-  id: string; // e.g. 'free', 'starter', 'team', 'scale'
+  id: string; // e.g. 'free', 'pro', 'self-host'
   name: string;
   priceUSD: number;
   priceINR: number;
   description: string;
   badge?: string;
-  backendPlan: "free" | "pro" | "team" | "scale";
+  backendPlan: "free" | "pro" | "self-host";
   maxServices: number;
   maxLogVolumeBytes: number;
   retentionDays: number;
@@ -40,19 +40,19 @@ export const PLANS: PlanDetails[] = [
     available: true,
   },
   {
-    id: "starter",
-    name: "Starter",
+    id: "pro",
+    name: "Pro Cloud",
     priceUSD: 29,
     priceINR: 2499,
-    description: "Solo founders & small teams in production.",
+    description: "Production intelligence for solo developers & small teams.",
     badge: "Most Popular",
     backendPlan: "pro",
-    maxServices: 5,
-    maxLogVolumeBytes: 5 * 1024 * 1024 * 1024, // 5GB
+    maxServices: 10,
+    maxLogVolumeBytes: 10 * 1024 * 1024 * 1024, // 10GB
     retentionDays: 30,
     features: [
-      { text: "Up to 5 services monitored", included: true },
-      { text: "5GB logs / month", included: true },
+      { text: "Up to 10 services monitored", included: true },
+      { text: "10GB logs / month", included: true },
       { text: "30-day secure data retention", included: true },
       { text: "Instant alerts (Slack, Discord, Teams)", included: true },
       { text: "AI SRE Analyst — incident diagnostics", included: true },
@@ -61,45 +61,22 @@ export const PLANS: PlanDetails[] = [
     available: true,
   },
   {
-    id: "team",
-    name: "Team",
-    priceUSD: 99,
-    priceINR: 7999,
-    description: "Growing engineering teams with production complexity.",
-    backendPlan: "team",
-    maxServices: 100, // High limit for team
-    maxLogVolumeBytes: 20 * 1024 * 1024 * 1024, // 20GB
-    retentionDays: 30,
+    id: "self-host",
+    name: "Self-Host Open Source",
+    priceUSD: 0,
+    priceINR: 0,
+    description: "Run ObservabilityOS on your own infrastructure.",
+    backendPlan: "self-host",
+    maxServices: 999999, // Practically Unlimited
+    maxLogVolumeBytes: 999999 * 1024 * 1024 * 1024, // Practically Unlimited
+    retentionDays: 9999, // User controls their own retention
     features: [
-      { text: "Unlimited services", included: true },
-      { text: "20GB logs / month", included: true },
-      { text: "30-day log retention", included: true },
-      { text: "Advanced AI root cause analysis", included: true },
-      { text: "GitHub + Jira + PagerDuty integrations", included: true },
-      { text: "Up to 10 team members", included: true },
-      { text: "SLO/SLA tracking + AI post-mortems", included: true },
-      { text: "Priority support", included: true },
-    ],
-    available: true,
-  },
-  {
-    id: "scale",
-    name: "Scale",
-    priceUSD: 299,
-    priceINR: 24999,
-    description: "Series A+ companies with compliance & security needs.",
-    backendPlan: "scale",
-    maxServices: 1000, // High limit for scale
-    maxLogVolumeBytes: 100 * 1024 * 1024 * 1024, // 100GB
-    retentionDays: 90,
-    features: [
-      { text: "Everything in Team", included: true },
-      { text: "100GB logs / month", included: true },
-      { text: "90-day retention", included: true },
-      { text: "Unlimited team members", included: true },
-      { text: "SAML SSO + SOC2 audit log exports", included: true },
-      { text: "Custom AI model fine-tuning", included: true },
-      { text: "SLA guarantee + Dedicated Slack support", included: true },
+      { text: "Unlimited services monitored", included: true },
+      { text: "Unlimited logs / month", included: true },
+      { text: "Unlimited data retention", included: true },
+      { text: "Community anomaly checking & SRE helpers", included: true },
+      { text: "Self-service Docker/Compose deployment", included: true },
+      { text: "GitHub community support", included: true },
     ],
     available: true,
   },

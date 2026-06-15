@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const manualSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
-  plan: z.enum(["free", "pro", "team", "scale"]),
+  plan: z.enum(["free", "pro", "self-host"]),
 });
 
 export async function POST(request: Request) {

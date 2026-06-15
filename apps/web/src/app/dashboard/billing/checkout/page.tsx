@@ -43,8 +43,8 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
     redirect("/dashboard/billing");
   }
 
-  // Validate planId
-  const planDetails = PLANS.find((p) => p.id === planId && p.id !== "free");
+  // Validate planId (Only Pro uses checkout flow)
+  const planDetails = PLANS.find((p) => p.id === planId && p.id === "pro");
   if (!planDetails) {
     redirect(`/dashboard/billing?projectId=${projectId}`);
   }
