@@ -1,16 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { generateIncidentAnalysis } from "./llm";
+import { generateIncidentAnalysis } from "./llm.js";
+import { IncidentPromptInput } from "./prompts/incident.js";
 
 describe("ObservabilityOS AI Engine", () => {
-  const mockInput = {
+  const mockInput: IncidentPromptInput = {
     serviceName: "payment-service",
-    environment: "prod" as const,
+    environment: "prod",
+    detectedAt: new Date().toISOString(),
+    anomalyMetric: "z-score: 4.2",
     logs: [
       {
         level: "error" as const,
         message:
           "insufficient funds to complete checkout transaction error code err_funds",
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
       },
     ],
     deploys: [
@@ -18,7 +21,7 @@ describe("ObservabilityOS AI Engine", () => {
         commitSha: "abcdef123456",
         commitMessage: "Optimized ledger database queries",
         branch: "main",
-        deployedAt: new Date(),
+        deployedAt: new Date().toISOString(),
       },
     ],
   };
@@ -246,13 +249,13 @@ describe("ObservabilityOS AI Engine", () => {
 
   it("should bypass real LLM calls and return mock analysis if playground logs are detected", async () => {
     process.env.AICREDITS_API_KEY = "test-aicredits-key";
-    const playgroundInput = {
+    const playgroundInput: IncidentPromptInput = {
       ...mockInput,
       logs: [
         {
           level: "error" as const,
           message: "something went wrong in the simulation",
-          timestamp: new Date(),
+          timestamp: new Date().toISOString(),
           traceId: "trace_playground_abc123",
         },
       ],
@@ -269,7 +272,7 @@ describe("ObservabilityOS AI Engine", () => {
 
   it("should bypass LLM calls and return mock analysis if bypassLLM is true in incident analysis", async () => {
     process.env.AICREDITS_API_KEY = "test-aicredits-key";
-    const bypassInput = {
+    const bypassInput: IncidentPromptInput = {
       ...mockInput,
       bypassLLM: true,
     };
@@ -302,7 +305,7 @@ describe("ObservabilityOS AI Engine", () => {
     const fetchMock = vi.fn();
     vi.stubGlobal("fetch", fetchMock);
 
-    const { generateEmailDigestSummary } = await import("./llm");
+    const { generateEmailDigestSummary } = await import("./llm.js");
     const result = await generateEmailDigestSummary(digestInput);
     expect(result).toContain("SRE anomalies occurred");
     expect(fetchMock).not.toHaveBeenCalled();
