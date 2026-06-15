@@ -34,8 +34,7 @@ const PLAN_ORDER = ["free", "starter", "team", "scale"];
 export default function BillingView({ project, usage }: BillingViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [gateway, setGateway] = useState<"stripe" | "razorpay">("razorpay");
+  const gateway = "razorpay";
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSandboxUpdating, setIsSandboxUpdating] = useState(false);
@@ -78,14 +77,11 @@ export default function BillingView({ project, usage }: BillingViewProps) {
 
   useEffect(() => {
     const status = searchParams.get("checkout_status");
-    const gatewayParam = searchParams.get("gateway");
     if (status === "success") {
       const planIdParam = searchParams.get("planId");
       Promise.resolve().then(() => {
         setTargetPlanId(planIdParam);
-        setSuccessMsg(
-          `Upgrading plan... Verifying payment with ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"}...`,
-        );
+        setSuccessMsg("Upgrading plan... Verifying payment with Razorpay...");
         setIsVerifyingUpgrade(true);
       });
       router.replace(`/dashboard/billing?projectId=${project.id}`);
@@ -190,52 +186,48 @@ export default function BillingView({ project, usage }: BillingViewProps) {
         throw new Error(data.error?.message || "Failed to initiate checkout");
       }
 
-      if (gateway === "stripe") {
-        window.location.assign(data.url);
+      // Razorpay checkout flow
+      if (data.isMock) {
+        setSuccessMsg(
+          "Initiating Mock Razorpay Checkout... (Upgrading account in sandbox mode)",
+        );
+        setTimeout(async () => {
+          await handleSandboxOverride("pro");
+        }, 1500);
       } else {
-        // Razorpay checkout flow
-        if (data.isMock) {
-          setSuccessMsg(
-            "Initiating Mock Razorpay Checkout... (Upgrading account in sandbox mode)",
-          );
-          setTimeout(async () => {
-            await handleSandboxOverride("pro");
-          }, 1500);
-        } else {
-          const loaded = await loadRazorpayScript();
-          if (!loaded) {
-            throw new Error("Razorpay SDK failed to load. Are you offline?");
-          }
-
-          const options = {
-            key: data.keyId,
-            subscription_id: data.subscriptionId,
-            amount: data.amount,
-            currency: data.currency,
-            name: data.name,
-            description: data.description,
-            handler: async function () {
-              setSuccessMsg(
-                "Razorpay authorization approved! Reloading settings...",
-              );
-              setTimeout(() => {
-                router.push(
-                  `/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`,
-                );
-              }, 1500);
-            },
-            prefill: { name: "", email: "" },
-            theme: { color: "#4f46e5" },
-          };
-
-          const rzp = new (
-            window as unknown as {
-              Razorpay: new (o: unknown) => { open: () => void };
-            }
-          ).Razorpay(options);
-          rzp.open();
-          setIsSubmitting(false);
+        const loaded = await loadRazorpayScript();
+        if (!loaded) {
+          throw new Error("Razorpay SDK failed to load. Are you offline?");
         }
+
+        const options = {
+          key: data.keyId,
+          subscription_id: data.subscriptionId,
+          amount: data.amount,
+          currency: data.currency,
+          name: data.name,
+          description: data.description,
+          handler: async function () {
+            setSuccessMsg(
+              "Razorpay authorization approved! Reloading settings...",
+            );
+            setTimeout(() => {
+              router.push(
+                `/dashboard/billing?projectId=${project.id}&checkout_status=success&gateway=razorpay`,
+              );
+            }, 1500);
+          },
+          prefill: { name: "", email: "" },
+          theme: { color: "#4f46e5" },
+        };
+
+        const rzp = new (
+          window as unknown as {
+            Razorpay: new (o: unknown) => { open: () => void };
+          }
+        ).Razorpay(options);
+        rzp.open();
+        setIsSubmitting(false);
       }
     } catch (err) {
       console.error(err);
@@ -618,8 +610,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
         </div>
         <p className="text-xs text-slate-500 leading-relaxed mb-4">
           Local sandbox environment detected. Use the quick toggle below to
-          simulate Stripe/Razorpay webhook outcomes instantly without
-          configuring keys.
+          simulate Razorpay webhook outcomes instantly without configuring keys.
         </p>
 
         <div className="flex flex-wrap items-center gap-2">

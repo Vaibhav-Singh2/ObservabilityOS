@@ -11,7 +11,7 @@ interface RazorpayPlan {
   id: string;
   item?: {
     name: string;
-    amount: number;
+    amount: string | number;
     currency: string;
   };
 }
@@ -83,10 +83,10 @@ export async function POST(request: Request) {
     const planName = `ObservabilityOS - ${planDetails.name}`;
 
     const plansList = await razorpay.plans.all({ count: 100 });
-    const existingPlan = plansList.items?.find(
-      (p: RazorpayPlan) =>
+    const existingPlan = (plansList.items as unknown as RazorpayPlan[])?.find(
+      (p) =>
         p.item?.name === planName &&
-        p.item?.amount === amountInPaise &&
+        Number(p.item?.amount) === amountInPaise &&
         p.item?.currency === "INR",
     );
 
