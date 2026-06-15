@@ -32,8 +32,8 @@ export default function DashboardError({ error, reset }: ErrorProps) {
         </h2>
 
         <p className="text-sm text-slate-400 mb-6 max-w-md mx-auto leading-relaxed">
-          An unexpected runtime exception occurred in this dashboard view. Don't
-          worry—the rest of the SRE platform is operating normally.
+          An unexpected runtime exception occurred in this dashboard view.
+          Don&apos;t worry—the rest of the SRE platform is operating normally.
         </p>
 
         {/* Technical Error details drawer */}

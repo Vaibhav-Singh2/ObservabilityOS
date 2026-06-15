@@ -4,7 +4,6 @@ import { NextResponse } from "next/server";
 import { Project } from "@repo/db";
 
 import { z } from "zod";
-import stripe from "@/lib/stripe";
 import razorpay from "@/lib/razorpay";
 import { PLANS } from "@/lib/plans";
 
@@ -26,7 +25,7 @@ export async function POST(request: Request) {
 
     const rawBody = await request.json();
     const validatedData = checkoutSchema.parse(rawBody);
-    const { projectId, gateway, planId } = validatedData;
+    const { projectId, planId } = validatedData;
 
     // Verify project ownership
     const project = await Project.findOne({
@@ -48,8 +47,6 @@ export async function POST(request: Request) {
         { status: 400 },
       );
     }
-
-    const origin = request.headers.get("origin") || "http://localhost:3000";
 
     // Razorpay checkout
     const razorpayKeyId = process.env.RAZORPAY_KEY_ID;

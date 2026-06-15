@@ -17,7 +17,10 @@ describe("Database Connection and Models", () => {
     if (mongoose.connection.readyState === 1) {
       const collections = mongoose.connection.collections;
       for (const key of Object.keys(collections)) {
-        await collections[key].deleteMany({});
+        const collection = collections[key];
+        if (collection) {
+          await collection.deleteMany({});
+        }
       }
     }
   });

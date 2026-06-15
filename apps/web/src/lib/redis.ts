@@ -15,7 +15,7 @@ if (!cached) {
 
 // In-Memory cache fallback implementation
 interface CacheEntry {
-  value: any;
+  value: unknown;
   expiresAt: number;
 }
 
@@ -31,7 +31,7 @@ function getMemoryCache<T>(key: string): T | null {
   return entry.value as T;
 }
 
-function setMemoryCache(key: string, value: any, ttlSeconds = 300): void {
+function setMemoryCache(key: string, value: unknown, ttlSeconds = 300): void {
   memoryCache.set(key, {
     value,
     expiresAt: Date.now() + ttlSeconds * 1000,

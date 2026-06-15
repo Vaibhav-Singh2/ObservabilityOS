@@ -36,7 +36,8 @@ export async function checkRateLimit(
   windowMs = 60000,
 ): Promise<RateLimitResult> {
   const redis = getRedisClient();
-  const isRedisReady = redis && (redis as any).status === "ready";
+  const isRedisReady =
+    redis && (redis as { status?: string }).status === "ready";
 
   if (!isRedisReady) {
     console.warn(

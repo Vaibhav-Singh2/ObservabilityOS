@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { connectToDatabase, Project, Log, User, Membership } from "@repo/db";
 import { hashApiKey } from "./crypto";

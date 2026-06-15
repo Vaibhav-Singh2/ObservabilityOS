@@ -53,8 +53,8 @@ export interface RetryOptions {
   backoffMs?: number;
   maxBackoffMs?: number;
   jitter?: boolean;
-  onRetry?: (error: any, attempt: number) => void;
-  shouldRetry?: (error: any) => boolean;
+  onRetry?: (error: unknown, attempt: number) => void;
+  shouldRetry?: (error: unknown) => boolean;
 }
 
 /**
@@ -200,7 +200,7 @@ export class CircuitBreaker {
     }
   }
 
-  private onFailure(error: any): void {
+  private onFailure(error: unknown): void {
     this.successCount = 0;
     this.failureCount++;
     console.warn(

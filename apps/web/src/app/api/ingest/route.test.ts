@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "./route";
 import { connectToDatabase, Project, Service, Log } from "@repo/db";
@@ -174,8 +175,8 @@ describe("Ingestion API Route", () => {
     expect(savedLog?.message).toBe(
       "Checkout failed for user [EMAIL_REDACTED] on card [CARD_REDACTED]",
     );
-    expect(savedLog?.metadata.password).toBe("[REDACTED]");
-    expect(savedLog?.metadata.ip).toBe("127.0.0.1");
+    expect(savedLog?.metadata?.password).toBe("[REDACTED]");
+    expect(savedLog?.metadata?.ip).toBe("127.0.0.1");
 
     // Check Redis Publish and Anomaly Trigger calls
     expect(mockRedis.publish).toHaveBeenCalled();

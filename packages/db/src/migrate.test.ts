@@ -36,8 +36,8 @@ describe("Database Migrations", () => {
 
     const appliedMigrations = await Migration.find({}).sort({ appliedAt: 1 });
     expect(appliedMigrations.length).toBe(2);
-    expect(appliedMigrations[0].name).toBe("001_create_membership_schema");
-    expect(appliedMigrations[1].name).toBe(
+    expect(appliedMigrations[0]?.name).toBe("001_create_membership_schema");
+    expect(appliedMigrations[1]?.name).toBe(
       "002_create_project_api_key_indexes",
     );
 

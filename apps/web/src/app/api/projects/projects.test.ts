@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { GET, POST } from "./route";
 import { connectToDatabase, Project, User } from "@repo/db";

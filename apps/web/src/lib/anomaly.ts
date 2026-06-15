@@ -378,7 +378,7 @@ export async function processAnomalyDetection(
       anomalyMetric: anomalyMetricDesc || `Metric deviation detected`,
       logs: logContexts,
       deploys: deployContexts,
-      bypassLLM: plan === "free",
+      bypassLLM: projectDoc?.plan === "free",
     });
   } catch (err) {
     console.error(

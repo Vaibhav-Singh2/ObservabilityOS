@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { checkRateLimit } from "./rate-limit";
 import { getRedisClient } from "./redis";

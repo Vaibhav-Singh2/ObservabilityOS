@@ -53,7 +53,9 @@ describe("ObservabilityOS SDK Logger", () => {
     await logger["activeFlushPromise"];
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    const [url, options] = fetchMock.mock.calls[0];
+    const callArgs = fetchMock.mock.calls[0];
+    expect(callArgs).toBeDefined();
+    const [url, options] = callArgs as [string, RequestInit];
     expect(url).toBe("http://localhost:3000/api/ingest");
     expect(options.method).toBe("POST");
     expect(options.headers).toEqual({
@@ -61,7 +63,7 @@ describe("ObservabilityOS SDK Logger", () => {
       "x-api-key": "test-key",
     });
 
-    const body = JSON.parse(options.body);
+    const body = JSON.parse(options.body as string);
     expect(body.length).toBe(3);
     expect(body[0].message).toBe("message 1");
     expect(body[0].level).toBe("info");
@@ -121,7 +123,10 @@ describe("ObservabilityOS SDK Logger", () => {
     await logger["activeFlushPromise"];
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    const body = JSON.parse(fetchMock.mock.calls[0][1].body);
+    const callArgs = fetchMock.mock.calls[0];
+    expect(callArgs).toBeDefined();
+    const options = callArgs?.[1] as RequestInit;
+    const body = JSON.parse(options.body as string);
     expect(body[0]).toMatchObject({
       level: "debug",
       message: "debug message",
@@ -157,7 +162,7 @@ describe("ObservabilityOS SDK Logger", () => {
     expect(fetchMock).toHaveBeenCalledTimes(1);
     // Queue should have the log put back
     expect(logger["queue"].length).toBe(1);
-    expect(logger["queue"][0].message).toBe("temporary log");
+    expect(logger["queue"][0]?.message).toBe("temporary log");
 
     logger.destroy();
   });
@@ -180,7 +185,7 @@ describe("ObservabilityOS SDK Logger", () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(logger["queue"].length).toBe(1);
-    expect(logger["queue"][0].message).toBe("network down log");
+    expect(logger["queue"][0]?.message).toBe("network down log");
 
     logger.destroy();
   });
