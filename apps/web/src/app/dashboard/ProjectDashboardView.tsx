@@ -121,7 +121,7 @@ export default function ProjectDashboardView({
   const endpointUrl =
     typeof window !== "undefined"
       ? `${window.location.protocol}//${window.location.host}/api/ingest`
-      : "http://localhost:3000/api/ingest";
+      : `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/ingest`;
 
   const handleCopyKey = () => {
     navigator.clipboard.writeText(project.apiKey);

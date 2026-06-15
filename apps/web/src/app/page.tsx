@@ -226,7 +226,7 @@ export default async function LandingPage() {
               FAQ
             </Link>
             <a
-              href="http://localhost:3001"
+              href={process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-slate-200 transition-colors flex items-center gap-0.5"
@@ -320,7 +320,7 @@ export default async function LandingPage() {
               </a>
             )}
             <a
-              href="http://localhost:3001"
+              href={process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 text-slate-200 font-semibold h-12 px-8 rounded-xl transition-all duration-200 cursor-pointer"
@@ -1352,7 +1352,7 @@ export default async function LandingPage() {
                 </a>
               )}
               <a
-                href="http://localhost:3001/docs/quickstart"
+                href={`${process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}/docs/quickstart`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold h-12 px-8 rounded-xl transition-all duration-200 cursor-pointer"
@@ -1443,7 +1443,10 @@ export default async function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="http://localhost:3001"
+                    href={
+                      process.env.NEXT_PUBLIC_DOCS_URL ||
+                      "http://localhost:3001"
+                    }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-slate-350 transition-colors"

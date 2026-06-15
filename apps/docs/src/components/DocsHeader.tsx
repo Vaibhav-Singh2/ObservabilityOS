@@ -90,7 +90,7 @@ export default function DocsHeader({
           </a>
 
           <a
-            href="http://localhost:3000"
+            href={process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}
             target="_blank"
             rel="noopener noreferrer"
             className="flex cursor-pointer items-center gap-2 rounded-lg bg-indigo-600 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-indigo-500 shrink-0"

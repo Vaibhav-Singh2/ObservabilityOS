@@ -99,7 +99,7 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
   const endpointUrl =
     typeof window !== "undefined"
       ? `${window.location.protocol}//${window.location.host}/api/ingest`
-      : "http://localhost:3000/api/ingest";
+      : `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/ingest`;
 
   const installCmd = "npm install @repo/sdk";
   const sdkIntegrationSnippet = `import { Logger } from "@repo/sdk";
