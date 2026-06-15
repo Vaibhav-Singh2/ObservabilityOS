@@ -1564,22 +1564,6 @@ export default async function LandingPage() {
               </h4>
               <ul className="space-y-2 text-xs text-slate-500 font-sans">
                 <li>
-                  <Link
-                    href="#"
-                    className="hover:text-slate-350 transition-colors"
-                  >
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="#"
-                    className="hover:text-slate-350 transition-colors"
-                  >
-                    Terms of Service
-                  </Link>
-                </li>
-                <li>
                   <a
                     href="mailto:support@observabilityos.com"
                     className="hover:text-slate-350 transition-colors"

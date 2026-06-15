@@ -24,6 +24,7 @@ jobs:
       MONGODB_URI: mongodb://localhost:27017/observability_test
       REDIS_URL: redis://localhost:6379
       JWT_SECRET: super_secure_ci_jwt_secret_999
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout Code

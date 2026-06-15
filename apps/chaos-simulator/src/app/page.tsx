@@ -10,10 +10,6 @@ import {
   RotateCcw,
   CheckCircle2,
   XCircle,
-  Database,
-  Cpu,
-  Clock,
-  HardDrive,
   Terminal,
   Settings,
   AlertTriangle,
@@ -23,21 +19,15 @@ import {
   Radio,
   FileText,
   Workflow,
-  Plus,
   RefreshCw,
 } from "lucide-react";
 
-import {
-  telemetryClient,
-  TelemetryStats,
-  TelemetryResponse,
-} from "@/lib/sdk-wrapper";
+import { telemetryClient, TelemetryStats } from "@/lib/sdk-wrapper";
 import {
   SERVICES,
   generateLogScenario,
   generateExceptionScenario,
   generateLatencyScenario,
-  generateErrorRateScenario,
   generateDatabaseScenario,
   generateRedisScenario,
   generateApiScenario,
@@ -45,7 +35,6 @@ import {
   generateTrafficScenario,
   generateMemoryScenario,
   generateCpuScenario,
-  generateServiceHealthScenario,
   generateBusinessEvent,
 } from "@/lib/generators";
 import { scenarioEngine, ScenarioStatus } from "@/lib/scenario-engine";
@@ -176,6 +165,7 @@ export default function ChaosSimulatorPage() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchSetup();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 2. Synchronize telemetry wrapper stats & environment
