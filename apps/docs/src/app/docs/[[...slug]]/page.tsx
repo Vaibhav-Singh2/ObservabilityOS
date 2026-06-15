@@ -7,7 +7,8 @@ import {
   getPrevNextLinks,
   getAllDocsForSearch,
 } from "@/lib/docs";
-import DocsLayoutClient from "@/components/DocsLayoutClient";
+import DocsNavShell from "@/components/DocsNavShell";
+import DocInteractivity from "@/components/DocInteractivity";
 import { ArrowLeft, ArrowRight, Edit3, ChevronRight, Hash } from "lucide-react";
 
 // Configure marked with a custom renderer for heading IDs to match our TOC IDs and convert document links
@@ -327,7 +328,7 @@ export default async function Page({ params }: PageProps) {
   };
 
   return (
-    <DocsLayoutClient searchIndex={searchIndex}>
+    <DocsNavShell searchIndex={searchIndex}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
@@ -489,6 +490,8 @@ export default async function Page({ params }: PageProps) {
           </aside>
         )}
       </div>
-    </DocsLayoutClient>
+
+      <DocInteractivity />
+    </DocsNavShell>
   );
 }
