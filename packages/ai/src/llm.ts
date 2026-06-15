@@ -90,6 +90,7 @@ class SimpleCircuitBreaker {
 
 const anthropicBreaker = new SimpleCircuitBreaker("Anthropic");
 const openaiBreaker = new SimpleCircuitBreaker("OpenAI");
+const aicreditsBreaker = new SimpleCircuitBreaker("AICredits");
 
 // Utility to execute fetch with a strict abort signal timeout
 async function fetchWithTimeout(
@@ -203,12 +204,24 @@ function parseJSONContentAndValidate(text: string): IncidentAnalysis {
 export async function generateIncidentAnalysis(
   input: IncidentPromptInput,
 ): Promise<IncidentAnalysis> {
+  // Prevent playground simulations and free developer plans from consuming real LLM API credits
+  const isPlayground = input.logs.some(
+    (l) => l.traceId && l.traceId.startsWith("trace_playground_"),
+  );
+  if (isPlayground || input.bypassLLM) {
+    console.log(
+      `[ObservabilityOS AI] Bypassing LLM API call (Reason: ${isPlayground ? "Playground simulation" : "Free Developer plan limit"}). Returning mock analysis.`,
+    );
+    return generateMockAnalysis(input);
+  }
+
   const prompt = generateIncidentPrompt(input);
 
+  const AICREDITS_API_KEY = process.env.AICREDITS_API_KEY;
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-  if (ANTHROPIC_API_KEY || OPENAI_API_KEY) {
+  if (AICREDITS_API_KEY || ANTHROPIC_API_KEY || OPENAI_API_KEY) {
     try {
       enforceCooldown();
     } catch (cooldownErr) {
@@ -220,7 +233,69 @@ export async function generateIncidentAnalysis(
     }
   }
 
-  // Provider Failover Chain: Anthropic -> OpenAI -> Mock
+  // Provider Failover Chain: AICredits -> Anthropic -> OpenAI -> Mock
+  if (AICREDITS_API_KEY && aicreditsBreaker.canExecute()) {
+    const gatewayModels = [
+      process.env.AICREDITS_MODEL,
+      "anthropic/claude-3-5-haiku-20241022",
+      "openai/gpt-4o-mini",
+    ].filter(Boolean) as string[];
+
+    for (const model of gatewayModels) {
+      try {
+        const response = await callProviderWithRetry(
+          `AICredits:${model}`,
+          aicreditsBreaker,
+          () =>
+            fetchWithTimeout(
+              "https://aicredits.in/v1/chat/completions",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${AICREDITS_API_KEY}`,
+                  "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                  model,
+                  max_tokens: 1500,
+                  messages: [{ role: "user", content: prompt }],
+                  response_format:
+                    model.includes("gpt") || model.includes("openai")
+                      ? { type: "json_object" }
+                      : undefined,
+                }),
+              },
+              5000,
+            ),
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `AICredits Gateway (${model}) returned status ${response.status}`,
+          );
+        }
+
+        const data = await response.json();
+        const usage = data.usage || {};
+        const inputTokens = usage.prompt_tokens || usage.input_tokens || 0;
+        const outputTokens =
+          usage.completion_tokens || usage.output_tokens || 0;
+        const cost = (inputTokens * 0.15 + outputTokens * 0.6) / 1000000;
+        console.log(
+          `[AI Cost Control] AICredits Gateway Call (${model}). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`,
+        );
+
+        const textContent = data.choices?.[0]?.message?.content || "";
+        return parseJSONContentAndValidate(textContent);
+      } catch (err) {
+        console.warn(
+          `[ObservabilityOS AI] AICredits Gateway call with model ${model} failed, trying next gateway model or provider...`,
+          err,
+        );
+      }
+    }
+  }
+
   if (ANTHROPIC_API_KEY && anthropicBreaker.canExecute()) {
     try {
       const response = await callProviderWithRetry(
@@ -513,12 +588,20 @@ function generateMockEmailDigestSummary(input: DigestPromptInput): string {
 export async function generateEmailDigestSummary(
   input: DigestPromptInput,
 ): Promise<string> {
+  if (input.bypassLLM) {
+    console.log(
+      "[ObservabilityOS AI] Bypassing LLM email digest call (Reason: Free Developer plan limit). Returning mock summary.",
+    );
+    return generateMockEmailDigestSummary(input);
+  }
+
   const prompt = generateDigestPrompt(input);
 
+  const AICREDITS_API_KEY = process.env.AICREDITS_API_KEY;
   const ANTHROPIC_API_KEY = process.env.ANTHROPIC_API_KEY;
   const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
-  if (ANTHROPIC_API_KEY || OPENAI_API_KEY) {
+  if (AICREDITS_API_KEY || ANTHROPIC_API_KEY || OPENAI_API_KEY) {
     try {
       enforceCooldown();
     } catch (cooldownErr) {
@@ -527,6 +610,64 @@ export async function generateEmailDigestSummary(
         cooldownErr,
       );
       return generateMockEmailDigestSummary(input);
+    }
+  }
+
+  if (AICREDITS_API_KEY && aicreditsBreaker.canExecute()) {
+    const gatewayModels = [
+      process.env.AICREDITS_MODEL,
+      "anthropic/claude-3-5-haiku-20241022",
+      "openai/gpt-4o-mini",
+    ].filter(Boolean) as string[];
+
+    for (const model of gatewayModels) {
+      try {
+        const response = await callProviderWithRetry(
+          `AICredits:${model}`,
+          aicreditsBreaker,
+          () =>
+            fetchWithTimeout(
+              "https://aicredits.in/v1/chat/completions",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${AICREDITS_API_KEY}`,
+                  "content-type": "application/json",
+                },
+                body: JSON.stringify({
+                  model,
+                  max_tokens: 300,
+                  messages: [{ role: "user", content: prompt }],
+                }),
+              },
+              5000,
+            ),
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `AICredits Gateway (${model}) returned status ${response.status}`,
+          );
+        }
+
+        const data = await response.json();
+        const usage = data.usage || {};
+        const inputTokens = usage.prompt_tokens || usage.input_tokens || 0;
+        const outputTokens =
+          usage.completion_tokens || usage.output_tokens || 0;
+        const cost = (inputTokens * 0.15 + outputTokens * 0.6) / 1000000;
+        console.log(
+          `[AI Cost Control] AICredits Gateway Call (${model}). Input Tokens: ${inputTokens}, Output Tokens: ${outputTokens}, Cost: $${cost.toFixed(6)}`,
+        );
+
+        const textContent = data.choices?.[0]?.message?.content || "";
+        return textContent.trim();
+      } catch (err) {
+        console.warn(
+          `[ObservabilityOS AI] AICredits Gateway call with model ${model} failed, trying next gateway model or provider...`,
+          err,
+        );
+      }
     }
   }
 

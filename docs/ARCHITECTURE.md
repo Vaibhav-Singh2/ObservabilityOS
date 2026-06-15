@@ -138,7 +138,9 @@ ObservabilityOS is hardened against cascading failures and third-party dependenc
 All outbound HTTP operations are wrapped inside a stateful **Circuit Breaker** and **Timeout** framework:
 
 - **Timeouts**: Restricted to 3000ms for webhooks and 5000ms for AI provider requests to prevent thread blockages.
-- **Failovers**: SRE pipeline automatically fails over AI diagnostic generation from Anthropic Claude to OpenAI chat completions, and eventually to local mock heuristic models in case of general outages.
+- **Failovers**: SRE pipeline automatically routes diagnostic calls through the AICredits gateway (failing over dynamically between the configured `AICREDITS_MODEL`, Claude 3.5 Haiku, and GPT-4o mini), then cascades to direct Anthropic Claude, OpenAI chat completions, and eventually to local mock heuristic models in case of severe outages.
+- **Sandbox Protection**: Simulated playground/sandbox logs (prefixed with `trace_playground_` trace IDs) bypass outbound LLM requests entirely, falling back to local mock heuristic analysis to save API credits.
+- **Plan-based Limits**: Projects on the Free Developer plan (`plan === "free"`) are restricted from consuming live LLM credits; calls automatically default to Mock Heuristics.
 - **Circuit Breakers**: Outbound Slack/Discord webhook requests will trip to `OPEN` state after 3 consecutive failures, preventing event loop blockages.
 
 ### 2. Dual-Layer Caching (Redis Failover)

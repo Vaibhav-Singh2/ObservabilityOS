@@ -20,6 +20,7 @@ export interface IncidentPromptInput {
   anomalyMetric: string; // e.g. "z-score: 4.2" or "spike from 0 to 15 errors"
   logs: LogContext[];
   deploys: DeployContext[];
+  bypassLLM?: boolean;
 }
 
 export function generateIncidentPrompt(input: IncidentPromptInput): string {

@@ -157,6 +157,7 @@ export async function buildAndSendEmailDigest(user: {
       aiSummary = await generateEmailDigestSummary({
         projectName: project.name,
         incidents: incidentDigestContexts,
+        bypassLLM: project.plan === "free",
       });
     } catch (err) {
       console.error(

@@ -11,16 +11,27 @@ export async function GET() {
   // AI config checks
   const hasAnthropicKey = !!process.env.ANTHROPIC_API_KEY;
   const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+  const hasAiCreditsKey = !!process.env.AICREDITS_API_KEY;
+  const isAiCreditsActive =
+    hasAiCreditsKey ||
+    (!process.env.VITEST && !hasAnthropicKey && !hasOpenAIKey);
+
   const aiHealth = {
-    status: hasAnthropicKey || hasOpenAIKey ? "healthy" : "degraded",
+    status:
+      hasAnthropicKey || hasOpenAIKey || isAiCreditsActive
+        ? "healthy"
+        : "degraded",
     details: {
+      hasAiCreditsKey,
       hasAnthropicKey,
       hasOpenAIKey,
-      activeProvider: hasAnthropicKey
-        ? "Anthropic Claude"
-        : hasOpenAIKey
-          ? "OpenAI GPT"
-          : "Mock Heuristic Analyzer Fallback",
+      activeProvider: isAiCreditsActive
+        ? "AICredits Gateway"
+        : hasAnthropicKey
+          ? "Anthropic Claude"
+          : hasOpenAIKey
+            ? "OpenAI GPT"
+            : "Mock Heuristic Analyzer Fallback",
     },
   };
 

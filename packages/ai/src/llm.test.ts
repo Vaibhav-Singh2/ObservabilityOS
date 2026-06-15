@@ -23,10 +23,17 @@ describe("ObservabilityOS AI Engine", () => {
     ],
   };
 
+  let currentTestTime = Date.now();
+
   beforeEach(() => {
+    currentTestTime += 10000; // Clear cooldown between tests
+    vi.spyOn(Date, "now").mockReturnValue(currentTestTime);
+
     vi.stubGlobal("fetch", vi.fn());
     vi.spyOn(console, "warn").mockImplementation(() => {});
     vi.spyOn(console, "log").mockImplementation(() => {});
+    delete process.env.AICREDITS_API_KEY;
+    delete process.env.AICREDITS_MODEL;
     delete process.env.ANTHROPIC_API_KEY;
     delete process.env.OPENAI_API_KEY;
   });
@@ -156,5 +163,148 @@ describe("ObservabilityOS AI Engine", () => {
 
     const result = await generateIncidentAnalysis(mockInput);
     expect(result.title).toBe("OpenAI Fallback Title");
+  });
+
+  it("should successfully call the AICredits gateway when AICREDITS_API_KEY is configured", async () => {
+    process.env.AICREDITS_API_KEY = "test-aicredits-key";
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  title: "AICredits Success Title",
+                  summary: "AICredits Summary",
+                  rootCause: "AICredits Root",
+                  impact: "AICredits Impact",
+                  suggestedFix: ["Test Fix"],
+                  confidence: 0.97,
+                }),
+              },
+            },
+          ],
+          usage: { prompt_tokens: 60, completion_tokens: 30 },
+        }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generateIncidentAnalysis(mockInput);
+    expect(result.title).toBe("AICredits Success Title");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://aicredits.in/v1/chat/completions",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "Bearer test-aicredits-key",
+          "content-type": "application/json",
+        }),
+      }),
+    );
+  });
+
+  it("should successfully call the AICredits gateway with custom model when AICREDITS_MODEL is configured", async () => {
+    process.env.AICREDITS_API_KEY = "test-aicredits-key";
+    process.env.AICREDITS_MODEL = "custom/claude-3-haiku";
+
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () =>
+        Promise.resolve({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  title: "Custom Model Success",
+                  summary: "Summary",
+                  rootCause: "Root",
+                  impact: "Impact",
+                  suggestedFix: ["Fix"],
+                  confidence: 0.95,
+                }),
+              },
+            },
+          ],
+          usage: { prompt_tokens: 50, completion_tokens: 25 },
+        }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generateIncidentAnalysis(mockInput);
+    expect(result.title).toBe("Custom Model Success");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://aicredits.in/v1/chat/completions",
+      expect.objectContaining({
+        body: expect.stringContaining('"model":"custom/claude-3-haiku"'),
+      }),
+    );
+  });
+
+  it("should bypass real LLM calls and return mock analysis if playground logs are detected", async () => {
+    process.env.AICREDITS_API_KEY = "test-aicredits-key";
+    const playgroundInput = {
+      ...mockInput,
+      logs: [
+        {
+          level: "error" as const,
+          message: "something went wrong in the simulation",
+          timestamp: new Date(),
+          traceId: "trace_playground_abc123",
+        },
+      ],
+    };
+
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generateIncidentAnalysis(playgroundInput);
+    // Should fall back to mock heuristics even though API keys are configured
+    expect(result.title).toContain("Spike in unresolved errors");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("should bypass LLM calls and return mock analysis if bypassLLM is true in incident analysis", async () => {
+    process.env.AICREDITS_API_KEY = "test-aicredits-key";
+    const bypassInput = {
+      ...mockInput,
+      bypassLLM: true,
+    };
+
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const result = await generateIncidentAnalysis(bypassInput);
+    expect(result.title).toContain("insufficient funds");
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("should bypass LLM calls and return mock summary if bypassLLM is true in email digest", async () => {
+    process.env.AICREDITS_API_KEY = "test-aicredits-key";
+    const digestInput = {
+      projectName: "payment-service",
+      incidents: [
+        {
+          title: "Critical error in DB",
+          serviceName: "payment-service",
+          environment: "prod",
+          status: "open",
+          createdAt: new Date().toISOString(),
+          rootCause: "DB pool exhaustion",
+        },
+      ],
+      bypassLLM: true,
+    };
+
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { generateEmailDigestSummary } = await import("./llm");
+    const result = await generateEmailDigestSummary(digestInput);
+    expect(result).toContain("SRE anomalies occurred");
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });

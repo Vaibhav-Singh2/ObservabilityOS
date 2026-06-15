@@ -10,6 +10,7 @@ export interface IncidentDigestContext {
 export interface DigestPromptInput {
   projectName: string;
   incidents: IncidentDigestContext[];
+  bypassLLM?: boolean;
 }
 
 export function generateDigestPrompt(input: DigestPromptInput): string {

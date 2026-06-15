@@ -2,6 +2,18 @@
 
 All notable changes to the ObservabilityOS project are documented here, grouped by release tags.
 
+## [v1.4.1] — AI Gateway Consolidation & Dynamic Routing
+
+### Added
+
+- **Third-Party AI Gateway Integration**: Added support for the AICredits gateway endpoint (`https://aicredits.in/v1/chat/completions`) as the primary LLM provider.
+- **Dynamic Model Selection**: Enabled setting and failing over custom models dynamically via `process.env.AICREDITS_MODEL`, with standard defaults for Claude 3.5 Haiku and GPT-4o mini.
+- **Sandbox Protection & Cost Safeguard**: Integrated automatic playground/sandbox detection via `trace_playground_` trace IDs to bypass external LLM calls and fallback directly to Local Mock Heuristics.
+- **Plan-based Limit Controls**: Enforced Free Developer plan limits by automatically bypassing live LLM calls and defaulting to Local Mock Heuristics for projects on the free tier.
+- **API Health Check Reporting**: Integrated AICredits active status checks inside `/api/health`.
+
+---
+
 ## [v1.4.0] — SRE Resilience & Fault Tolerance
 
 ### Added
