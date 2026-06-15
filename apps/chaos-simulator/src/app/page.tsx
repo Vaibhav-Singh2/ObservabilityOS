@@ -123,10 +123,13 @@ export default function ChaosSimulatorPage() {
   >([]);
   const terminalContainerRef = useRef<HTMLDivElement>(null);
 
-  // 1. Initial configuration setup on mount
-  useEffect(() => {
-    fetchSetup();
-  }, []);
+  const addTerminalLog = (
+    type: "info" | "warn" | "error" | "success" | "system",
+    text: string,
+  ) => {
+    const time = new Date().toLocaleTimeString();
+    setTerminalLogs((prev) => [...prev.slice(-99), { time, type, text }]);
+  };
 
   const fetchSetup = async () => {
     setLoadingSetup(true);
@@ -169,6 +172,12 @@ export default function ChaosSimulatorPage() {
     }
   };
 
+  // 1. Initial configuration setup on mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchSetup();
+  }, []);
+
   // 2. Synchronize telemetry wrapper stats & environment
   useEffect(() => {
     if (setup) {
@@ -179,6 +188,7 @@ export default function ChaosSimulatorPage() {
         defaultService: SERVICES.GATEWAY,
         defaultEnv: environment,
       });
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       addTerminalLog(
         "system",
         `Switched active simulator environment to: ${environment.toUpperCase()}`,
@@ -228,16 +238,8 @@ export default function ChaosSimulatorPage() {
     }
   }, [terminalLogs]);
 
-  const addTerminalLog = (
-    type: "info" | "warn" | "error" | "success" | "system",
-    text: string,
-  ) => {
-    const time = new Date().toLocaleTimeString();
-    setTerminalLogs((prev) => [...prev.slice(-99), { time, type, text }]);
-  };
-
   // Actions trigger helper
-  const handleAction = async (name: string, fn: () => any) => {
+  const handleAction = async (name: string, fn: () => unknown) => {
     addTerminalLog("info", `Triggering action: ${name}`);
     try {
       await fn();
@@ -697,7 +699,7 @@ export default function ChaosSimulatorPage() {
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
+                  onClick={() => setActiveTab(tab.id as typeof activeTab)}
                   className={`flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-lg transition-all ${
                     activeTab === tab.id
                       ? "bg-slate-800 text-slate-100 border border-slate-700 shadow-md"
@@ -1439,8 +1441,9 @@ export default function ChaosSimulatorPage() {
                     </div>
                     <p className="text-xs text-slate-400 mb-3 leading-normal">
                       Stripe API fails to respond (15s timeout) $\rightarrow$
-                      Job queue 'payment-jobs' backlog grows past threshold
-                      $\rightarrow$ Failed jobs fall to dead-letter queue.
+                      Job queue &apos;payment-jobs&apos; backlog grows past
+                      threshold $\rightarrow$ Failed jobs fall to dead-letter
+                      queue.
                     </p>
                     <div className="flex items-center gap-1 text-[10px] text-slate-500">
                       <span>Flow:</span>

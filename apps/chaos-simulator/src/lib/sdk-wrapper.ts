@@ -1,4 +1,4 @@
-import { Logger, LoggerConfig } from "@repo/sdk";
+import { Logger } from "@repo/sdk";
 
 export interface TelemetryResponse {
   timestamp: string;
@@ -92,7 +92,7 @@ class TelemetrySDKWrapper {
     options?: {
       service?: string;
       environment?: "prod" | "staging" | "dev";
-      metadata?: Record<string, any>;
+      metadata?: Record<string, unknown>;
       traceId?: string;
     },
   ) {
@@ -235,7 +235,7 @@ class TelemetrySDKWrapper {
   public recordBusinessEvent(
     name: string,
     message: string,
-    metadata: Record<string, any>,
+    metadata: Record<string, unknown>,
     options?: {
       service?: string;
       environment?: "prod" | "staging" | "dev";
