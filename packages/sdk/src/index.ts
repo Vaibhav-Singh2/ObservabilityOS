@@ -119,6 +119,7 @@ export class Logger {
 
     const itemsToSend = [...this.queue];
     this.queue = [];
+    let flushSuccessful = false;
 
     this.activeFlushPromise = (async () => {
       try {
@@ -139,6 +140,8 @@ export class Logger {
           );
           // Put logs back in the queue to try again
           this.queue.unshift(...itemsToSend);
+        } else {
+          flushSuccessful = true;
         }
       } catch (err) {
         console.error(
@@ -156,7 +159,7 @@ export class Logger {
       this.activeFlushPromise = null;
     }
 
-    if (this.queue.length > 0) {
+    if (flushSuccessful && this.queue.length > 0) {
       return this.flush();
     }
   }
