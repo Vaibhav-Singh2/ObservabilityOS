@@ -1,0 +1,87 @@
+import { NextResponse } from "next/server";
+import { connectToDatabase, Project, Log, Metric } from "@repo/db";
+import { PLAN_LIMITS } from "@/lib/quota";
+
+export async function GET(request: Request) {
+  try {
+    // 1. Authenticate Cron Trigger
+    const { searchParams } = new URL(request.url);
+    const authHeader = request.headers.get("Authorization");
+    const secretParam = searchParams.get("secret");
+
+    const expectedSecret = process.env.CRON_SECRET || "dev_cron_secret_123";
+
+    const isAuthorized =
+      authHeader === `Bearer ${expectedSecret}` ||
+      secretParam === expectedSecret ||
+      process.env.NODE_ENV === "development";
+
+    if (!isAuthorized) {
+      return NextResponse.json(
+        {
+          error: { code: "UNAUTHORIZED", message: "Unauthorized trigger call" },
+        },
+        { status: 401 },
+      );
+    }
+
+    // 2. Connect to Database
+    await connectToDatabase();
+
+    // 3. Retrieve all projects
+    const projects = await Project.find({});
+    console.log(
+      `[Data Retention Cron] Processing retention for ${projects.length} projects.`,
+    );
+
+    const results = [];
+
+    for (const project of projects) {
+      const plan = project.plan || "free";
+      const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+      const retentionDays = limits.retentionDays;
+
+      const thresholdDate = new Date(
+        Date.now() - retentionDays * 24 * 60 * 60 * 1000,
+      );
+
+      // Delete logs and metrics older than the threshold
+      const deletedLogs = await Log.deleteMany({
+        projectId: project._id,
+        timestamp: { $lt: thresholdDate },
+      });
+
+      const deletedMetrics = await Metric.deleteMany({
+        projectId: project._id,
+        timestamp: { $lt: thresholdDate },
+      });
+
+      results.push({
+        projectId: project._id.toString(),
+        projectName: project.name,
+        plan,
+        retentionDays,
+        thresholdDate: thresholdDate.toISOString(),
+        deletedLogsCount: deletedLogs.deletedCount,
+        deletedMetricsCount: deletedMetrics.deletedCount,
+      });
+    }
+
+    return NextResponse.json({
+      success: true,
+      processedProjectsCount: projects.length,
+      results,
+    });
+  } catch (error) {
+    console.error("Cron Data Retention Error:", error);
+    return NextResponse.json(
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Cron data retention trigger failed",
+        },
+      },
+      { status: 500 },
+    );
+  }
+}

@@ -7,6 +7,7 @@ interface RazorpayPayload {
   customer_id?: string;
   notes?: {
     projectId?: string;
+    plan?: string;
   };
   status?: string;
 }
@@ -58,16 +59,17 @@ export async function POST(request: Request) {
       case "subscription.activated":
       case "subscription.charged": {
         const projectId = payload.notes?.projectId;
+        const targetPlan = payload.notes?.plan || "pro";
         if (projectId) {
           await Project.findByIdAndUpdate(projectId, {
-            plan: "pro",
+            plan: targetPlan,
             subscriptionStatus: "active",
             billingProvider: "razorpay",
             razorpaySubscriptionId: payload.id as string,
             razorpayCustomerId: payload.customer_id as string,
           });
           console.log(
-            `[Razorpay Webhook] Project ${projectId} upgraded to PRO via Razorpay.`,
+            `[Razorpay Webhook] Project ${projectId} upgraded to ${targetPlan.toUpperCase()} via Razorpay.`,
           );
         }
         break;

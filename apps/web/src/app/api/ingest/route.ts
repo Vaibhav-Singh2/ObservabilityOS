@@ -7,6 +7,11 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { hashApiKey } from "@/lib/crypto";
 import { scrubText, scrubObject } from "@/lib/scrubber";
 import { getRedisClient } from "@/lib/redis";
+import {
+  PLAN_LIMITS,
+  getLogVolumeUsage,
+  incrementLogVolumeUsage,
+} from "@/lib/quota";
 
 // Validation schema for single log items
 const logItemSchema = z.object({
@@ -70,8 +75,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 4. Parse & Validate Payload
-    const rawBody = await request.json();
+    // 4. Parse & Validate Payload and Track Volume Limits
+    const rawBodyText = await request.text();
+    const bytesToAdd = Buffer.byteLength(rawBodyText, "utf-8");
+    const rawBody = JSON.parse(rawBodyText);
     const validatedData = ingestPayloadSchema.parse(rawBody);
 
     // Standardize to an array of log items
@@ -83,11 +90,62 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, count: 0 });
     }
 
+    const plan = project.plan || "free";
+    const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+
+    const currentVolume = await getLogVolumeUsage(project._id.toString());
+    if (currentVolume + bytesToAdd > limits.maxLogVolumeBytes) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "QUOTA_EXCEEDED",
+            message: `Monthly log ingestion limit exceeded. Your plan (${plan}) only allows up to ${limits.maxLogVolumeBytes / (1024 * 1024)}MB of logs per month.`,
+          },
+        },
+        { status: 403 },
+      );
+    }
+
     // 5. Cache/Fetch Services
     const existingServices = await Service.find({ projectId: project._id });
     const serviceMap = new Map<string, Types.ObjectId>();
     for (const s of existingServices) {
       serviceMap.set(`${s.name}-${s.environment}`, s._id);
+    }
+
+    // Determine how many new services need to be created in this batch
+    const servicesToCreate = new Set<string>();
+    for (const logItem of logItems) {
+      const cacheKey = `${logItem.service}-${logItem.environment}`;
+      if (!serviceMap.has(cacheKey)) {
+        const dbService = await Service.findOne({
+          projectId: project._id,
+          name: logItem.service,
+          environment: logItem.environment,
+        });
+        if (!dbService) {
+          servicesToCreate.add(cacheKey);
+        } else {
+          serviceMap.set(cacheKey, dbService._id);
+        }
+      }
+    }
+
+    if (servicesToCreate.size > 0) {
+      const currentServiceCount = await Service.countDocuments({
+        projectId: project._id,
+      });
+      if (currentServiceCount + servicesToCreate.size > limits.maxServices) {
+        return NextResponse.json(
+          {
+            error: {
+              code: "QUOTA_EXCEEDED",
+              message: `Service limit reached. Your plan (${plan}) only allows up to ${limits.maxServices} services.`,
+            },
+          },
+          { status: 403 },
+        );
+      }
     }
 
     // Ensure all services mentioned in the logs exist
@@ -141,6 +199,9 @@ export async function POST(request: Request) {
     });
 
     await Log.insertMany(logsToInsert);
+
+    // Track log volume usage
+    await incrementLogVolumeUsage(project._id.toString(), bytesToAdd);
 
     // Publish to Redis Pub/Sub for real-time streaming
     const redisClient = getRedisClient();

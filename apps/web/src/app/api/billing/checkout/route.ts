@@ -6,10 +6,12 @@ import { Project } from "@repo/db";
 import { z } from "zod";
 import stripe from "@/lib/stripe";
 import razorpay from "@/lib/razorpay";
+import { PLANS } from "@/lib/plans";
 
 const checkoutSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
-  gateway: z.enum(["stripe", "razorpay"]),
+  gateway: z.enum(["razorpay"]), // Stripe is disabled
+  planId: z.enum(["starter", "team", "scale"]),
 });
 
 export async function POST(request: Request) {
@@ -24,7 +26,7 @@ export async function POST(request: Request) {
 
     const rawBody = await request.json();
     const validatedData = checkoutSchema.parse(rawBody);
-    const { projectId, gateway } = validatedData;
+    const { projectId, gateway, planId } = validatedData;
 
     // Verify project ownership
     const project = await Project.findOne({
@@ -39,77 +41,69 @@ export async function POST(request: Request) {
       );
     }
 
+    const planDetails = PLANS.find((p) => p.id === planId);
+    if (!planDetails) {
+      return NextResponse.json(
+        { error: { code: "BAD_REQUEST", message: "Invalid planId" } },
+        { status: 400 },
+      );
+    }
+
     const origin = request.headers.get("origin") || "http://localhost:3000";
 
-    if (gateway === "stripe") {
-      const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    // Razorpay checkout
+    const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
+    const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
 
-      // If Stripe API key is not present, mock successful redirect for sandbox testing
-      if (!stripeSecretKey) {
-        console.log(
-          "[Mock Billing] No Stripe key found. Redirecting to mock success URL.",
-        );
-        return NextResponse.json({
-          url: `${origin}/dashboard/billing?projectId=${projectId}&checkout_status=success&gateway=stripe`,
-          isMock: true,
-        });
-      }
+    const amountInPaise = planDetails.priceINR * 100;
 
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ["card"],
-        line_items: [
-          {
-            price: process.env.STRIPE_PRICE_ID || "price_pro_tier",
-            quantity: 1,
-          },
-        ],
-        mode: "subscription",
-        success_url: `${origin}/dashboard/billing?projectId=${projectId}&checkout_status=success&gateway=stripe`,
-        cancel_url: `${origin}/dashboard/billing?projectId=${projectId}&checkout_status=cancel&gateway=stripe`,
-        metadata: { projectId },
-      });
-
-      return NextResponse.json({ url: session.url });
-    } else {
-      // Razorpay checkout
-      const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
-      const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
-
-      if (!razorpayKeyId || !razorpayKeySecret) {
-        console.log(
-          "[Mock Billing] No Razorpay keys found. Returning mock subscription payload.",
-        );
-        return NextResponse.json({
-          subscriptionId: `sub_mock_${Math.random().toString(36).substr(2, 9)}`,
-          keyId: "rzp_test_mock",
-          amount: 4900,
-          currency: "INR",
-          name: "ObservabilityOS",
-          description: "Pro Plan Subscription (Mock)",
-          isMock: true,
-        });
-      }
-
-      // Create subscription in Razorpay
-      const planId = process.env.RAZORPAY_PLAN_ID || "plan_pro_tier";
-      const subscription = await razorpay.subscriptions.create({
-        plan_id: planId,
-        customer_notify: 1,
-        total_count: 12,
-        notes: {
-          projectId,
-        },
-      });
-
+    if (!razorpayKeyId || !razorpayKeySecret) {
+      console.log(
+        `[Mock Billing] No Razorpay keys found. Returning mock subscription payload for plan: ${planDetails.name}`,
+      );
       return NextResponse.json({
-        subscriptionId: subscription.id,
-        keyId: razorpayKeyId,
-        amount: 4900, // Rs. 49.00 or custom price
+        subscriptionId: `sub_mock_${Math.random().toString(36).substring(2, 11)}`,
+        keyId: "rzp_test_mock",
+        amount: amountInPaise,
         currency: "INR",
         name: "ObservabilityOS",
-        description: "Pro Plan Subscription",
+        description: `${planDetails.name} Plan Subscription (Mock)`,
+        isMock: true,
       });
     }
+
+    // Resolve Razorpay Plan ID from environment variables or use fallback mock IDs
+    let rzpPlanId = "";
+    if (planId === "starter") {
+      rzpPlanId =
+        process.env.RAZORPAY_PLAN_STARTER_ID ||
+        process.env.RAZORPAY_PLAN_ID ||
+        "plan_pro_tier";
+    } else if (planId === "team") {
+      rzpPlanId = process.env.RAZORPAY_PLAN_TEAM_ID || "plan_team_tier";
+    } else if (planId === "scale") {
+      rzpPlanId = process.env.RAZORPAY_PLAN_SCALE_ID || "plan_scale_tier";
+    }
+
+    // Create subscription in Razorpay
+    const subscription = await razorpay.subscriptions.create({
+      plan_id: rzpPlanId,
+      customer_notify: 1,
+      total_count: 12,
+      notes: {
+        projectId,
+        plan: planDetails.backendPlan,
+      },
+    });
+
+    return NextResponse.json({
+      subscriptionId: subscription.id,
+      keyId: razorpayKeyId,
+      amount: amountInPaise,
+      currency: "INR",
+      name: "ObservabilityOS",
+      description: `${planDetails.name} Plan Subscription`,
+    });
   } catch (error) {
     console.error("Billing Checkout POST Error:", error);
 

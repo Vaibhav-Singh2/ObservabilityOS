@@ -7,7 +7,7 @@ import { z } from "zod";
 
 const manualSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
-  plan: z.enum(["free", "pro"]),
+  plan: z.enum(["free", "pro", "team", "scale"]),
 });
 
 export async function POST(request: Request) {
@@ -44,8 +44,8 @@ export async function POST(request: Request) {
 
     // Update plan and status
     project.plan = plan;
-    project.subscriptionStatus = plan === "pro" ? "active" : "none";
-    project.billingProvider = plan === "pro" ? "manual" : "none";
+    project.subscriptionStatus = plan !== "free" ? "active" : "none";
+    project.billingProvider = plan !== "free" ? "manual" : "none";
 
     await project.save();
 

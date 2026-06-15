@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project } from "@repo/db";
+import { connectToDatabase, User, Project, Service } from "@repo/db";
 import jwt from "jsonwebtoken";
 import BillingView from "./BillingView";
+import { getLogVolumeUsage } from "@/lib/quota";
 
 interface PageProps {
   searchParams: Promise<{ projectId?: string }>;
@@ -64,5 +65,20 @@ export default async function BillingPage({ searchParams }: PageProps) {
     razorpaySubscriptionId: activeProject.razorpaySubscriptionId || "",
   };
 
-  return <BillingView project={serializedProject} />;
+  const serviceCount = await Service.countDocuments({
+    projectId: activeProject._id,
+  });
+  let logVolumeBytes = 0;
+  try {
+    logVolumeBytes = await getLogVolumeUsage(activeProject._id.toString());
+  } catch (err) {
+    console.error("Failed to fetch log volume usage:", err);
+  }
+
+  const usage = {
+    serviceCount,
+    logVolumeBytes,
+  };
+
+  return <BillingView project={serializedProject} usage={usage} />;
 }

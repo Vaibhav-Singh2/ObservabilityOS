@@ -23,106 +23,20 @@ interface BillingViewProps {
     subscriptionStatus: string;
     billingProvider: string;
   };
+  usage: {
+    serviceCount: number;
+    logVolumeBytes: number;
+  };
 }
 
-interface PlanFeature {
-  text: string;
-  included: boolean;
-}
-
-interface Plan {
-  id: string;
-  name: string;
-  priceUSD: number;
-  priceINR: number;
-  description: string;
-  badge?: string;
-  features: PlanFeature[];
-  backendPlan: string;
-  available: boolean;
-}
-
-const PLANS: Plan[] = [
-  {
-    id: "free",
-    name: "Free Developer",
-    priceUSD: 0,
-    priceINR: 0,
-    description: "Side projects & local testing.",
-    features: [
-      { text: "1 service monitored", included: true },
-      { text: "500MB logs / month", included: true },
-      { text: "7-day data retention", included: true },
-      { text: "Basic statistical anomaly checking", included: true },
-      { text: "Multi-channel alerts (Slack, Discord, Teams)", included: false },
-      { text: "AI incident root cause analysis", included: false },
-    ],
-    backendPlan: "free",
-    available: true,
-  },
-  {
-    id: "starter",
-    name: "Starter",
-    priceUSD: 29,
-    priceINR: 2499,
-    description: "Solo founders & small teams in production.",
-    badge: "Most Popular",
-    features: [
-      { text: "Up to 5 services monitored", included: true },
-      { text: "5GB logs / month", included: true },
-      { text: "30-day secure data retention", included: true },
-      { text: "Instant alerts (Slack, Discord, Teams)", included: true },
-      { text: "AI SRE Analyst — incident diagnostics", included: true },
-      { text: "1 team member seat", included: true },
-    ],
-    backendPlan: "pro",
-    available: true,
-  },
-  {
-    id: "team",
-    name: "Team",
-    priceUSD: 99,
-    priceINR: 7999,
-    description: "Growing engineering teams with production complexity.",
-    features: [
-      { text: "Unlimited services", included: true },
-      { text: "20GB logs / month", included: true },
-      { text: "30-day log retention", included: true },
-      { text: "Advanced AI root cause analysis", included: true },
-      { text: "GitHub + Jira + PagerDuty integrations", included: true },
-      { text: "Up to 10 team members", included: true },
-      { text: "SLO/SLA tracking + AI post-mortems", included: true },
-      { text: "Priority support", included: true },
-    ],
-    backendPlan: "team",
-    available: false,
-  },
-  {
-    id: "scale",
-    name: "Scale",
-    priceUSD: 299,
-    priceINR: 24999,
-    description: "Series A+ companies with compliance & security needs.",
-    features: [
-      { text: "Everything in Team", included: true },
-      { text: "100GB logs / month", included: true },
-      { text: "90-day retention", included: true },
-      { text: "Unlimited team members", included: true },
-      { text: "SAML SSO + SOC2 audit log exports", included: true },
-      { text: "Custom AI model fine-tuning", included: true },
-      { text: "SLA guarantee + Dedicated Slack support", included: true },
-    ],
-    backendPlan: "scale",
-    available: false,
-  },
-];
+import { PLANS, PlanDetails as Plan } from "@/lib/plans";
 
 const PLAN_ORDER = ["free", "starter", "team", "scale"];
 
-export default function BillingView({ project }: BillingViewProps) {
+export default function BillingView({ project, usage }: BillingViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [gateway, setGateway] = useState<"stripe" | "razorpay">("stripe");
+  const [gateway, setGateway] = useState<"stripe" | "razorpay">("razorpay");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSandboxUpdating, setIsSandboxUpdating] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -136,11 +50,38 @@ export default function BillingView({ project }: BillingViewProps) {
     project.billingProvider,
   );
   const [isVerifyingUpgrade, setIsVerifyingUpgrade] = useState(false);
+  const [targetPlanId, setTargetPlanId] = useState<string | null>(null);
+
+  const planDetails =
+    PLANS.find((p) => p.backendPlan === currentPlan) || PLANS[0];
+  const maxServices = planDetails.maxServices;
+  const maxLogVolumeBytes = planDetails.maxLogVolumeBytes;
+  const retentionDays = planDetails.retentionDays;
+
+  const servicePercentage = Math.min(
+    (usage.serviceCount / maxServices) * 100,
+    100,
+  );
+  const logVolumePercentage = Math.min(
+    (usage.logVolumeBytes / maxLogVolumeBytes) * 100,
+    100,
+  );
+
+  const formatVolume = (bytes: number): string => {
+    const mb = bytes / (1024 * 1024);
+    if (mb < 1000) {
+      return `${mb.toFixed(2)} MB`;
+    }
+    const gb = bytes / (1024 * 1024 * 1024);
+    return `${gb.toFixed(2)} GB`;
+  };
 
   useEffect(() => {
     const status = searchParams.get("checkout_status");
     const gatewayParam = searchParams.get("gateway");
     if (status === "success") {
+      const planIdParam = searchParams.get("planId");
+      setTargetPlanId(planIdParam);
       Promise.resolve().then(() => {
         setSuccessMsg(
           `Upgrading plan... Verifying payment with ${gatewayParam === "stripe" ? "Stripe" : "Razorpay"}...`,
@@ -170,15 +111,29 @@ export default function BillingView({ project }: BillingViewProps) {
             (p: { _id: string; plan: string; billingProvider: string }) =>
               p._id === project.id,
           );
-          if (activeProj && activeProj.plan === "pro") {
-            setCurrentPlan("pro");
-            setCurrentSubStatus("active");
-            setCurrentBillingProvider(activeProj.billingProvider);
-            setIsVerifyingUpgrade(false);
-            setSuccessMsg(
-              "Upgrade verified successfully! Welcome to Pro Tier.",
-            );
-            router.refresh();
+          if (activeProj) {
+            const planDetails = PLANS.find((p) => p.id === targetPlanId);
+            const targetBackendPlan = planDetails
+              ? planDetails.backendPlan
+              : "pro";
+            if (
+              activeProj.plan === targetBackendPlan ||
+              (targetBackendPlan === "pro" && activeProj.plan !== "free")
+            ) {
+              setCurrentPlan(activeProj.plan);
+              setCurrentSubStatus("active");
+              setCurrentBillingProvider(activeProj.billingProvider);
+              setIsVerifyingUpgrade(false);
+              const displayName =
+                activeProj.plan === "pro"
+                  ? "Starter"
+                  : activeProj.plan.charAt(0).toUpperCase() +
+                    activeProj.plan.slice(1);
+              setSuccessMsg(
+                `Upgrade verified successfully! Welcome to ${displayName} Tier.`,
+              );
+              router.refresh();
+            }
           }
         }
       } catch (err) {
@@ -292,7 +247,9 @@ export default function BillingView({ project }: BillingViewProps) {
     }
   };
 
-  const handleSandboxOverride = async (targetPlan: "free" | "pro") => {
+  const handleSandboxOverride = async (
+    targetPlan: "free" | "pro" | "team" | "scale",
+  ) => {
     setIsSandboxUpdating(true);
     setErrorMsg("");
     setSuccessMsg("");
@@ -318,8 +275,8 @@ export default function BillingView({ project }: BillingViewProps) {
         `Plan successfully changed to ${targetPlan.toUpperCase()} via Dev Override.`,
       );
       setCurrentPlan(targetPlan);
-      setCurrentSubStatus(targetPlan === "pro" ? "active" : "none");
-      setCurrentBillingProvider(targetPlan === "pro" ? "manual" : "none");
+      setCurrentSubStatus(targetPlan !== "free" ? "active" : "none");
+      setCurrentBillingProvider(targetPlan !== "free" ? "manual" : "none");
       router.refresh();
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "Dev override failed");
@@ -438,49 +395,73 @@ export default function BillingView({ project }: BillingViewProps) {
         </div>
       </div>
 
-      {/* Gateway Selection */}
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="text-[10px] uppercase font-bold tracking-widest text-slate-500 shrink-0">
-          Payment Gateway
-        </span>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setGateway("stripe")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
-              gateway === "stripe"
-                ? "bg-indigo-600/15 border-indigo-500 text-white"
-                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-            }`}
-          >
-            <Globe2 className="w-3.5 h-3.5" />
-            Stripe
-            <span className="text-[9px] text-slate-500 font-normal hidden sm:inline">
-              · International Cards
+      {/* Usage & Plan Limits */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Services Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-slate-400">
+              Services Monitored
             </span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setGateway("razorpay")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
-              gateway === "razorpay"
-                ? "bg-indigo-600/15 border-indigo-500 text-white"
-                : "bg-slate-950 border-slate-800 text-slate-400 hover:text-white hover:border-slate-700"
-            }`}
-          >
-            <DollarSign className="w-3.5 h-3.5" />
-            Razorpay
-            <span className="text-[9px] text-slate-500 font-normal hidden sm:inline">
-              · UPI, Net Banking
+            <span className="text-xs font-black text-white bg-slate-800 px-2 py-0.5 rounded-md">
+              {usage.serviceCount} / {maxServices}
             </span>
-          </button>
+          </div>
+          <div className="w-full bg-slate-950 rounded-full h-2 mb-2">
+            <div
+              className="bg-linear-to-r from-indigo-500 to-violet-500 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${servicePercentage}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-slate-550">
+            {servicePercentage >= 100
+              ? "Service limit reached. Upgrade your plan to monitor more services."
+              : `${maxServices - usage.serviceCount} more services available.`}
+          </p>
         </div>
-        {gateway === "razorpay" && (
-          <span className="text-[10px] text-indigo-400 font-semibold flex items-center gap-1">
-            🇮🇳 Prices shown in INR
-          </span>
-        )}
+
+        {/* Log Volume Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold text-slate-400">
+              Monthly Log Volume
+            </span>
+            <span className="text-xs font-black text-white bg-slate-800 px-2 py-0.5 rounded-md">
+              {formatVolume(usage.logVolumeBytes)} /{" "}
+              {formatVolume(maxLogVolumeBytes)}
+            </span>
+          </div>
+          <div className="w-full bg-slate-950 rounded-full h-2 mb-2">
+            <div
+              className="bg-linear-to-r from-violet-500 to-fuchsia-500 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${logVolumePercentage}%` }}
+            />
+          </div>
+          <p className="text-[11px] text-slate-555">
+            {logVolumePercentage >= 100
+              ? "Log ingestion limit reached. Logs are now being rejected."
+              : `${(100 - logVolumePercentage).toFixed(1)}% of quota remaining.`}
+          </p>
+        </div>
+
+        {/* Retention Card */}
+        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 relative overflow-hidden flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">
+              Data Retention Window
+            </span>
+            <span className="text-xs font-black text-indigo-450 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+              {retentionDays} Days
+            </span>
+          </div>
+          <p className="text-xs text-slate-350 mt-3">
+            Logs and performance metrics are securely retained for{" "}
+            {retentionDays} days before being automatically purged.
+          </p>
+        </div>
       </div>
+
+      <div className="pt-2" />
 
       {/* Pricing Cards — responsive 1→2→4 column grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
@@ -583,13 +564,16 @@ export default function BillingView({ project }: BillingViewProps) {
                     <Check className="w-3.5 h-3.5" />
                     Current Plan
                   </div>
-                ) : upgrade ? (
+                ) : plan.id !== "free" ? (
                   <button
-                    onClick={handleCheckout}
-                    disabled={isSubmitting}
-                    className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-950 disabled:cursor-not-allowed text-white py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
+                    onClick={() =>
+                      router.push(
+                        `/dashboard/billing/checkout?projectId=${project.id}&planId=${plan.id}`,
+                      )
+                    }
+                    className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
                   >
-                    {isSubmitting ? "Processing..." : "Upgrade"}
+                    Select Plan
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 ) : (
@@ -636,20 +620,20 @@ export default function BillingView({ project }: BillingViewProps) {
           configuring keys.
         </p>
 
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() =>
-              handleSandboxOverride(currentPlan === "pro" ? "free" : "pro")
-            }
-            disabled={isSandboxUpdating}
-            className="px-4 py-2 bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer"
-          >
-            {isSandboxUpdating
-              ? "Updating..."
-              : currentPlan === "pro"
-                ? "Simulate Free Downgrade"
-                : "Simulate Pro Upgrade"}
-          </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {["free", "pro", "team", "scale"].map((p) => {
+            if (p === currentPlan) return null;
+            return (
+              <button
+                key={p}
+                onClick={() => handleSandboxOverride(p as any)}
+                disabled={isSandboxUpdating}
+                className="px-3.5 py-2 bg-slate-955 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer uppercase"
+              >
+                Set to {p}
+              </button>
+            );
+          })}
         </div>
       </section>
     </div>

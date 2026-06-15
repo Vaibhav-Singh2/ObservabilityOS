@@ -13,6 +13,7 @@ import {
 
 import { logAuditEvent } from "@/lib/audit";
 import { delCache } from "@/lib/redis";
+import { PLAN_LIMITS } from "@/lib/quota";
 
 export async function GET(request: Request) {
   try {
@@ -135,6 +136,24 @@ export async function POST(request: Request) {
           },
         },
         { status: 409 },
+      );
+    }
+
+    // Check service limit based on project plan
+    const plan = project.plan || "free";
+    const limits = PLAN_LIMITS[plan] || PLAN_LIMITS.free;
+    const serviceCount = await Service.countDocuments({
+      projectId: project._id,
+    });
+    if (serviceCount >= limits.maxServices) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "QUOTA_EXCEEDED",
+            message: `Service limit reached. Your plan (${plan}) only allows up to ${limits.maxServices} services.`,
+          },
+        },
+        { status: 403 },
       );
     }
 
