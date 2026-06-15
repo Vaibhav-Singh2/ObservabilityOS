@@ -23,7 +23,7 @@ erDiagram
         string apiKey "Hashed SHA-256"
         float zScoreThreshold "Default 3.0"
         int minErrorCount "Default 3"
-        string plan "free | pro | team | scale"
+        string plan "free | pro | self-host"
     }
 
     SERVICE {

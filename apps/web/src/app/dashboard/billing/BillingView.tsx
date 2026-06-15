@@ -241,7 +241,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
   };
 
   const handleSandboxOverride = async (
-    targetPlan: "free" | "pro" | "team" | "scale",
+    targetPlan: "free" | "pro" | "self-host",
   ) => {
     setIsSandboxUpdating(true);
     setErrorMsg("");
@@ -628,7 +628,7 @@ export default function BillingView({ project, usage }: BillingViewProps) {
               <button
                 key={p}
                 onClick={() =>
-                  handleSandboxOverride(p as "free" | "pro" | "team" | "scale")
+                  handleSandboxOverride(p as "free" | "pro" | "self-host")
                 }
                 disabled={isSandboxUpdating}
                 className="px-3.5 py-2 bg-slate-955 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer uppercase"

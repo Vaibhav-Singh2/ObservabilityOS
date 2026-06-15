@@ -28,10 +28,10 @@ const COMPETITORS: Record<string, CompetitorData> = {
     tagline:
       "Stop paying massive, unpredictable bills per host and host metric.",
     description:
-      "Datadog is a great legacy observability suite, but its complex pricing models, seat-based metrics, and high billing surprise factors make it highly restrictive for fast-moving startups. ObservabilityOS offers a flat $29/mo plan with AI-powered root-cause answers instead of raw graphs.",
+      "Datadog is a great legacy observability suite, but its complex pricing models, seat-based metrics, and high billing surprise factors make it highly restrictive for fast-moving startups. ObservabilityOS offers a flat $29/mo Pro Cloud plan with AI-powered root-cause answers, or a 100% free Self-Host OSS option.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt: "Days of YAML configuration and agent installation",
-    pricing: "Flat $29/mo (No seat/host limits)",
+    pricing: "Flat $29/mo or Free Self-Host",
     pricingAlt:
       "Complex matrix per host, metric, and logs custom retention rules",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
@@ -42,7 +42,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
     otlp: "Native HTTP OTLP JSON ingest endpoint",
     otlpAlt: "Requires agent-side exporter routing configuration",
     highlights: [
-      "Eliminate unpredictable bills: Pay $29/mo instead of fluctuating $1,000+ monthly fees.",
+      "Eliminate unpredictable bills: Pay $29/mo (or self-host for free) instead of fluctuating $1,000+ monthly fees.",
       "Instant explanations: Instead of manual timeline graphs correlation, get a written summary of what commit broke production.",
       "100% compliant data pipelines: Sensitive client data is automatically redacted on your own machine before leaving the local sandbox.",
     ],
@@ -56,7 +56,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
       "New Relic charges heavily per developer seat, making it expensive to share telemetry data across your engineering team. ObservabilityOS encourages developer collaboration with flat subscription models and structured Slack post-mortems.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt: "Proprietary agents setup and configuration debugging",
-    pricing: "Flat $29/mo (No seat/host limits)",
+    pricing: "Flat $29/mo or Free Self-Host",
     pricingAlt: "Expensive per-user fees and volume ingest overage bills",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
     aiFeaturesAlt: "Separate add-on products and basic regression alerting",
@@ -80,7 +80,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt:
       "Configuring Prometheus, Promtail, Loki, and custom dashboards",
-    pricing: "Flat $29/mo (No seat/host limits)",
+    pricing: "Flat $29/mo or Free Self-Host",
     pricingAlt:
       "Free open-source but high hosting/maintenance costs; Cloud gets expensive quickly",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
@@ -105,7 +105,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt:
       "Different configurations for backend log engines and client traces",
-    pricing: "Flat $29/mo (No seat/host limits)",
+    pricing: "Flat $29/mo or Free Self-Host",
     pricingAlt: "Charged per error event and transaction volume scales",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",
     aiFeaturesAlt: "Basic stack trace summaries without deployment correlation",
@@ -127,7 +127,7 @@ const COMPETITORS: Record<string, CompetitorData> = {
       "Better Stack offers fast log queries and basic Uptime checking. However, they lack AI-native diagnostics to automatically pinpoint developer commit failures. ObservabilityOS couples log search with GPT-4 and Claude summaries.",
     setupTime: "1 Minute (Single SDK/Sidecar)",
     setupTimeAlt: "Custom fluentd configurations and vector routing setups",
-    pricing: "Flat $29/mo (No seat/host limits)",
+    pricing: "Flat $29/mo or Free Self-Host",
     pricingAlt:
       "Tier-based pricing that restricts team seats and query history length",
     aiFeatures: "Automated GPT-4/Claude post-mortems in under 10 seconds",

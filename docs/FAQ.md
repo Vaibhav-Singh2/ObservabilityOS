@@ -54,7 +54,7 @@ We store service metric aggregates in Redis under `cache:project:<id>:metrics` w
 
 ### Q: Does the sandbox manual billing override modify Razorpay settings?
 
-**No.** The sandbox manual billing route (`POST /api/billing/manual`) bypasses the Razorpay processor completely. It directly mutates the database's `plan` schema value to the requested tier (`free`, `pro`, `team`, or `scale`) for offline developer testing.
+**No.** The sandbox manual billing route (`POST /api/billing/manual`) bypasses the Razorpay processor completely. It directly mutates the database's `plan` schema value to the requested tier (`free`, `pro`, or `self-host`) for offline developer testing.
 
 ---
 

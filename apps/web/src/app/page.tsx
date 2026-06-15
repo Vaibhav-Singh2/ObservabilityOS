@@ -332,10 +332,19 @@ export default async function LandingPage() {
               </a>
             )}
             <a
+              href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 text-slate-200 font-semibold h-12 px-6 rounded-xl transition-all duration-200 cursor-pointer"
+            >
+              <Github className="w-4 h-4 text-emerald-450" />
+              Self-Host (Free)
+            </a>
+            <a
               href={process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 text-slate-200 font-semibold h-12 px-8 rounded-xl transition-all duration-200 cursor-pointer"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-850 hover:border-slate-700 text-slate-200 font-semibold h-12 px-6 rounded-xl transition-all duration-200 cursor-pointer"
             >
               <Terminal className="w-4 h-4 text-indigo-400" />
               Read Docs

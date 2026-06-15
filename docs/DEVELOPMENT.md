@@ -116,7 +116,7 @@ curl -X POST http://localhost:3000/api/ingest \
 
 Our local environment includes a developer sandbox bypass card located on the Billing Management page.
 
-- You can click any of the tier buttons (**Set to free**, **pro**, **team**, or **scale**) to instantly trigger database plan overrides.
+- You can click any of the tier buttons (**Set to free**, **pro**, or **self-host**) to instantly trigger database plan overrides.
 - This calls `POST /api/billing/manual`, bypassing external payment processor keys (Razorpay) for frictionless offline testing.
 
 ### 3. Redis Invalidation Monitoring
