@@ -189,6 +189,35 @@ function parseFrontmatter(content: string): {
   return { data: {}, content };
 }
 
+/**
+ * Resolves the file path for a doc entry.
+ *
+ * In production (Vercel), the docs app runs standalone and cannot traverse
+ * outside its own directory. A prebuild script (scripts/copy-docs.mjs) copies
+ * all markdown files into apps/docs/content/ so they are bundled with the app.
+ *
+ * In local development, the monorepo-relative path from DOCS_MAP is used directly.
+ */
+function resolveDocPath(mapItem: (typeof DOCS_MAP)[string]): string {
+  const contentDir = path.join(process.cwd(), "content");
+  const filename = path.basename(mapItem.filePath);
+
+  // First try the local content/ directory (bundled on Vercel)
+  const localPath = path.join(contentDir, filename);
+  if (fs.existsSync(localPath)) {
+    return localPath;
+  }
+
+  // Fall back to the monorepo-relative path (local development)
+  const monorepoPath = path.resolve(process.cwd(), mapItem.filePath);
+  if (fs.existsSync(monorepoPath)) {
+    return monorepoPath;
+  }
+
+  // Log and return the local path (will be caught by caller)
+  return localPath;
+}
+
 export function getDocBySlug(slugArray: string[] | undefined): DocData | null {
   const slug =
     slugArray && slugArray.length > 0 ? slugArray[0] : "introduction";
@@ -196,7 +225,7 @@ export function getDocBySlug(slugArray: string[] | undefined): DocData | null {
 
   if (!mapItem) return null;
 
-  const absolutePath = path.resolve(process.cwd(), mapItem.filePath);
+  const absolutePath = resolveDocPath(mapItem);
 
   if (!fs.existsSync(absolutePath)) {
     console.error(`[Docs Engine] File not found: ${absolutePath}`);

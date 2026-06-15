@@ -46,6 +46,9 @@ yarn-error.log*
 !.yarn/sdks
 !.yarn/versions
 
+# Generated content (monorepo docs copied for standalone deployment)
+apps/docs/content/
+
 # User private credentials and assets
 private/
 .private/
