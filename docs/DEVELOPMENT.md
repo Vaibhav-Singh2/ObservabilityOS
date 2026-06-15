@@ -74,6 +74,10 @@ The root `package.json` maps script operations across individual workspaces via 
 - `yarn lint`: Runs ESLint analysis across applications.
 - `yarn lint:fix`: Automatically fixes ESLint styling warnings.
 - `yarn check-types`: Compiles code files without writing outputs to find syntax type mismatches.
+- `yarn test`: Runs the Vitest unit, integration, database, performance, and security test suites.
+- `yarn test:coverage`: Executes Vitest tests and generates coverage reports.
+
+For a detailed walkthrough of our automated testing architecture, refer to the **[TESTING.md](TESTING.md)** guide.
 
 ---
 

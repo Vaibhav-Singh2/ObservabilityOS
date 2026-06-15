@@ -14,7 +14,9 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "check-types": "tsc --noEmit",
-    "migrate": "tsc && node dist/migrate.js"
+    "migrate": "tsc && node dist/migrate.js",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "mongoose": "^8.11.0"
