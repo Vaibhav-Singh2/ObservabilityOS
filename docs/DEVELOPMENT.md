@@ -36,10 +36,18 @@ Follow these steps to run a local development workspace:
    ```
 
 5. **Start Dev Workspace**: Start live compilation and hot-reloading for the Next.js console:
+
    ```bash
    yarn dev
    ```
+
    _Dev server binds to `http://localhost:3000`._
+
+6. **Start Chaos Simulator (Optional)**: Start the telemetry workload and failure generator:
+   ```bash
+   yarn --cwd apps/chaos-simulator dev
+   ```
+   _Simulator binds to `http://localhost:3001`._
 
 ---
 
