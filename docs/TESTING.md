@@ -141,3 +141,6 @@ We maintain a dedicated simulator application at [apps/chaos-simulator](file:///
    ```
 3. Navigate to `http://localhost:3005` and verify the sandbox seeding status.
 4. Run testing presets (e.g. **Payment Outage**, **Black Friday Traffic**, **Incident Storm**) or manual scenario engines to assert correct pipeline ingestion, Redis invalidations, and AI incident report creations.
+
+> [!NOTE]
+> By default, the seeded sandbox project runs on the `free` tier. This automatically bypasses LLM calls and writes incident summaries using local heuristic templates, consuming 0 tokens. To test the full AI incident reasoning pipeline, use the **Use Custom API Key / Endpoints** form in the header to paste the credentials of a project upgraded to a `pro` (or higher) plan.
