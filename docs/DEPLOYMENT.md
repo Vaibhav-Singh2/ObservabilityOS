@@ -160,17 +160,46 @@ After setting the root directory, Vercel will show the **Framework** section wit
 - **Install Command** — How to install dependencies. `yarn install --immutable` ensures the exact versions from `yarn.lock` are used (Yarn v4 equivalent of the old `--frozen-lockfile` flag). See the **Yarn v4 on Vercel** note below for the required companion setting.
 - **Development Command** — The command used for local development preview on Vercel (not needed for production deployment; can be left blank).
 
-> **❗ Yarn v4 on Vercel — Required Environment Variable**
+> **❗ Yarn v4 on Vercel — Choose One of Two Options**
 >
-> This project uses **Yarn v4** (`"packageManager": "yarn@4.16.0"`) but Vercel's default build image ships with **Yarn v1** (`yarn install v1.22.19`). If you use `yarn install --immutable` without Corepack, Vercel will run Yarn v1 and fail because the lockfile is in Yarn v4 format.
+> This project uses **Yarn v4** (`"packageManager": "yarn@4.16.0"`) but Vercel's default build image ships with **Yarn v1**. If you run `yarn install --immutable` without telling Vercel to use Yarn v4, it will run Yarn v1 and fail because the lockfile is in Yarn v4 format.
 >
-> **Fix:** Add the following **Environment Variable** in your Vercel project settings under _Settings → Environment Variables_:
+> Vercel offers two ways to make it use Yarn 4:
+>
+> **Option A: Enable Corepack (Recommended — no extra files)**
+>
+> Add this **Environment Variable** in Vercel project _Settings → Environment Variables_:
 >
 > | Key                            | Value |
 > | ------------------------------ | ----- |
 > | `ENABLE_EXPERIMENTAL_COREPACK` | `1`   |
 >
-> This tells Vercel to use [Corepack](https://nodejs.org/api/corepack.html), which reads the `"packageManager"` field in `package.json` and automatically downloads and uses the correct version of Yarn (v4.16.0). Without this, the install command will fail with a lockfile mismatch error.
+> Corepack reads the `"packageManager"` field in `package.json` and automatically downloads and uses the correct Yarn version (v4.16.0). This requires no changes to the repository.
+>
+> **Option B: Commit the Yarn v4 binary to `.yarn/releases/`**
+>
+> Run this command locally once to download the Yarn v4 binary and commit it:
+>
+> ```bash
+> yarn set version 4.16.0 --yarn-path
+> ```
+>
+> This creates `.yarn/releases/yarn-4.16.0.cjs` and updates `.yarnrc.yml`. Commit both files:
+>
+> ```bash
+> git add .yarn/releases/yarn-4.16.0.cjs .yarnrc.yml
+> git commit -m "chore: commit Yarn v4 binary for Vercel detection"
+> ```
+>
+> Vercel detects the `.yarn/releases/` directory and automatically uses the bundled Yarn v4 instead of the default Yarn v1.
+>
+> **Without one of these two options, the build will fail with:**
+>
+> ```
+> error Your lockfile needs to be updated, but yarn was run with `--frozen-lockfile`.
+> ```
+>
+> (or `error --immutable` with Yarn v1 trying to read a Yarn v4 lockfile).
 
 #### Step 4 — Environment Variables
 
