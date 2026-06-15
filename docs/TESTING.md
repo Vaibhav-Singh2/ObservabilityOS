@@ -139,5 +139,5 @@ We maintain a dedicated simulator application at [apps/chaos-simulator](file:///
    ```bash
    yarn --cwd apps/chaos-simulator dev
    ```
-3. Navigate to `http://localhost:3001` and verify the sandbox seeding status.
+3. Navigate to `http://localhost:3005` and verify the sandbox seeding status.
 4. Run testing presets (e.g. **Payment Outage**, **Black Friday Traffic**, **Incident Storm**) or manual scenario engines to assert correct pipeline ingestion, Redis invalidations, and AI incident report creations.

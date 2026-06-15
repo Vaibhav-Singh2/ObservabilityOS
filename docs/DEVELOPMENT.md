@@ -47,7 +47,7 @@ Follow these steps to run a local development workspace:
    ```bash
    yarn --cwd apps/chaos-simulator dev
    ```
-   _Simulator binds to `http://localhost:3001`._
+   _Simulator binds to `http://localhost:3005`._
 
 ---
 
