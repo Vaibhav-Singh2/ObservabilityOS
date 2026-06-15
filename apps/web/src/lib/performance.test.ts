@@ -65,7 +65,7 @@ describe("Performance Benchmarks", () => {
     }
 
     const start = performance.now();
-    await Log.insertMany(logs);
+    await Log.insertMany(logs, { ordered: false });
     const end = performance.now();
     const duration = end - start;
 
