@@ -38,16 +38,16 @@ Understanding the inter-package dependencies is critical for correct deployment.
 
 **How this affects deployment:**
 
-| Workspace                 | Builds To                   | Requires Pre-build      | Notes                             |
-| ------------------------- | --------------------------- | ----------------------- | --------------------------------- |
-| `@repo/typescript-config` | Shared config (no build)    | —                       | Used at compile time only         |
-| `@repo/eslint-config`     | Shared config (no build)    | —                       | devDependency                     |
-| `@repo/ai`                | `./dist/` (via `tsc`)       | `typescript-config`     | Must be built before web          |
-| `@repo/db`                | `./dist/` (via `tsc`)       | `typescript-config`     | Must be built before web          |
-| `@repo/sdk`               | `./dist/` (via `tsc`)       | `typescript-config`     | Must be built before web          |
-| `@repo/ui`                | Raw TSX (no build step)     | —                       | Next.js compiles it at build time |
-| `apps/web`                | `.next/` (via `next build`) | All `@repo/*` packages  | Primary deployment target         |
-| `apps/chaos-simulator`    | `.next/` (via `next build`) | `@repo/db`, `@repo/sdk` | Separate deployable app           |
+| Workspace                 | Builds To                   | Requires Pre-build                  | Notes                             |
+| ------------------------- | --------------------------- | ----------------------------------- | --------------------------------- |
+| `@repo/typescript-config` | Shared config (no build)    | —                                   | Used at compile time only         |
+| `@repo/eslint-config`     | Shared config (no build)    | —                                   | devDependency                     |
+| `@repo/ai`                | `./dist/` (via `tsc`)       | `typescript-config`                 | Must be built before web          |
+| `@repo/db`                | `./dist/` (via `tsc`)       | `typescript-config`                 | Must be built before web          |
+| `@observability-os/sdk`   | `./dist/` (via `tsc`)       | `typescript-config`                 | Must be built before web          |
+| `@repo/ui`                | Raw TSX (no build step)     | —                                   | Next.js compiles it at build time |
+| `apps/web`                | `.next/` (via `next build`) | All `@repo/*` packages              | Primary deployment target         |
+| `apps/chaos-simulator`    | `.next/` (via `next build`) | `@repo/db`, `@observability-os/sdk` | Separate deployable app           |
 
 The `turbo.json` file defines the build execution order:
 
@@ -250,7 +250,7 @@ Your `@repo` packages have different build requirements:
 | ------------------------- | ------------------------------- | ------------ | --------------------------------------------------------------------------- |
 | `@repo/ai`                | `./dist/index.js`               | ✅ Yes (tsc) | Turborepo builds this before web                                            |
 | `@repo/db`                | `./dist/index.js`               | ✅ Yes (tsc) | Turborepo builds this before web                                            |
-| `@repo/sdk`               | `./dist/index.js`               | ✅ Yes (tsc) | Turborepo builds this before web                                            |
+| `@observability-os/sdk`   | `./dist/index.js`               | ✅ Yes (tsc) | Turborepo builds this before web                                            |
 | `@repo/ui`                | `./src/*.tsx` (raw source)      | ❌ No        | Next.js compiles TSX directly at build time; Turborepo treats it as a no-op |
 | `@repo/typescript-config` | Config files only               | ❌ No        | Used at compile time only                                                   |
 | `@repo/eslint-config`     | Config files only               | ❌ No        | devDependency only                                                          |
