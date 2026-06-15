@@ -23,6 +23,7 @@ coverage
 out/
 build
 dist
+next-env.d.ts
 
 # TypeScript incremental build cache
 *.tsbuildinfo
