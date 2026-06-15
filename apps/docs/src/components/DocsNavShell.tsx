@@ -41,7 +41,11 @@ export default function DocsNavShell({
         />
 
         {/* Page Content Panel */}
-        {children}
+        <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain scroll-smooth">
+          <div className="mx-auto w-full max-w-5xl px-1 py-10 md:px-10 md:py-14">
+            {children}
+          </div>
+        </main>
       </div>
 
       {/* Search Modal */}

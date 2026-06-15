@@ -32,7 +32,7 @@ export default function DashboardShell({
   return (
     <div className="flex min-h-screen bg-slate-950 text-slate-100 font-sans">
       {/* Desktop Sidebar (static on desktop, hidden on mobile) */}
-      <aside className="hidden md:flex fixed inset-y-0 left-0 z-50 w-64 border-r border-slate-900 bg-slate-950 flex-col shrink-0 static h-full">
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-50 w-64 border-r border-slate-900 bg-slate-950 flex-col shrink-0 static h-screen">
         {/* Brand */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-slate-900">
           <Link
