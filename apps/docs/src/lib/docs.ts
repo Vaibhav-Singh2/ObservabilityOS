@@ -199,17 +199,23 @@ function parseFrontmatter(content: string): {
  * In local development, the monorepo-relative path from DOCS_MAP is used directly.
  */
 function resolveDocPath(mapItem: (typeof DOCS_MAP)[string]): string {
-  const contentDir = path.join(process.cwd(), "content");
+  const contentDir = path.join(
+    /*turbopackIgnore: true*/ process.cwd(),
+    "content",
+  );
   const filename = path.basename(mapItem.filePath);
 
   // First try the local content/ directory (bundled on Vercel)
-  const localPath = path.join(contentDir, filename);
+  const localPath = path.join(/*turbopackIgnore: true*/ contentDir, filename);
   if (fs.existsSync(localPath)) {
     return localPath;
   }
 
   // Fall back to the monorepo-relative path (local development)
-  const monorepoPath = path.resolve(process.cwd(), mapItem.filePath);
+  const monorepoPath = path.resolve(
+    /*turbopackIgnore: true*/ process.cwd(),
+    mapItem.filePath,
+  );
   if (fs.existsSync(monorepoPath)) {
     return monorepoPath;
   }
