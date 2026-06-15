@@ -1,0 +1,36 @@
+name: Verify & Validate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Build & Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack for Yarn v4
+        run: corepack enable
+
+      - name: Setup Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "yarn"
+
+      - name: Install Dependencies
+        run: yarn install --immutable
+
+      - name: Run TypeScript Compiler Check
+        run: yarn check-types
+
+      - name: Run Linter Checks
+        run: yarn lint
+
+      - name: Compile Workspaces and Build Applications
+        run: yarn build
