@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { POST } from "./route";
-import { connectToDatabase, Project, Service, Log } from "@repo/db";
+import { connectToDatabase, Project, Service, Log, User } from "@repo/db";
 import { hashApiKey } from "@/lib/crypto";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getRedisClient } from "@/lib/redis";
@@ -31,6 +31,7 @@ describe("Ingestion API Route", () => {
     await connectToDatabase();
 
     // Clean DB collections
+    await User.deleteMany({});
     await Project.deleteMany({});
     await Service.deleteMany({});
     await Log.deleteMany({});
@@ -39,13 +40,20 @@ describe("Ingestion API Route", () => {
     vi.mocked(checkRateLimit).mockReset();
     vi.mocked(getRedisClient).mockReset();
     vi.mocked(triggerAnomalyCheck).mockReset();
+    vi.mocked(triggerAnomalyCheck).mockResolvedValue(undefined);
 
     // Default rate limit allow
     vi.mocked(checkRateLimit).mockResolvedValue({ allowed: true, count: 1 });
 
+    const owner = await User.create({
+      githubId: "git-ingest-test",
+      username: "ingest_test_user",
+    });
+
     // Create a dummy project
     project = await Project.create({
       name: "Ingest Test Project",
+      ownerId: owner._id,
       apiKey: hashedKey,
       plan: "free",
       subscriptionStatus: "active",

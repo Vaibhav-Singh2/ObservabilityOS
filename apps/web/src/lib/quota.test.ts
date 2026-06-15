@@ -117,7 +117,7 @@ describe("Quota Enforcement Service", () => {
       get: vi.fn().mockResolvedValue("10000"),
     };
     vi.mocked(getRedisClient).mockReturnValue(mockRedis as any);
-    vi.mocked(Service.countDocuments).mockResolvedValue(2);
+    vi.mocked(Service.countDocuments).mockResolvedValue(1);
 
     const limits = await checkQuotaLimits("project-123", "free", 5000);
 

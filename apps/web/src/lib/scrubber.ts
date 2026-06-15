@@ -5,7 +5,7 @@ const CREDIT_CARD_REGEX =
   /\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9]{12})|3[47][0-9]{13})\b/g;
 const DB_URI_REGEX =
   /(mongodb(?:\+srv)?|postgres(?:ql)?|mysql|redis):\/\/[^:]+:([^@]+)@/gi;
-const AUTH_HEADER_REGEX = /(Bearer\s+|Basic\s+|Token\s+)[A-Za-z0-9-_=.]+/gi;
+const AUTH_HEADER_REGEX = /(Bearer|Basic|Token)\s+[A-Za-z0-9-_=.]{8,}/gi;
 
 // Sensitive keys in metadata to be redacted fully
 const SENSITIVE_KEYS = new Set([
@@ -26,14 +26,13 @@ const SENSITIVE_KEYS = new Set([
 export function scrubText(text: string): string {
   if (typeof text !== "string") return text;
   let scrubbed = text;
-  scrubbed = scrubbed.replace(EMAIL_REGEX, "[EMAIL_REDACTED]");
-  scrubbed = scrubbed.replace(JWT_REGEX, "[JWT_REDACTED]");
-  scrubbed = scrubbed.replace(CREDIT_CARD_REGEX, "[CARD_REDACTED]");
-  scrubbed = scrubbed.replace(AUTH_HEADER_REGEX, "$1[TOKEN_REDACTED]");
-  scrubbed = scrubbed.replace(DB_URI_REGEX, (match) => {
-    // Replace username:password with username:[PASSWORD_REDACTED]
-    return match.replace(/:([^@]+)@/, ":[PASSWORD_REDACTED]@");
+  scrubbed = scrubbed.replace(DB_URI_REGEX, (match, _scheme, password) => {
+    return match.replace(`:${password}@`, ":[PASSWORD_REDACTED]@");
   });
+  scrubbed = scrubbed.replace(JWT_REGEX, "[JWT_REDACTED]");
+  scrubbed = scrubbed.replace(EMAIL_REGEX, "[EMAIL_REDACTED]");
+  scrubbed = scrubbed.replace(CREDIT_CARD_REGEX, "[CARD_REDACTED]");
+  scrubbed = scrubbed.replace(AUTH_HEADER_REGEX, "$1 [TOKEN_REDACTED]");
   return scrubbed;
 }
 

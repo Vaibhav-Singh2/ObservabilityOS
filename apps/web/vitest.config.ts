@@ -7,7 +7,7 @@ export default defineConfig({
     globals: true,
     include: ["src/**/*.test.ts"],
     fileParallelism: false,
-    isolate: false,
+    isolate: true,
     exclude: ["**/node_modules/**", "**/dist/**", "**/.next/**", "**/.yarn/**"],
   },
   resolve: {

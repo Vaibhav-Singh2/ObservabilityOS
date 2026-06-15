@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { processAnomalyDetection } from "./anomaly";
 import {
   connectToDatabase,
+  User,
   Project,
   Service,
   Log,
@@ -33,6 +34,7 @@ describe("Anomaly Detection Integration Tests", () => {
     await connectToDatabase();
 
     // Clear collections
+    await User.deleteMany({});
     await Project.deleteMany({});
     await Service.deleteMany({});
     await Log.deleteMany({});
@@ -43,10 +45,17 @@ describe("Anomaly Detection Integration Tests", () => {
     vi.mocked(generateIncidentAnalysis).mockReset();
     vi.mocked(dispatchMultiChannelIncidentAlert).mockReset();
 
+    const owner = await User.create({
+      githubId: "git-anomaly-test",
+      username: "anomaly_test_user",
+    });
+
     // Create dummy project and service
     project = await Project.create({
       name: "Test Ops",
+      ownerId: owner._id,
       apiKey: "test-key-hash",
+      slackWebhookUrl: "https://hooks.slack.com/services/test/webhook",
       minErrorCount: 3,
       zScoreThreshold: 2.5,
     });
@@ -158,6 +167,7 @@ describe("Anomaly Detection Integration Tests", () => {
       impact: "all",
       suggestedFix: ["restart"],
       confidence: 0.9,
+      ttd: 120000,
       status: "open",
       createdAt: new Date(now - 2 * 60 * 1000),
     });
