@@ -1,6 +1,21 @@
 {
   "$schema": "https://v2-9-18.turborepo.dev/schema.json",
   "ui": "tui",
+  "globalEnv": [
+    "MONGODB_URI",
+    "REDIS_URL",
+    "JWT_SECRET",
+    "CRON_SECRET",
+    "AICREDITS_API_KEY",
+    "AICREDITS_MODEL",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "RAZORPAY_WEBHOOK_SECRET",
+    "GITHUB_CLIENT_ID",
+    "GITHUB_CLIENT_SECRET",
+    "NEXT_PUBLIC_APP_URL",
+    "NEXT_PUBLIC_DOCS_URL"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
