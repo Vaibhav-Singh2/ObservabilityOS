@@ -129,6 +129,32 @@ Where:
 - $\sigma$: Standard deviation of the baseline windows.
 - If $Z \geq$ configured threshold (default `3.0`), the system triggers an anomaly alert.
 
+## 🛡️ SRE Resilience & Self-Healing Architecture
+
+ObservabilityOS is hardened against cascading failures and third-party dependencies outages:
+
+### 1. Resilient Outbound Calls (Webhooks & AI APIs)
+
+All outbound HTTP operations are wrapped inside a stateful **Circuit Breaker** and **Timeout** framework:
+
+- **Timeouts**: Restricted to 3000ms for webhooks and 5000ms for AI provider requests to prevent thread blockages.
+- **Failovers**: SRE pipeline automatically fails over AI diagnostic generation from Anthropic Claude to OpenAI chat completions, and eventually to local mock heuristic models in case of general outages.
+- **Circuit Breakers**: Outbound Slack/Discord webhook requests will trip to `OPEN` state after 3 consecutive failures, preventing event loop blockages.
+
+### 2. Dual-Layer Caching (Redis Failover)
+
+If the Redis cluster is offline, caching mechanisms (`getCache`, `setCache`) and rate limits drop back to local in-memory fallbacks:
+
+- **In-Memory Cache**: Map-based local TTL cache.
+- **In-Memory Rate Limiting**: Local sliding-window token bucket implementation.
+
+### 3. Database Robustness
+
+The MongoDB connection layer handles spikes and downtime gracefully:
+
+- **Connection Pooling**: Configured with `maxPoolSize: 10` and `minPoolSize: 2` to manage resource limits.
+- **Graceful Shutdown**: The process intercepts `SIGINT`/`SIGTERM` to cleanly disconnect all Mongoose sockets before exiting.
+
 ---
 
 ## 🔗 Related Documents

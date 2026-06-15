@@ -2,6 +2,22 @@
 
 All notable changes to the ObservabilityOS project are documented here, grouped by release tags.
 
+## [v1.4.0] — SRE Resilience & Fault Tolerance
+
+### Added
+
+- **Resilience Core Utilities (`resilience.ts`)**: Implemented zero-dependency timeout control, exponential backoff retries with jitter, and a stateful `CircuitBreaker` pattern supporting CLOSED, OPEN, and HALF_OPEN states.
+- **Central API Health Route (`/api/health`)**: Created SRE health endpoint returning JSON health status reports for MongoDB, Redis, and configured AI services.
+- **React Client Error Boundaries**: Integrated custom error boundary overlays at root and dashboard levels, preventing page blanking and facilitating client-side retries.
+
+### Changed
+
+- **Database Hardening**: Refactored Mongoose connection module to use database connection pooling (`maxPoolSize: 10`, `minPoolSize: 2`), custom connect/socket timeouts, automatic retries, and graceful process shutdown listeners.
+- **Redis Failover Layer**: Refactored caching module to monitor connection states and transparently fall back to local in-memory Map cache layers during Redis outages.
+- **AI Integration Safeguards**: Configured provider failover chains (Anthropic ➡️ OpenAI ➡️ Mock) wrapped in timeouts and rate limit retries, along with regex JSON validation parsing.
+- **Alert Webhook Circuit Breaker**: Wrapped Slack, Discord, and Teams notification calls in circuit breakers to avoid blocking event loops.
+- **In-Memory Rate Limiting Fallback**: Modified rate limiting validation to drop to a local in-memory sliding-window token bucket when Redis is down.
+
 ---
 
 ## [v1.3.0] — Documentation Platform, Licensing & SEO Optimization

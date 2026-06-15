@@ -5,17 +5,44 @@ export interface RateLimitResult {
   count: number;
 }
 
+// In-Memory sliding-window rate limiter fallback
+const memoryRateLimits = new Map<string, number[]>();
+
+function checkMemoryRateLimit(
+  apiKey: string,
+  limit: number,
+  windowMs: number,
+): RateLimitResult {
+  const now = Date.now();
+  const key = `mem_limit:${apiKey}`;
+  const timestamps = memoryRateLimits.get(key) || [];
+
+  // Filter out expired timestamps
+  const activeTimestamps = timestamps.filter((ts) => now - ts < windowMs);
+
+  if (activeTimestamps.length >= limit) {
+    memoryRateLimits.set(key, activeTimestamps);
+    return { allowed: false, count: activeTimestamps.length };
+  }
+
+  activeTimestamps.push(now);
+  memoryRateLimits.set(key, activeTimestamps);
+  return { allowed: true, count: activeTimestamps.length };
+}
+
 export async function checkRateLimit(
   apiKey: string,
   limit = 100,
   windowMs = 60000,
 ): Promise<RateLimitResult> {
   const redis = getRedisClient();
-  if (!redis) {
+  const isRedisReady = redis && (redis as any).status === "ready";
+
+  if (!isRedisReady) {
     console.warn(
-      "Redis client not available, bypassing rate limiting (fail-open).",
+      `[RateLimit] Redis client not ready/available. Falling back to local in-memory rate limiting for API key: ${apiKey.slice(0, 8)}...`,
     );
-    return { allowed: true, count: 0 };
+    return checkMemoryRateLimit(apiKey, limit, windowMs);
   }
 
   const key = `rate_limit:ingest:${apiKey}`;
@@ -47,7 +74,10 @@ export async function checkRateLimit(
 
     return { allowed: true, count };
   } catch (err) {
-    console.warn("Error running sliding-window rate limit, fail-open:", err);
-    return { allowed: true, count: 0 };
+    console.warn(
+      `[RateLimit] Error running sliding-window rate limit on Redis. Falling back to local memory:`,
+      err,
+    );
+    return checkMemoryRateLimit(apiKey, limit, windowMs);
   }
 }

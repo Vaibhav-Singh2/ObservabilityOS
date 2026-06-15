@@ -1,4 +1,5 @@
 import { IProject } from "@repo/db";
+import { getCircuitBreaker } from "./resilience";
 
 export interface AlertPayload {
   projectId: string;
@@ -135,13 +136,30 @@ export class SlackAlertAdapter implements AlertAdapter {
       ],
     };
 
+    const breaker = getCircuitBreaker({
+      name: "SlackAlerts",
+      failureThreshold: 3,
+      recoveryTimeoutMs: 10000,
+      requestTimeoutMs: 3000,
+    });
+
     try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(slackPayload),
-      });
-      return response.ok;
+      return await breaker.execute(
+        async () => {
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(slackPayload),
+          });
+          return response.ok;
+        },
+        () => {
+          console.warn(
+            "[SlackAlertAdapter] Fallback triggered. Webhook failed or circuit open.",
+          );
+          return false;
+        },
+      );
     } catch (err) {
       console.error("[SlackAlertAdapter] Failed to dispatch alert:", err);
       return false;
@@ -199,13 +217,30 @@ export class DiscordAlertAdapter implements AlertAdapter {
       ],
     };
 
+    const breaker = getCircuitBreaker({
+      name: "DiscordAlerts",
+      failureThreshold: 3,
+      recoveryTimeoutMs: 10000,
+      requestTimeoutMs: 3000,
+    });
+
     try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(discordPayload),
-      });
-      return response.ok;
+      return await breaker.execute(
+        async () => {
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(discordPayload),
+          });
+          return response.ok;
+        },
+        () => {
+          console.warn(
+            "[DiscordAlertAdapter] Fallback triggered. Webhook failed or circuit open.",
+          );
+          return false;
+        },
+      );
     } catch (err) {
       console.error("[DiscordAlertAdapter] Failed to dispatch alert:", err);
       return false;
@@ -262,13 +297,30 @@ export class TeamsAlertAdapter implements AlertAdapter {
       ],
     };
 
+    const breaker = getCircuitBreaker({
+      name: "TeamsAlerts",
+      failureThreshold: 3,
+      recoveryTimeoutMs: 10000,
+      requestTimeoutMs: 3000,
+    });
+
     try {
-      const response = await fetch(webhookUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(teamsPayload),
-      });
-      return response.ok;
+      return await breaker.execute(
+        async () => {
+          const response = await fetch(webhookUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(teamsPayload),
+          });
+          return response.ok;
+        },
+        () => {
+          console.warn(
+            "[TeamsAlertAdapter] Fallback triggered. Webhook failed or circuit open.",
+          );
+          return false;
+        },
+      );
     } catch (err) {
       console.error("[TeamsAlertAdapter] Failed to dispatch alert:", err);
       return false;

@@ -27,6 +27,175 @@ export interface IncidentAnalysis {
   confidence: number;
 }
 
+// Stateful SRE Circuit Breaker for AI integrations to prevent cascading latency/failure
+class SimpleCircuitBreaker {
+  public readonly name: string;
+  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
+  private failures = 0;
+  private successCount = 0;
+  private lastFailureTime = 0;
+  private readonly threshold = 3;
+  private readonly cooldown = 15000; // 15 seconds
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  public canExecute(): boolean {
+    if (this.state === "OPEN") {
+      if (Date.now() - this.lastFailureTime > this.cooldown) {
+        this.state = "HALF_OPEN";
+        console.warn(
+          `[AI CircuitBreaker:${this.name}] Transitioned to HALF_OPEN. Testing connection...`,
+        );
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }
+
+  public onSuccess(): void {
+    if (this.state === "HALF_OPEN") {
+      this.successCount++;
+      if (this.successCount >= 2) {
+        this.state = "CLOSED";
+        this.failures = 0;
+        this.successCount = 0;
+        console.log(
+          `[AI CircuitBreaker:${this.name}] Transitioned to CLOSED. Health restored.`,
+        );
+      }
+    } else {
+      this.failures = 0;
+    }
+  }
+
+  public onFailure(): void {
+    this.successCount = 0;
+    this.failures++;
+    this.lastFailureTime = Date.now();
+    if (this.failures >= this.threshold || this.state === "HALF_OPEN") {
+      this.state = "OPEN";
+      console.warn(
+        `[AI CircuitBreaker:${this.name}] Transitioned to OPEN. Service is degraded.`,
+      );
+    }
+  }
+
+  public getState(): string {
+    return this.state;
+  }
+}
+
+const anthropicBreaker = new SimpleCircuitBreaker("Anthropic");
+const openaiBreaker = new SimpleCircuitBreaker("OpenAI");
+
+// Utility to execute fetch with a strict abort signal timeout
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit,
+  timeoutMs = 5000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(id);
+  }
+}
+
+// Wrapper for handling rate limit (429) backoffs and breaker failure logging
+async function callProviderWithRetry(
+  name: string,
+  breaker: SimpleCircuitBreaker,
+  makeCall: () => Promise<Response>,
+  maxRetries = 2,
+): Promise<Response> {
+  let attempt = 0;
+  while (true) {
+    try {
+      if (!breaker.canExecute()) {
+        throw new Error(`Circuit breaker for ${name} is OPEN`);
+      }
+
+      const response = await makeCall();
+
+      if (response.status === 429 || response.status >= 500) {
+        throw new Error(`HTTP Status ${response.status}`);
+      }
+
+      breaker.onSuccess();
+      return response;
+    } catch (err: any) {
+      attempt++;
+      breaker.onFailure();
+
+      if (attempt > maxRetries) {
+        throw err;
+      }
+
+      const delay = Math.pow(2, attempt) * 500 + Math.random() * 200;
+      console.warn(
+        `[AI Provider:${name}] Attempt ${attempt} failed: ${err.message}. Retrying in ${delay.toFixed(0)}ms...`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+}
+
+// Safely parse JSON with regex extraction recovery and structural schema defaults
+function parseJSONContentAndValidate(text: string): IncidentAnalysis {
+  let parsed: any;
+  try {
+    let cleanText = text.trim();
+    if (cleanText.startsWith("```json")) {
+      cleanText = cleanText.substring(7, cleanText.length - 3).trim();
+    } else if (cleanText.startsWith("```")) {
+      cleanText = cleanText.substring(3, cleanText.length - 3).trim();
+    }
+    parsed = JSON.parse(cleanText);
+  } catch (e) {
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      try {
+        parsed = JSON.parse(jsonMatch[0]);
+      } catch {
+        throw new Error("Failed to parse JSON structure from LLM content");
+      }
+    } else {
+      throw new Error("Invalid JSON structure returned by LLM");
+    }
+  }
+
+  return {
+    title:
+      typeof parsed.title === "string" && parsed.title
+        ? parsed.title
+        : "Unresolved Runtime Anomaly",
+    summary:
+      typeof parsed.summary === "string" && parsed.summary
+        ? parsed.summary
+        : "Telemetry analysis completed with baseline heuristics.",
+    rootCause:
+      typeof parsed.rootCause === "string" && parsed.rootCause
+        ? parsed.rootCause
+        : "Unknown system anomaly",
+    impact:
+      typeof parsed.impact === "string" && parsed.impact
+        ? parsed.impact
+        : "Partial system degradation",
+    suggestedFix: Array.isArray(parsed.suggestedFix)
+      ? parsed.suggestedFix.map(String)
+      : ["Inspect SRE error log streams.", "Verify system status details."],
+    confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0.7,
+  };
+}
+
 /**
  * Invokes LLM providers (Anthropic Claude, OpenAI GPT-4o-mini) depending on active environment variables.
  * Falls back to a high-quality mock heuristic analyzer if no API keys are present.
@@ -51,26 +220,34 @@ export async function generateIncidentAnalysis(
     }
   }
 
-  if (ANTHROPIC_API_KEY) {
+  // Provider Failover Chain: Anthropic -> OpenAI -> Mock
+  if (ANTHROPIC_API_KEY && anthropicBreaker.canExecute()) {
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-20241022",
-          max_tokens: 1500,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
+      const response = await callProviderWithRetry(
+        "Anthropic",
+        anthropicBreaker,
+        () =>
+          fetchWithTimeout(
+            "https://api.anthropic.com/v1/messages",
+            {
+              method: "POST",
+              headers: {
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "claude-3-5-haiku-20241022",
+                max_tokens: 1500,
+                messages: [{ role: "user", content: prompt }],
+              }),
+            },
+            5000,
+          ),
+      );
 
       if (!response.ok) {
-        throw new Error(
-          `Anthropic API returned status ${response.status}: ${await response.text()}`,
-        );
+        throw new Error(`Anthropic API returned status ${response.status}`);
       }
 
       const data = await response.json();
@@ -83,38 +260,42 @@ export async function generateIncidentAnalysis(
       );
 
       const textContent = data.content?.[0]?.text || "";
-      return parseJSONContent(textContent);
+      return parseJSONContentAndValidate(textContent);
     } catch (err) {
       console.warn(
-        "[ObservabilityOS AI] Anthropic Claude call failed, falling back...",
+        "[ObservabilityOS AI] Anthropic Claude call failed, trying OpenAI next...",
         err,
       );
     }
   }
 
-  if (OPENAI_API_KEY) {
+  if (OPENAI_API_KEY && openaiBreaker.canExecute()) {
     try {
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            max_tokens: 1500,
-            messages: [{ role: "user", content: prompt }],
-            response_format: { type: "json_object" },
-          }),
-        },
+      const response = await callProviderWithRetry(
+        "OpenAI",
+        openaiBreaker,
+        () =>
+          fetchWithTimeout(
+            "https://api.openai.com/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${OPENAI_API_KEY}`,
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                max_tokens: 1500,
+                messages: [{ role: "user", content: prompt }],
+                response_format: { type: "json_object" },
+              }),
+            },
+            5000,
+          ),
       );
 
       if (!response.ok) {
-        throw new Error(
-          `OpenAI API returned status ${response.status}: ${await response.text()}`,
-        );
+        throw new Error(`OpenAI API returned status ${response.status}`);
       }
 
       const data = await response.json();
@@ -127,10 +308,10 @@ export async function generateIncidentAnalysis(
       );
 
       const textContent = data.choices?.[0]?.message?.content || "";
-      return parseJSONContent(textContent);
+      return parseJSONContentAndValidate(textContent);
     } catch (err) {
       console.warn(
-        "[ObservabilityOS AI] OpenAI GPT call failed, falling back...",
+        "[ObservabilityOS AI] OpenAI GPT call failed, falling back to mock...",
         err,
       );
     }
@@ -138,22 +319,6 @@ export async function generateIncidentAnalysis(
 
   // Fallback to Mock Heuristics for local development testing
   return generateMockAnalysis(input);
-}
-
-function parseJSONContent(text: string): IncidentAnalysis {
-  try {
-    // Try to strip out backticks if LLM mistakenly returned them
-    let cleanText = text.trim();
-    if (cleanText.startsWith("```json")) {
-      cleanText = cleanText.substring(7, cleanText.length - 3).trim();
-    } else if (cleanText.startsWith("```")) {
-      cleanText = cleanText.substring(3, cleanText.length - 3).trim();
-    }
-    return JSON.parse(cleanText) as IncidentAnalysis;
-  } catch (e) {
-    console.error("[ObservabilityOS AI] Failed to parse JSON response:", text);
-    throw new Error("Invalid JSON structure returned by LLM");
-  }
 }
 
 function generateMockAnalysis(input: IncidentPromptInput): IncidentAnalysis {
@@ -330,6 +495,17 @@ function generateMockAnalysis(input: IncidentPromptInput): IncidentAnalysis {
   };
 }
 
+function generateMockEmailDigestSummary(input: DigestPromptInput): string {
+  if (input.incidents.length === 0) {
+    return "All services were fully operational overnight with 100% availability. No anomalies or active incidents were detected.";
+  } else {
+    const serviceNames = Array.from(
+      new Set(input.incidents.map((inc) => inc.serviceName)),
+    );
+    return `Overnight, ${input.incidents.length} SRE anomalies occurred in ${serviceNames.join(", ")}. The primary issue was related to transaction failures in payment-service caused by customer balance exceptions.`;
+  }
+}
+
 /**
  * Generates an SRE-focused plain-text morning digest summary of overnight incidents.
  * Falls back to local heuristics if no LLM API keys are present.
@@ -350,37 +526,37 @@ export async function generateEmailDigestSummary(
         "[ObservabilityOS AI] Cooldown active, falling back to mock summary:",
         cooldownErr,
       );
-      if (input.incidents.length === 0) {
-        return "All services were fully operational overnight with 100% availability. No anomalies or active incidents were detected.";
-      } else {
-        const serviceNames = Array.from(
-          new Set(input.incidents.map((inc) => inc.serviceName)),
-        );
-        return `Overnight, ${input.incidents.length} SRE anomalies occurred in ${serviceNames.join(", ")}. The primary issue was related to transaction failures in payment-service caused by customer balance exceptions.`;
-      }
+      return generateMockEmailDigestSummary(input);
     }
   }
 
-  if (ANTHROPIC_API_KEY) {
+  if (ANTHROPIC_API_KEY && anthropicBreaker.canExecute()) {
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "claude-3-5-haiku-20241022",
-          max_tokens: 300,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
+      const response = await callProviderWithRetry(
+        "Anthropic",
+        anthropicBreaker,
+        () =>
+          fetchWithTimeout(
+            "https://api.anthropic.com/v1/messages",
+            {
+              method: "POST",
+              headers: {
+                "x-api-key": ANTHROPIC_API_KEY,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "claude-3-5-haiku-20241022",
+                max_tokens: 300,
+                messages: [{ role: "user", content: prompt }],
+              }),
+            },
+            5000,
+          ),
+      );
 
       if (!response.ok) {
-        throw new Error(
-          `Anthropic API returned status ${response.status}: ${await response.text()}`,
-        );
+        throw new Error(`Anthropic API returned status ${response.status}`);
       }
 
       const data = await response.json();
@@ -396,34 +572,38 @@ export async function generateEmailDigestSummary(
       return textContent.trim();
     } catch (err) {
       console.warn(
-        "[ObservabilityOS AI] Anthropic Claude call failed, falling back...",
+        "[ObservabilityOS AI] Anthropic Claude call failed, trying OpenAI next...",
         err,
       );
     }
   }
 
-  if (OPENAI_API_KEY) {
+  if (OPENAI_API_KEY && openaiBreaker.canExecute()) {
     try {
-      const response = await fetch(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${OPENAI_API_KEY}`,
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "gpt-4o-mini",
-            max_tokens: 300,
-            messages: [{ role: "user", content: prompt }],
-          }),
-        },
+      const response = await callProviderWithRetry(
+        "OpenAI",
+        openaiBreaker,
+        () =>
+          fetchWithTimeout(
+            "https://api.openai.com/v1/chat/completions",
+            {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${OPENAI_API_KEY}`,
+                "content-type": "application/json",
+              },
+              body: JSON.stringify({
+                model: "gpt-4o-mini",
+                max_tokens: 300,
+                messages: [{ role: "user", content: prompt }],
+              }),
+            },
+            5000,
+          ),
       );
 
       if (!response.ok) {
-        throw new Error(
-          `OpenAI API returned status ${response.status}: ${await response.text()}`,
-        );
+        throw new Error(`OpenAI API returned status ${response.status}`);
       }
 
       const data = await response.json();
@@ -439,19 +619,11 @@ export async function generateEmailDigestSummary(
       return textContent.trim();
     } catch (err) {
       console.warn(
-        "[ObservabilityOS AI] OpenAI GPT call failed, falling back...",
+        "[ObservabilityOS AI] OpenAI GPT call failed, falling back to mock...",
         err,
       );
     }
   }
 
-  // Fallback to Mock Heuristics for local development testing
-  if (input.incidents.length === 0) {
-    return "All services were fully operational overnight with 100% availability. No anomalies or active incidents were detected.";
-  } else {
-    const serviceNames = Array.from(
-      new Set(input.incidents.map((inc) => inc.serviceName)),
-    );
-    return `Overnight, ${input.incidents.length} SRE anomalies occurred in ${serviceNames.join(", ")}. The primary issue was related to transaction failures in payment-service caused by customer balance exceptions.`;
-  }
+  return generateMockEmailDigestSummary(input);
 }
