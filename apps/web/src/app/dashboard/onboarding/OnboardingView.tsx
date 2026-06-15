@@ -574,8 +574,11 @@ logger.info("ObservabilityOS integration successful!", {
                         Awaiting Log Streams
                       </h4>
                       <p className="text-xs text-slate-500 max-w-xs mx-auto mt-0.5 leading-normal">
-                        Listening on port 3000 at `/api/ingest`. Send a test
-                        POST request or run your logger client...
+                        Listening at{" "}
+                        <code className="font-mono text-slate-400 text-[10px] break-all">
+                          {endpointUrl}
+                        </code>
+                        . Send a test POST request or run your logger client...
                       </p>
                     </div>
                   </div>
