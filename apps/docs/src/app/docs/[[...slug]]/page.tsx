@@ -99,6 +99,30 @@ interface PageProps {
   }>;
 }
 
+/**
+ * Pre-render all doc pages at build time into static HTML.
+ *
+ * This is critical for Vercel: instead of reading markdown files from the
+ * filesystem at request time (which fails on Vercel's serverless functions
+ * because Next.js can't trace dynamic fs.readFile calls), we read them once
+ * during the build and generate static pages. All content is embedded in the
+ * output bundle.
+ */
+export async function generateStaticParams() {
+  const { getSidebarNav } = await import("@/lib/navigation");
+  const nav = getSidebarNav();
+  const params: { slug?: string[] }[] = [];
+
+  for (const category of nav) {
+    for (const item of category.items) {
+      params.push({ slug: [item.slug] });
+    }
+  }
+  return params;
+}
+
+export const dynamic = "force-static";
+
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
