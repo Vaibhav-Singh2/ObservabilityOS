@@ -282,10 +282,21 @@ export default async function LandingPage() {
       <main className="flex-1 w-full relative z-10">
         {/* HERO SECTION */}
         <section className="max-w-7xl mx-auto px-6 pt-16 pb-24 text-center flex flex-col items-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider mb-8">
-            <Zap className="w-3.5 h-3.5" />
-            AI-Native DevOps Intelligence
+          {/* Badges */}
+          <div className="flex flex-wrap justify-center gap-3 mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold uppercase tracking-wider">
+              <Zap className="w-3.5 h-3.5" />
+              AI-Native DevOps Intelligence
+            </div>
+            <a
+              href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/15 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
+            >
+              <Github className="w-3.5 h-3.5" />
+              100% Open Source Self-Host Available
+            </a>
           </div>
 
           <h1 className="text-4xl sm:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6 max-w-4xl bg-linear-to-b from-white via-slate-100 to-slate-400 bg-clip-text text-transparent">
@@ -1063,7 +1074,7 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 w-full max-w-6xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
             {/* Free Developer Plan */}
             <div className="bg-slate-950 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between text-left hover:border-slate-850 transition-colors">
               <div>
@@ -1114,14 +1125,14 @@ export default async function LandingPage() {
               </a>
             </div>
 
-            {/* Starter Plan (Highlighted) */}
+            {/* Pro Cloud Plan (Highlighted) */}
             <div className="bg-slate-900 border-2 border-indigo-500/40 p-6 rounded-2xl flex flex-col justify-between text-left relative shadow-xl shadow-indigo-900/10">
               <div className="absolute top-0 right-5 -translate-y-1/2 bg-linear-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
                 Most Popular
               </div>
               <div>
                 <h3 className="text-base font-bold text-slate-200 flex items-center gap-1.5">
-                  Starter
+                  Pro Cloud
                   <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
                 </h3>
                 <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
@@ -1139,11 +1150,11 @@ export default async function LandingPage() {
                 <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/80 pt-5">
                   <li className="flex items-start gap-2 font-semibold text-slate-200">
                     <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Up to 5 services monitored
+                    Up to 10 services monitored
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    5GB logs / month
+                    10GB logs / month
                   </li>
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
@@ -1171,115 +1182,57 @@ export default async function LandingPage() {
               </a>
             </div>
 
-            {/* Team Plan (Coming Soon) */}
-            <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-2xl flex flex-col justify-between text-left relative opacity-70">
-              <div className="absolute top-0 left-5 -translate-y-1/2 bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-slate-700">
-                Coming Soon
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-200">Team</h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
-                  Growing engineering teams with production complexity.
-                </p>
-                <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">
-                    $99
-                  </strong>
-                  <span className="text-xs text-slate-500"> / month</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">
-                    ≈ ₹7,999 / month in India
-                  </span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-450 border-t border-slate-900/60 pt-5">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    Unlimited services
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    20GB logs / month
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    30-day log retention
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    Advanced AI root cause analysis
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    GitHub + Jira + PagerDuty integrations
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    Up to 10 team member seats
-                  </li>
-                </ul>
-              </div>
-              <button
-                disabled
-                className="mt-6 w-full py-2 rounded-lg text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-650 cursor-not-allowed"
-              >
-                Notify Me
-              </button>
-            </div>
-
-            {/* Scale Plan (Coming Soon) */}
-            <div className="bg-slate-900/60 border border-slate-800/80 p-6 rounded-2xl flex flex-col justify-between text-left relative opacity-70">
-              <div className="absolute top-0 left-5 -translate-y-1/2 bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-slate-700">
-                Coming Soon
-              </div>
+            {/* Self-Host Open Source Plan */}
+            <div className="bg-slate-950 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between text-left hover:border-slate-850 transition-colors">
               <div>
                 <h3 className="text-base font-bold text-slate-200 flex items-center gap-1.5">
-                  Scale
+                  Self-Host OSS
                   <Zap className="w-3.5 h-3.5 text-amber-400" />
                 </h3>
                 <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
-                  Series A+ companies with compliance & security needs.
+                  Run on your own infrastructure.
                 </p>
                 <div className="my-5">
                   <strong className="text-3xl font-extrabold text-white">
-                    $299
+                    Free
                   </strong>
-                  <span className="text-xs text-slate-500"> / month</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">
-                    ≈ ₹24,999 / month in India
-                  </span>
+                  <span className="text-xs text-slate-500"> / Open Source</span>
                 </div>
-                <ul className="space-y-3 text-xs text-slate-450 border-t border-slate-900/60 pt-5">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    Everything in Team
+                <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/60 pt-5">
+                  <li className="flex items-start gap-2 font-semibold text-slate-200">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    Unlimited services monitored
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    100GB logs / month
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    Unlimited logs / month
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    90-day retention
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    Unlimited data retention
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    Unlimited team members
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    Community z-score anomaly checker
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    SAML SSO + SOC2 audits
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    Self-service Docker/Compose setup
                   </li>
                   <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-slate-450 shrink-0 mt-0.5" />
-                    SLA guarantee + Dedicated Slack
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    GitHub community support
                   </li>
                 </ul>
               </div>
-              <button
-                disabled
-                className="mt-6 w-full py-2 rounded-lg text-xs font-semibold bg-slate-950 border border-slate-800 text-slate-650 cursor-not-allowed"
+              <a
+                href="https://github.com/Vaibhav-Singh2/ObservabilityOS"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-6 w-full inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold h-10 rounded-lg text-xs transition-colors cursor-pointer text-center"
               >
-                Notify Me
-              </button>
+                Deploy Now
+              </a>
             </div>
           </div>
 
