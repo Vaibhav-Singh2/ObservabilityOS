@@ -7,6 +7,15 @@ import { z } from "zod";
 import razorpay from "@/lib/razorpay";
 import { PLANS } from "@/lib/plans";
 
+interface RazorpayPlan {
+  id: string;
+  item?: {
+    name: string;
+    amount: number;
+    currency: string;
+  };
+}
+
 const checkoutSchema = z.object({
   projectId: z.string().min(1, "projectId is required"),
   gateway: z.enum(["razorpay"]), // Stripe is disabled
@@ -69,17 +78,32 @@ export async function POST(request: Request) {
       });
     }
 
-    // Resolve Razorpay Plan ID from environment variables or use fallback mock IDs
+    // Resolve Razorpay Plan ID dynamically
     let rzpPlanId = "";
-    if (planId === "starter") {
-      rzpPlanId =
-        process.env.RAZORPAY_PLAN_STARTER_ID ||
-        process.env.RAZORPAY_PLAN_ID ||
-        "plan_pro_tier";
-    } else if (planId === "team") {
-      rzpPlanId = process.env.RAZORPAY_PLAN_TEAM_ID || "plan_team_tier";
-    } else if (planId === "scale") {
-      rzpPlanId = process.env.RAZORPAY_PLAN_SCALE_ID || "plan_scale_tier";
+    const planName = `ObservabilityOS - ${planDetails.name}`;
+
+    const plansList = await razorpay.plans.all({ count: 100 });
+    const existingPlan = plansList.items?.find(
+      (p: RazorpayPlan) =>
+        p.item?.name === planName &&
+        p.item?.amount === amountInPaise &&
+        p.item?.currency === "INR",
+    );
+
+    if (existingPlan) {
+      rzpPlanId = existingPlan.id;
+    } else {
+      const newPlan = await razorpay.plans.create({
+        period: "monthly",
+        interval: 1,
+        item: {
+          name: planName,
+          amount: amountInPaise,
+          currency: "INR",
+          description: `${planDetails.name} Plan Subscription`,
+        },
+      });
+      rzpPlanId = newPlan.id;
     }
 
     // Create subscription in Razorpay
