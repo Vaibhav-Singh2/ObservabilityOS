@@ -115,7 +115,7 @@ export default function ChaosSimulatorPage() {
       text: string;
     }>
   >([]);
-  const terminalEndRef = useRef<HTMLDivElement>(null);
+  const terminalContainerRef = useRef<HTMLDivElement>(null);
 
   // 1. Initial configuration setup on mount
   useEffect(() => {
@@ -211,9 +211,12 @@ export default function ChaosSimulatorPage() {
     });
   }, []);
 
-  // Auto scroll terminal to bottom
+  // Auto scroll terminal to bottom (contained within container)
   useEffect(() => {
-    terminalEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (terminalContainerRef.current) {
+      terminalContainerRef.current.scrollTop =
+        terminalContainerRef.current.scrollHeight;
+    }
   }, [terminalLogs]);
 
   const addTerminalLog = (
@@ -1612,7 +1615,10 @@ export default function ChaosSimulatorPage() {
             </div>
 
             {/* Terminal logs list */}
-            <div className="p-4 h-[358px] overflow-y-auto space-y-2 leading-relaxed selection:bg-indigo-900/40">
+            <div
+              ref={terminalContainerRef}
+              className="p-4 h-[358px] overflow-y-auto space-y-2 leading-relaxed selection:bg-indigo-900/40"
+            >
               {terminalLogs.length === 0 ? (
                 <div className="text-slate-600 italic flex items-center justify-center h-full">
                   Terminal ready. Trigger scenarios or presets to output
@@ -1654,7 +1660,6 @@ export default function ChaosSimulatorPage() {
                   </div>
                 ))
               )}
-              <div ref={terminalEndRef} />
             </div>
           </div>
         </div>
