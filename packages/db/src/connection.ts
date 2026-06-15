@@ -62,6 +62,11 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
 
   registerGracefulShutdown();
 
+  if (mongoose.connection.readyState === 0) {
+    cached.conn = null;
+    cached.promise = null;
+  }
+
   if (cached.conn) {
     return cached.conn;
   }

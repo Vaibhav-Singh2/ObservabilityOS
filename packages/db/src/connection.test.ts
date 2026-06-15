@@ -40,6 +40,7 @@ describe("Database Connection and Models", () => {
   });
 
   it("should create user and enforce validations", async () => {
+    await User.init();
     const user = await User.create({
       githubId: "git-123456",
       username: "testuser",
