@@ -1,7 +1,5 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project } from "@repo/db";
-import jwt from "jsonwebtoken";
+import { getAuthSession } from "@/lib/auth-cache";
 import SettingsView from "./SettingsView";
 
 interface PageProps {
@@ -9,35 +7,8 @@ interface PageProps {
 }
 
 export default async function SettingsPage({ searchParams }: PageProps) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-
-  if (!token) {
-    redirect("/");
-  }
-
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    redirect("/");
-  }
-
-  let decoded: { userId: string };
-  try {
-    decoded = jwt.verify(token, jwtSecret) as { userId: string };
-  } catch {
-    redirect("/");
-  }
-
-  await connectToDatabase();
-  const user = await User.findById(decoded.userId);
-  if (!user) {
-    redirect("/");
-  }
-
+  const { user, projects } = await getAuthSession();
   const resolvedSearchParams = await searchParams;
-  const projects = await Project.find({ ownerId: user._id }).sort({
-    createdAt: -1,
-  });
 
   if (projects.length === 0) {
     redirect("/dashboard");

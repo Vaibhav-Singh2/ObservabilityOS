@@ -27,6 +27,7 @@ import jwt from "jsonwebtoken";
 import SDKSwitcher from "@/components/SDKSwitcher";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import FAQAccordion from "@/components/FAQAccordion";
+import BackToTop from "@/components/BackToTop";
 
 export const metadata = {
   title:
@@ -1610,6 +1611,7 @@ export default async function LandingPage() {
           </div>
         </div>
       </footer>
+      <BackToTop />
     </div>
   );
 }
