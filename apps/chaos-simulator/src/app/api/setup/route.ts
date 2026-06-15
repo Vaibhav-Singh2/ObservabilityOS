@@ -33,17 +33,20 @@ export async function GET() {
         ownerId: user._id,
         name: "Chaos Simulator Sandbox",
         apiKey: hashedKey,
-        plan: "pro", // Use pro tier so we get full AI analysis & larger quotas
-        subscriptionStatus: "active",
+        plan: "free", // Default to free tier so we bypass the LLM and cost nothing
+        subscriptionStatus: "none",
         billingProvider: "none",
       });
       console.log(
         `[Chaos Setup] Created simulator project: ${project.name} (${project._id})`,
       );
-    } else if (project.name !== "Chaos Simulator Sandbox") {
+    } else if (
+      project.name !== "Chaos Simulator Sandbox" ||
+      project.plan !== "free"
+    ) {
       project.name = "Chaos Simulator Sandbox";
-      project.plan = "pro";
-      project.subscriptionStatus = "active";
+      project.plan = "free";
+      project.subscriptionStatus = "none";
       await project.save();
     }
 
