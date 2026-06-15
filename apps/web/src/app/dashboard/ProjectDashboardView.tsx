@@ -286,7 +286,7 @@ export default function ProjectDashboardView({
 
               <TabsContent value="basic" className="mt-0">
                 <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
-                  {`import { Logger } from "@repo/sdk";
+                  {`import { Logger } from "@observability-os/sdk";
 
 const logger = new Logger({
   apiKey: "${project.apiKey.slice(0, 10)}...",
@@ -301,7 +301,7 @@ logger.info("Service started successfully");`}
 
               <TabsContent value="multi" className="mt-0">
                 <pre className="bg-slate-950 border border-slate-800 rounded-lg p-3 text-[10px] font-mono text-indigo-300 whitespace-pre-wrap break-all mb-4 select-all">
-                  {`import { Logger } from "@repo/sdk";
+                  {`import { Logger } from "@observability-os/sdk";
 
 const logger = new Logger({
   apiKey: "${project.apiKey.slice(0, 10)}...",
@@ -346,7 +346,7 @@ curl -X POST "${endpointUrl.replace("/api/ingest", "/api/webhooks/github")}" \\
               <code className="font-mono text-slate-400">
                 {sdkTab === "deploy"
                   ? "POST /api/webhooks/github"
-                  : "yarn add @repo/sdk"}
+                  : "yarn add @observability-os/sdk"}
               </code>
               .
             </span>

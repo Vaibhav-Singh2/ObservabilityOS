@@ -1,4 +1,4 @@
-import { Logger } from "@repo/sdk";
+import { Logger } from "@observability-os/sdk";
 
 export interface TelemetryResponse {
   timestamp: string;

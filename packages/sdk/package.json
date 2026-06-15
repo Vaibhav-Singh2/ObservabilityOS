@@ -1,5 +1,5 @@
 {
-  "name": "@repo/sdk",
+  "name": "@observability-os/sdk",
   "version": "0.0.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

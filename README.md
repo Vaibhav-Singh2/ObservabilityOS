@@ -99,10 +99,10 @@ Open `http://localhost:3000` to access the ObservabilityOS console.
 
 ### Node.js / TypeScript SDK
 
-Install the `@repo/sdk` package and integrate it in one line:
+Install the `@observability-os/sdk` package and integrate it in one line:
 
 ```typescript
-import { Logger } from "@repo/sdk";
+import { Logger } from "@observability-os/sdk";
 
 const logger = new Logger({
   apiKey: "your_project_api_key",

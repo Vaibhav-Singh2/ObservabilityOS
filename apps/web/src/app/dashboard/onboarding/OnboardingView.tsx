@@ -101,8 +101,8 @@ export default function OnboardingView({ project }: OnboardingViewProps) {
       ? `${window.location.protocol}//${window.location.host}/api/ingest`
       : `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/api/ingest`;
 
-  const installCmd = "npm install @repo/sdk";
-  const sdkIntegrationSnippet = `import { Logger } from "@repo/sdk";
+  const installCmd = "npm install @observability-os/sdk";
+  const sdkIntegrationSnippet = `import { Logger } from "@observability-os/sdk";
 
 const logger = new Logger({
   apiKey: "${displayApiKey}",
