@@ -1,0 +1,48 @@
+title = "ObservabilityOS Gitleaks Config"
+
+[allowlist]
+description = "Test fixture keys, placeholder values, and non-secret strings"
+paths = [
+  # Test files with fixture API keys
+  "apps/web/src/lib/crypto.test.ts",
+  "apps/web/src/lib/scrubber.test.ts",
+  "apps/web/src/lib/performance.test.ts",
+  "apps/web/src/app/api/ingest/route.test.ts",
+  "apps/web/src/app/api/projects/projects.test.ts",
+  "apps/web/src/lib/security.test.ts",
+  # Documentation with placeholder values
+  "docs/DEVELOPMENT.md",
+  "README.md",
+  # Scratch test scripts with fake keys
+  "scratch/",
+]
+
+regexes = [
+  # Test/placeholder API key patterns
+  "obs_sk_test_api_key_\\d+",
+  "obs_sk_\\d+",
+  "obs_sk_slo_test_key_\\d+",
+  "obs_sk_billing_test_",
+  "obs_sk_TEST_KEY_DO_NOT_USE",
+  "obs_sk_TEST_KEY",
+  "obs_sk_finance_a",
+  "obs_sk_ecommerce_b",
+  "obs_sk_wrong_key",
+  # Placeholder values in documentation
+  "your_project_api_key",
+  "your_sandbox_api_key",
+  "your_project_secret_api_key_here",
+  "your_github_client_id",
+  "your_github_client_secret",
+  "your_jwt_secret_token_here",
+  "dev_cron_secret_123",
+  # Dummy JWT tokens used for testing scrubber
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.dummy.signature",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c",
+  # Standard well-known test tokens
+  "sec_999999",
+  # Mock Razorpay test keys
+  "rzp_test_mock",
+  # Dev-only fallback secrets
+  "dev-jwt-secret-for-testing-only",
+]
