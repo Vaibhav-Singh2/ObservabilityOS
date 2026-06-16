@@ -18,6 +18,9 @@ coverage
 # Vercel
 .vercel
 
+# npm lockfile (not used with Yarn)
+package-lock.json
+
 # Build Outputs
 .next/
 out/

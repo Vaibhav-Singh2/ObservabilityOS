@@ -40,6 +40,10 @@
     "check-types": {
       "dependsOn": ["^build", "^check-types"]
     },
+    "vulnerability-check": {
+      "dependsOn": ["^vulnerability-check"],
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true
