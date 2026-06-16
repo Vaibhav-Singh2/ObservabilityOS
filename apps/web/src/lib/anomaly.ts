@@ -12,7 +12,7 @@ import { Types } from "mongoose";
 import { dispatchMultiChannelIncidentAlert } from "./alerts";
 import { delCache } from "./redis";
 
-import type { Queue } from "bullmq";
+import type { Queue, IRedisClient } from "bullmq";
 
 // Setup queue and worker dependencies dynamically to avoid crash if ioredis fails to connect.
 let queue: Queue | null = null;
@@ -43,7 +43,9 @@ async function initQueue() {
       } catch {
         connection = new IORedis(REDIS_URL, { maxRetriesPerRequest: null });
       }
-      queue = new Queue("anomaly-detection-queue", { connection });
+      queue = new Queue("anomaly-detection-queue", {
+        connection: connection as unknown as IRedisClient,
+      });
 
       new Worker(
         "anomaly-detection-queue",
@@ -56,7 +58,7 @@ async function initQueue() {
             throw err;
           }
         },
-        { connection },
+        { connection: connection as unknown as IRedisClient },
       );
       console.log(
         "[Anomaly Queue] BullMQ Queue and Worker initialized successfully.",
