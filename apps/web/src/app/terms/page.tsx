@@ -8,10 +8,31 @@ import {
 } from "lucide-react";
 import type { Metadata } from "next";
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Terms of Service | ObservabilityOS",
   description:
     "Read our terms of service: Licensing options, user responsibilities, SLA terms, and billing guidelines.",
+  alternates: {
+    canonical: `${baseUrl}/terms`,
+  },
+  openGraph: {
+    title: "Terms of Service | ObservabilityOS",
+    description:
+      "Read our terms of service: Licensing options, user responsibilities, SLA terms, and billing guidelines.",
+    url: `${baseUrl}/terms`,
+    siteName: "ObservabilityOS",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms of Service | ObservabilityOS",
+    description:
+      "Read our terms of service: Licensing options, user responsibilities, SLA terms, and billing guidelines.",
+    creator: "@observabilityos",
+  },
 };
 
 export default function TermsPage() {
@@ -57,6 +78,24 @@ export default function TermsPage() {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-6 py-16">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "Terms of Service | ObservabilityOS",
+              description:
+                "Read our terms of service: Licensing options, user responsibilities, SLA terms, and billing guidelines.",
+              inLanguage: "en-US",
+              isPartOf: {
+                "@type": "WebSite",
+                name: "ObservabilityOS",
+                url: baseUrl,
+              },
+            }),
+          }}
+        />
         <section className="mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-6 font-mono">
             Legal Terms

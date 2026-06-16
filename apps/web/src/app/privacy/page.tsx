@@ -2,10 +2,31 @@ import Link from "next/link";
 import { Activity, Github, Shield, Lock, Eye } from "lucide-react";
 import type { Metadata } from "next";
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 export const metadata: Metadata = {
   title: "Privacy Policy | ObservabilityOS",
   description:
     "Read our privacy commitment: Local telemetry scrubbing, GDPR/HIPAA compliance patterns, and secure incident data ingestion policies.",
+  alternates: {
+    canonical: `${baseUrl}/privacy`,
+  },
+  openGraph: {
+    title: "Privacy Policy | ObservabilityOS",
+    description:
+      "Read our privacy commitment: Local telemetry scrubbing, GDPR/HIPAA compliance patterns, and secure incident data ingestion policies.",
+    url: `${baseUrl}/privacy`,
+    siteName: "ObservabilityOS",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy | ObservabilityOS",
+    description:
+      "Read our privacy commitment: Local telemetry scrubbing, GDPR/HIPAA compliance patterns, and secure incident data ingestion policies.",
+    creator: "@observabilityos",
+  },
 };
 
 export default function PrivacyPage() {
@@ -51,6 +72,24 @@ export default function PrivacyPage() {
 
       {/* Main Content */}
       <main className="flex-1 w-full max-w-4xl mx-auto px-6 py-16">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "Privacy Policy | ObservabilityOS",
+              description:
+                "Read our privacy commitment: Local telemetry scrubbing, GDPR/HIPAA compliance patterns, and secure incident data ingestion policies.",
+              inLanguage: "en-US",
+              isPartOf: {
+                "@type": "WebSite",
+                name: "ObservabilityOS",
+                url: baseUrl,
+              },
+            }),
+          }}
+        />
         <section className="mb-12">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-bold uppercase tracking-wider mb-6 font-mono">
             Security & Trust

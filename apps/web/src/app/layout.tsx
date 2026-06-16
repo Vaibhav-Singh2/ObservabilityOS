@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   ],
   alternates: {
     canonical: baseUrl,
-    languages: { "en-US": baseUrl },
+    languages: { "x-default": baseUrl, "en-US": baseUrl },
   },
   openGraph: {
     title:

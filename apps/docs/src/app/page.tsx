@@ -216,9 +216,9 @@ export default function Page() {
                       <Icon className="w-5 h-5" />
                     </div>
                     <div className="space-y-1">
-                      <h3 className="font-bold text-lg text-slate-100 group-hover:text-white transition-colors">
+                      <h2 className="font-bold text-lg text-slate-100 group-hover:text-white transition-colors">
                         {cat.title}
-                      </h3>
+                      </h2>
                       <p className="text-slate-400 text-xs leading-relaxed font-medium">
                         {cat.description}
                       </p>
@@ -253,9 +253,9 @@ export default function Page() {
             <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-indigo-500/5 blur-[50px] rounded-full pointer-events-none" />
 
             <div className="space-y-2 text-center sm:text-left max-w-xl">
-              <h3 className="font-bold text-lg text-slate-100">
+              <h2 className="font-bold text-lg text-slate-100">
                 Looking for a quick integration?
-              </h3>
+              </h2>
               <p className="text-slate-400 text-xs leading-relaxed font-medium">
                 Jump straight into our step-by-step Quick Start guide.
                 Initialize the server workspace, connect your logging agents,
