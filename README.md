@@ -7,7 +7,16 @@
 
 ObservabilityOS is an **AI-native DevOps intelligence and log analytics platform** built for high-performance engineering teams. Instead of just displaying raw logs and complex dashboard grids, ObservabilityOS ingests structured logs, automatically redacts sensitive PII locally, calculates standard-deviation anomaly Z-Scores in real-time, and generates structured root-cause post-mortems using GPT-4 and Claude.
 
-Datadog shows you everything and explains nothing. **ObservabilityOS shows you what matters and explains it in plain English.**
+---
+
+### ⏱️ The 30-Second Pitch
+
+- **What it is**: An AI-native telemetry analytics and automated incident response platform.
+- **Who it is for**: DevOps, SRE, and full-stack engineering teams seeking to minimize downtime.
+- **Why it matters**: Reduces pager noise by 98% through dynamic anomaly baseline analysis and drops MTTR from hours to seconds by correlating deployment commits with telemetry spikes.
+- **Why it is unique**: Combines real-time statistical mathematical models (Z-Scores) with a self-healing multi-provider LLM diagnostic fallback gateway (AICredits, Claude, GPT).
+
+> Datadog shows you everything and explains nothing. **ObservabilityOS shows you what matters and explains it in plain English.**
 
 ---
 
@@ -15,11 +24,11 @@ Datadog shows you everything and explains nothing. **ObservabilityOS shows you w
 
 - **Local PII Redaction (`scrubber.ts`)**: Automatically scrubs passwords, credentials, credit cards, JWTs, and Auth headers from metadata and text fields _before_ telemetry leaves your app.
 - **Rolling Z-Score Anomaly Engine (`anomaly.ts`)**: Calculates rolling standard deviations on error rates, latency, and CPU usage. Adapts to weekly/daily traffic cycles to reduce pager noise by 98%.
-- **GitHub Deployment Correlation**: Correlates deploy events (branches, commit SHAs, authors) with metric and regression spikes within a 30-minute window.
 - **AI Incident Diagnostics**: Processes raw logs and deployment diffs to compile narrative post-mortems explaining "What happened", "Why", and "Suggested hotfix" in under 10 seconds.
+- **Outbound Failover & Circuit Breakers**: Standardizes outgoing provider calls with stateful circuit breakers to prevent thread blocks, falling back dynamically across providers.
+- **Lucene Full-text Log Search**: Full-text log query console powered by a Lucene-based MongoDB Atlas Search index with a regex fallback for local development.
+- **Chaos & Load Simulator**: A built-in traffic and failure generator app to simulate Black Friday spikes, database outages, or security breaches and verify system telemetry.
 - **Multi-channel Alerts**: Delivers rich, markdown-styled incident alerts directly to Slack, Discord, and Microsoft Teams.
-- **Full-text Log Search**: Full-text log query console powered by a Lucene-based MongoDB Atlas Search index with a regex fallback for local development.
-- **Redis Aggregates Cache**: Speeds up dashboard aggregates and microservices registries through a high-performance Redis cache layer.
 
 ---
 
@@ -29,10 +38,12 @@ ObservabilityOS is structured as a **Turborepo monorepo workspace**:
 
 ```text
 ├── apps
-│   └── web                   # Next.js 16 Web Dashboard, APIs & Rate Limiters
+│   ├── web                   # Next.js 16 Web Dashboard, APIs & Rate Limiters
+│   ├── docs                  # Next.js Static Documentation Portal
+│   └── chaos-simulator       # Incident, failure, and traffic workload generator UI
 ├── packages
-│   ├── db                    # Shared Mongoose/MongoDB connection & schemas
-│   ├── ai                    # Prompt builders & narrative LLM wrappers
+│   ├── db                    # Shared Mongoose/MongoDB connection, schemas & cache fallbacks
+│   ├── ai                    # Prompt builders, failover models, and LLM wrappers
 │   ├── sdk                   # Zero-dependency TypeScript logger SDK (MIT Licensed)
 │   ├── typescript-config     # Shared base TSConfig options
 │   └── ui                    # Standardized Radix-based shadcn/ui components
@@ -134,9 +145,11 @@ For in-depth guides and technical details, see the files in the `docs/` director
 - 🚀 **[DEPLOYMENT.md](docs/DEPLOYMENT.md)**: Production configurations for Vercel, Railway, and Docker environments.
 - 🛡️ **[SECURITY.md](docs/SECURITY.md)**: OAuth scopes, rate-limiting, and recursive PII scrubbing algorithms.
 - 🛠️ **[DEVELOPMENT.md](docs/DEVELOPMENT.md)**: Codebase rules, testing framework, workspace tools, and testing commands.
-- 🤝 **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**: PR workflows, linting, and commit naming conventions.
+- 🧪 **[TESTING.md](docs/TESTING.md)**: Details on unit, contract integration, performance benchmarks, and Playwright E2E tests.
+- 🩹 **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**: Solutions to database timeouts, Redis connection refusals, and port conflicts.
 - ❓ **[FAQ.md](docs/FAQ.md)**: Solutions to common developer questions.
-- 🩹 **[TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)**: Error codes, database connection timeouts, and memory buffer recoveries.
+- 🤝 **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**: PR workflows, linting, and commit naming conventions.
+- 💼 **[RECRUITER_GUIDE.md](docs/RECRUITER_GUIDE.md)**: Hiring roadmap detailing system design, complexity highlights, and skills.
 - 🗺️ **[ROADMAP.md](docs/ROADMAP.md)**: Planned milestones.
 - 📜 **[CHANGELOG.md](docs/CHANGELOG.md)**: Release logs.
 

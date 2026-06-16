@@ -36,6 +36,7 @@ const FILES_TO_COPY = [
   { source: "docs/SECURITY.md", dest: "SECURITY.md" },
   { source: "docs/TESTING.md", dest: "TESTING.md" },
   { source: "docs/TROUBLESHOOTING.md", dest: "TROUBLESHOOTING.md" },
+  { source: "docs/RECRUITER_GUIDE.md", dest: "RECRUITER_GUIDE.md" },
 ];
 
 // Create content directory if it doesn't exist

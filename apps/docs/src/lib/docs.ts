@@ -87,6 +87,13 @@ const DOCS_MAP: Record<
     defaultDesc:
       "Common errors like date formats hydration mismatches and database timeouts.",
   },
+  testing: {
+    filePath: "../../docs/TESTING.md",
+    category: "Reference Guides",
+    defaultTitle: "Automated Testing",
+    defaultDesc:
+      "Overview of unit, integration, and Playwright end-to-end verification suites.",
+  },
   faq: {
     filePath: "../../docs/FAQ.md",
     category: "Reference Guides",
@@ -100,6 +107,13 @@ const DOCS_MAP: Record<
     defaultTitle: "Contributing Guide",
     defaultDesc:
       "Git branching workflows, Conventional Commits, and code review criteria.",
+  },
+  "recruiter-guide": {
+    filePath: "../../docs/RECRUITER_GUIDE.md",
+    category: "Community & Releases",
+    defaultTitle: "Recruiter & Portfolio Guide",
+    defaultDesc:
+      "A walkthrough of system architecture challenges and developer skills shown in the project.",
   },
   roadmap: {
     filePath: "../../docs/ROADMAP.md",

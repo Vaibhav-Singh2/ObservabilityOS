@@ -88,7 +88,7 @@ npx playwright test
 
 ## ⚡ Memory & Performance Optimization
 
-To prevent V8 worker memory exhaustion (common in monorepos resolving massive workspace symlinks), the root [vitest.config.ts](file:///d:/Projects/ObservabilityOS/vitest.config.ts) is configured to disable file parallelism and process isolation for tests:
+To prevent V8 worker memory exhaustion (common in monorepos resolving massive workspace symlinks), the root [vitest.config.ts](../vitest.config.ts) is configured to disable file parallelism and process isolation for tests:
 
 ```typescript
 // vitest.config.ts
@@ -116,7 +116,7 @@ $env:NODE_OPTIONS="--max-old-space-size=4096"; npx vitest run
 
 ## 🤖 CI/CD Integration
 
-All pull requests and commits to the `main` branch are automatically validated in GitHub Actions via [.github/workflows/ci.yml](file:///d:/Projects/ObservabilityOS/.github/workflows/ci.yml).
+All pull requests and commits to the `main` branch are automatically validated in GitHub Actions via [.github/workflows/ci.yml](../.github/workflows/ci.yml).
 
 The pipeline:
 
@@ -130,7 +130,7 @@ The pipeline:
 
 ## ⚡ Chaos and Load Testing (Chaos Simulator)
 
-We maintain a dedicated simulator application at [apps/chaos-simulator](file:///d:/Projects/ObservabilityOS/apps/chaos-simulator) to validate system resilience, statistical anomaly detection, and AI incident generation.
+We maintain a dedicated simulator application at [apps/chaos-simulator](../apps/chaos-simulator) to validate system resilience, statistical anomaly detection, and AI incident generation.
 
 ### Triggering Outages & Incidents
 

@@ -8,7 +8,7 @@ Get up and running with a local instance of **ObservabilityOS** and send your fi
 
 ### Step 1: Boot Local Infrastructure
 
-ObservabilityOS requires **MongoDB** (data storage) and **Redis** (caching and rate limiting). Spin them up instantly using the pre-configured [docker-compose.yml](file:///d:/Projects/ObservabilityOS/docker-compose.yml):
+ObservabilityOS requires **MongoDB** (data storage) and **Redis** (caching and rate limiting). Spin them up instantly using the pre-configured [docker-compose.yml](../docker-compose.yml):
 
 ```bash
 docker-compose up -d

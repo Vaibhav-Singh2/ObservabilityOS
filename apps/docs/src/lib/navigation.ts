@@ -54,6 +54,7 @@ const SIDEBAR_NAV: SidebarCategory[] = [
       { title: "API Specification", slug: "api" },
       { title: "Production Deployment", slug: "deployment" },
       { title: "Troubleshooting", slug: "troubleshooting" },
+      { title: "Automated Testing", slug: "testing" },
       { title: "Technical FAQ", slug: "faq" },
     ],
   },
@@ -61,6 +62,7 @@ const SIDEBAR_NAV: SidebarCategory[] = [
     title: "Community & Releases",
     items: [
       { title: "Contributing Guide", slug: "contributing" },
+      { title: "Recruiter & Portfolio", slug: "recruiter-guide" },
       { title: "Product Roadmap", slug: "roadmap" },
       { title: "Changelog", slug: "changelog" },
       { title: "Source License", slug: "license" },

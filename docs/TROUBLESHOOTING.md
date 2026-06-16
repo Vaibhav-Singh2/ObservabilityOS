@@ -111,6 +111,42 @@ The Winston SDK holds logs in an in-memory buffer before flushing them in batche
 
 ---
 
+## 🐋 5. Docker Port Conflicts (27017 or 6379 Already in Use)
+
+### Symptom:
+
+Running `docker-compose up -d` prints errors about port bind failures:
+
+```text
+Error response from daemon: Ports are not available: exposing port TCP 0.0.0.0:27017 -> 0.0.0.0:0: listen tcp 0.0.0.0:27017: bind: address already in use
+```
+
+### Cause:
+
+You have a native installation of MongoDB or Redis running directly on your host machine as a background service, blocking the Docker daemon from mapping the container ports.
+
+### Fix:
+
+1. **Identify and stop the host service**:
+   - **Windows**: Open Services (`services.msc`), search for "MongoDB Server" or "Redis", click Stop, and disable automatic startup. Alternatively, run in admin PowerShell:
+     ```powershell
+     Stop-Service -Name "MongoDB" -ErrorAction SilentlyContinue
+     ```
+   - **macOS**: Stop brew service:
+     ```bash
+     brew services stop mongodb-community
+     brew services stop redis
+     ```
+2. **Re-run the containers**:
+   ```bash
+   docker-compose down
+   docker-compose up -d
+   ```
+3. **Change mapping port (alternative)**:
+   If you must run the host service, modify your local `docker-compose.yml` to map to alternative ports (e.g. `27018:27017` and `6380:6379`) and adjust `MONGODB_URI` / `REDIS_URL` in `apps/web/.env` accordingly.
+
+---
+
 ## 🔗 Related Documents
 
 - ⏱️ **[QUICKSTART.md](QUICKSTART.md)**: Boot local instances.

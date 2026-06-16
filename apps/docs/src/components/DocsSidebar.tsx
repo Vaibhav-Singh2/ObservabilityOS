@@ -17,6 +17,8 @@ import {
   AlertTriangle,
   Milestone,
   History,
+  CheckSquare,
+  UserCheck,
 } from "lucide-react";
 
 interface DocsSidebarProps {
@@ -40,8 +42,10 @@ const SLUG_ICONS: Record<
   api: Terminal,
   deployment: Rocket,
   troubleshooting: AlertTriangle,
+  testing: CheckSquare,
   faq: HelpCircle,
   contributing: Wrench,
+  "recruiter-guide": UserCheck,
   roadmap: Milestone,
   changelog: History,
 };

@@ -53,7 +53,7 @@ Follow these steps to run a local development workspace:
 
 ## 🧪 Running Validation & Verification Scripts
 
-We maintain week-by-week verification scripts in the [scratch/](file:///d:/Projects/ObservabilityOS/scratch/) directory to test database connections, full-text searches, and cache invalidation.
+We maintain week-by-week verification scripts in the [scratch/](../scratch/) directory to test database connections, full-text searches, and cache invalidation.
 
 ```bash
 # Run week 9 tests (Saved queries, CSV exports, Cascade microservice deletion, Audit logs)
@@ -128,3 +128,20 @@ docker exec -it <redis-container-id> redis-cli flushall
 ```
 
 The codebase invalidates Redis cache keys dynamically upon new log ingestion anomalies or microservice state updates (refer to the cache schema details in **[DATABASE.md](DATABASE.md)**).
+
+---
+
+## ⚡ Chaos Simulator & Local Load Injection
+
+To test SRE resilience features (such as cache invalidations, circuit breakers, rate-limiting, and AI diagnostic failovers), you can run the Chaos Simulator:
+
+```bash
+yarn --cwd apps/chaos-simulator dev
+```
+
+The simulator binds to `http://localhost:3005`. It offers a dashboard UI containing several outage simulation presets:
+
+1. **Stripe Timeout Outage**: Seeds logs with high latency and database network failures. Tests if the Z-Score engine detects standard-deviation anomaly spikes and compiles Claude/Gemini summaries.
+2. **Black Friday Peak Traffic**: Injects sudden spikes in log ingestion rates, verifying if the Redis sliding-window rate limiters trigger `429 Too Many Requests` correctly.
+3. **AI Provider Failure Loop**: Tripps the outbound LLM circuit breaker (`SimpleCircuitBreaker` inside `packages/ai`) to verify that the system gracefully falls back to direct OpenAI, direct Anthropic, or local heuristics.
+4. **Plan Limit Bypasses**: Simulates logging under `free` plan tiers to assert that live API credits are not consumed and local mock summaries are loaded instead.

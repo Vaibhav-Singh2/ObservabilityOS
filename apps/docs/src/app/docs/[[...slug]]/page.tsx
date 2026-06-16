@@ -62,7 +62,15 @@ renderer.link = function (arg1: unknown, arg2?: unknown, arg3?: unknown) {
     !href.startsWith("#") &&
     !href.startsWith("mailto:")
   ) {
-    const cleanHref = href.replace(/\\/g, "/");
+    let cleanHref = href.replace(/\\/g, "/");
+    if (cleanHref.startsWith("file:///")) {
+      const parts = cleanHref.split("/ObservabilityOS/");
+      if (parts.length > 1) {
+        cleanHref = parts[1];
+      } else {
+        cleanHref = cleanHref.replace(/^file:\/\/\/(?:[a-zA-Z]:\/)?/, "");
+      }
+    }
 
     if (cleanHref.endsWith("packages/sdk/LICENSE")) {
       resolvedHref =
