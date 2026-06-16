@@ -53,3 +53,6 @@ apps/docs/content/
 private/
 .private/
 
+# Internal business strategy, pricing, and roadmap
+context/
+

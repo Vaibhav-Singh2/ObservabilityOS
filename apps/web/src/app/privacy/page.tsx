@@ -167,10 +167,10 @@ export default function PrivacyPage() {
             </p>
             <p className="font-mono text-indigo-400">
               <a
-                href="mailto:vaibhav.fullstack.dev@gmail.com"
+                href="mailto:privacy@observabilityos.com"
                 className="hover:underline"
               >
-                vaibhav.fullstack.dev@gmail.com
+                privacy@observabilityos.com
               </a>
             </p>
           </div>

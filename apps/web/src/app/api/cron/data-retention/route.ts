@@ -9,12 +9,22 @@ export async function GET(request: Request) {
     const authHeader = request.headers.get("Authorization");
     const secretParam = searchParams.get("secret");
 
-    const expectedSecret = process.env.CRON_SECRET || "dev_cron_secret_123";
+    if (!process.env.CRON_SECRET) {
+      console.error("[Cron Data Retention] CRON_SECRET not configured");
+      return NextResponse.json(
+        {
+          error: {
+            code: "CONFIG_ERROR",
+            message: "Cron secret not configured",
+          },
+        },
+        { status: 500 },
+      );
+    }
 
     const isAuthorized =
-      authHeader === `Bearer ${expectedSecret}` ||
-      secretParam === expectedSecret ||
-      process.env.NODE_ENV === "development";
+      authHeader === `Bearer ${process.env.CRON_SECRET}` ||
+      secretParam === process.env.CRON_SECRET;
 
     if (!isAuthorized) {
       return NextResponse.json(
