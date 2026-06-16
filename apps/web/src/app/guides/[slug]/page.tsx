@@ -181,8 +181,7 @@ export async function generateMetadata({
     return { title: "Not Found" };
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   return {
     title: `${guide.title} | ObservabilityOS Guides`,
@@ -212,8 +211,7 @@ export default async function GuidePage({ params }: PageProps) {
     notFound();
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   const techArticleSchema = {
     "@context": "https://schema.org",
@@ -353,7 +351,7 @@ export default async function GuidePage({ params }: PageProps) {
               Sign Up with GitHub
             </Link>
             <Link
-              href="https://docs.observabilityos.com"
+              href={process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 h-11 px-6 rounded-xl transition-all font-semibold"
             >
               <Terminal className="w-4 h-4 text-indigo-400" />

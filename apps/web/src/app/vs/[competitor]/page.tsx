@@ -168,8 +168,7 @@ export async function generateMetadata({
 
   const title = `ObservabilityOS vs ${comp.name} — AI-Native Telemetry Comparison`;
   const description = `Compare ObservabilityOS and ${comp.name}. Learn why engineering teams choose ObservabilityOS for flat-rate pricing, local PII scrubbing, and AI root cause analysis.`;
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
   return {
     title,
@@ -199,8 +198,7 @@ export default async function CompetitorPage({ params }: PageProps) {
     notFound();
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const webPageSchema = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -410,7 +408,7 @@ export default async function CompetitorPage({ params }: PageProps) {
               Sign Up with GitHub
             </Link>
             <Link
-              href="https://docs.observabilityos.com"
+              href={process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 h-11 px-6 rounded-xl transition-all font-semibold"
             >
               <Terminal className="w-4 h-4 text-indigo-400" />

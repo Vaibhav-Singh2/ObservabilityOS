@@ -25,7 +25,7 @@ try {
   console.warn("Could not read .env file:", e);
 }
 
-const TEST_API_KEY = "obs_sk_slo_test_key_12345";
+const TEST_API_KEY = "obs_sk_TEST_KEY_DO_NOT_USE";
 const TEST_GITHUB_ID = "dummy_slo_test_user";
 
 async function verify() {
@@ -73,9 +73,7 @@ async function verify() {
   console.log(`Service created: ${service._id}`);
 
   // Generate Session Token
-  const jwtSecret =
-    process.env.JWT_SECRET ||
-    "fbe490197b1c7403b92b8e6befbe723d1_jwt_secret_dev_local_123";
+  const jwtSecret = process.env.JWT_SECRET || "dev-jwt-secret-for-testing-only";
   const sessionToken = jwt.sign({ userId: user._id.toString() }, jwtSecret);
   const cookieHeader = `session=${sessionToken}`;
 

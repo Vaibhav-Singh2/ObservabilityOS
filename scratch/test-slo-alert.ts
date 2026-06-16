@@ -23,7 +23,7 @@ try {
   console.warn("Could not read .env file:", e);
 }
 
-const TEST_API_KEY = "obs_sk_slo_alert_test_key_xyz";
+const TEST_API_KEY = "obs_sk_TEST_KEY_DO_NOT_USE";
 const TEST_GITHUB_ID = "dummy_slo_alert_user";
 
 // Intercept fetch calls to mock webhooks
@@ -108,7 +108,7 @@ async function runTest() {
   // Helper to call SLO monitoring endpoint
   const runMonitoring = async () => {
     const request = new Request(
-      "http://localhost:3000/api/cron/slo-monitoring?secret=dev_cron_secret_123",
+      "http://localhost:3000/api/cron/slo-monitoring?secret=replace-with-your-cron-secret",
     );
     const response = await triggerSloMonitoring(request);
     return await response.json();

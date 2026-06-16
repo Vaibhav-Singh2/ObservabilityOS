@@ -13,8 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const baseUrl =
-  process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),

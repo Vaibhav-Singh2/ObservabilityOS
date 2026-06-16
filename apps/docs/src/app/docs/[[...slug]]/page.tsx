@@ -144,8 +144,7 @@ export async function generateMetadata({
     };
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001";
 
   return {
     title: doc.title,
@@ -286,8 +285,7 @@ export default async function Page({ params }: PageProps) {
   const githubEditUrl = `https://github.com/Vaibhav-Singh2/ObservabilityOS/edit/main/${repoFilePath}`;
 
   const searchIndex = getAllDocsForSearch();
-  const baseUrl =
-    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001";
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
@@ -326,7 +324,7 @@ export default async function Page({ params }: PageProps) {
       name: "ObservabilityOS",
       logo: {
         "@type": "ImageObject",
-        url: `https://observabilityos.com/favicon.ico`,
+        url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/favicon.ico`,
       },
     },
     author: {

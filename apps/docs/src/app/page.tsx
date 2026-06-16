@@ -18,14 +18,13 @@ export const metadata = {
   description:
     "Explore the setup instructions, architecture design specifications, API schemas, security models, and developer guides for ObservabilityOS.",
   alternates: {
-    canonical: "https://docs.observabilityos.com",
+    canonical: process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001",
   },
 };
 
 export default function Page() {
   const searchIndex = getAllDocsForSearch();
-  const baseUrl =
-    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001";
 
   const siteSchema = {
     "@context": "https://schema.org",

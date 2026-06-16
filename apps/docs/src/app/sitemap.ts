@@ -2,8 +2,7 @@ import { MetadataRoute } from "next";
 import { getSidebarNav } from "@/lib/navigation";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001";
 
   const sidebarData = getSidebarNav();
   const flatSlugs: string[] = [];

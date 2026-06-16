@@ -44,7 +44,7 @@ export const metadata = {
     "OpenTelemetry monitoring",
   ],
   alternates: {
-    canonical: "https://observabilityos.com",
+    canonical: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
   },
 };
 
@@ -65,8 +65,7 @@ export default async function LandingPage() {
     }
   }
 
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL || "https://observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
   const orgSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -106,7 +105,7 @@ export default async function LandingPage() {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: "https://docs.observabilityos.com?q={search_term_string}",
+        urlTemplate: `${process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },

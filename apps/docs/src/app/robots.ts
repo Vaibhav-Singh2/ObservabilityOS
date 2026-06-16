@@ -1,8 +1,7 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl =
-    process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.observabilityos.com";
+  const baseUrl = process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001";
   return {
     rules: {
       userAgent: "*",
