@@ -29,14 +29,14 @@ async function run() {
   await connectToDatabase();
 
   // Find or create test project
-  let project = await Project.findOne({ apiKey: "obs_sk_test_api_key_987654" });
+  let project = await Project.findOne({ apiKey: "obs_sk_TEST_KEY_DO_NOT_USE" });
   if (!project) {
     console.log("Test project not found, creating one...");
     // Create a dummy user
     project = await Project.create({
       ownerId: "65e2365287e07675fcdbc919", // dummy objectid
       name: "Docker Test Project",
-      apiKey: "obs_sk_test_api_key_987654",
+      apiKey: "obs_sk_TEST_KEY_DO_NOT_USE",
       plan: "free",
       subscriptionStatus: "none",
     });

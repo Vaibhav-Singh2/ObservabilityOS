@@ -27,7 +27,7 @@ async function run() {
   await connectToDatabase();
 
   const project = await Project.findOne({
-    apiKey: "obs_sk_test_api_key_987654",
+    apiKey: "obs_sk_TEST_KEY_DO_NOT_USE",
   });
   if (!project) {
     console.error(

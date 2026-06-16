@@ -25,7 +25,7 @@ try {
   console.warn("Could not read .env file:", e);
 }
 
-const TEST_API_KEY = "obs_sk_test_api_key_987654";
+const TEST_API_KEY = "obs_sk_TEST_KEY_DO_NOT_USE";
 
 async function verify() {
   console.log("Connecting to database at:", process.env.MONGODB_URI);
