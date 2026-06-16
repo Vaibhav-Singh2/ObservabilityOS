@@ -19,11 +19,7 @@ export default defineConfig({
       "**/e2e/**",
     ],
     fileParallelism: false,
-    isolate: false,
-    pool: "forks",
-    forks: {
-      isolate: false,
-    },
+    isolate: true,
   },
   resolve: {
     alias: {
