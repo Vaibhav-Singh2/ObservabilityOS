@@ -31,7 +31,8 @@ export const metadata: Metadata = {
     "ObservabilityOS docs",
   ],
   alternates: {
-    canonical: "./",
+    canonical: baseUrl,
+    languages: { "en-US": baseUrl },
   },
   openGraph: {
     title: "ObservabilityOS Documentation",

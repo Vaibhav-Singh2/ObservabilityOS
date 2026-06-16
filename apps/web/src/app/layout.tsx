@@ -37,7 +37,8 @@ export const metadata: Metadata = {
     "error tracking",
   ],
   alternates: {
-    canonical: "./",
+    canonical: baseUrl,
+    languages: { "en-US": baseUrl },
   },
   openGraph: {
     title:
