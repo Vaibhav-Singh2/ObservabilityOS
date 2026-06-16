@@ -1550,7 +1550,7 @@ export default async function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="mailto:support@observabilityos.com"
+                    href="mailto:vaibhav.fullstack.dev@gmail.com"
                     className="hover:text-slate-350 transition-colors"
                   >
                     Support Email
@@ -1558,7 +1558,7 @@ export default async function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="mailto:contact@observabilityos.com"
+                    href="mailto:vaibhav.fullstack.dev@gmail.com"
                     className="hover:text-slate-350 transition-colors"
                   >
                     Contact Sales

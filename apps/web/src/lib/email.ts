@@ -189,7 +189,7 @@ export async function buildAndSendEmailDigest(user: {
   if (resend) {
     try {
       const emailResponse = await resend.emails.send({
-        from: "ObservabilityOS <digest@observabilityos.com>",
+        from: "ObservabilityOS <vaibhav.fullstack.dev@gmail.com>",
         to: user.email,
         subject: `☀️ ObservabilityOS Morning Digest for ${user.username}`,
         html: htmlContent,
