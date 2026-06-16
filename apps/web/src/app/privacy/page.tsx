@@ -66,11 +66,11 @@ export default function PrivacyPage() {
         <article className="prose prose-invert max-w-none text-slate-300 space-y-8 text-sm sm:text-base leading-relaxed">
           <p>
             At ObservabilityOS, we are committed to building an observability
-            platform that respects your organization's privacy and keeps
+            platform that respects your organization&apos;s privacy and keeps
             sensitive data safe. We design our client-side SDKs and ingestion
             engines with high-security scrubbing rules, ensuring that your
-            customers' Personally Identifiable Information (PII) is redacted
-            before it ever leaves your network.
+            customers&apos; Personally Identifiable Information (PII) is
+            redacted before it ever leaves your network.
           </p>
 
           <div className="border-t border-slate-900 pt-8 space-y-4">

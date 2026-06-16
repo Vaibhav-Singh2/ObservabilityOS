@@ -29,8 +29,6 @@ interface BillingViewProps {
 
 import { PLANS, PlanDetails as Plan } from "@/lib/plans";
 
-const PLAN_ORDER = ["free", "pro", "self-host"];
-
 export default function BillingView({ project, usage }: BillingViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -298,11 +296,6 @@ export default function BillingView({ project, usage }: BillingViewProps) {
   };
 
   const isCurrentPlan = (plan: Plan) => plan.id === currentPlanId();
-
-  const isUpgrade = (plan: Plan) => {
-    const currentIndex = PLAN_ORDER.indexOf(currentPlanId());
-    return PLAN_ORDER.indexOf(plan.id) > currentIndex;
-  };
 
   const currentDisplayName = () => {
     if (currentPlan === "pro") return "Pro Cloud";

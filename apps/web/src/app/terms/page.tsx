@@ -101,7 +101,7 @@ export default function TermsPage() {
               <li>
                 <strong>Hosted Cloud Console:</strong> We grant you a revocable,
                 non-exclusive, non-transferable license to access our dashboards
-                for your project's monitoring purposes.
+                for your project&apos;s monitoring purposes.
               </li>
             </ul>
           </div>

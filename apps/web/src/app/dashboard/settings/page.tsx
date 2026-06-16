@@ -7,7 +7,7 @@ interface PageProps {
 }
 
 export default async function SettingsPage({ searchParams }: PageProps) {
-  const { user, projects } = await getAuthSession();
+  const { projects } = await getAuthSession();
   const resolvedSearchParams = await searchParams;
 
   if (projects.length === 0) {

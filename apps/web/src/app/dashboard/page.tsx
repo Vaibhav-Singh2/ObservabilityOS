@@ -17,7 +17,7 @@ interface PageProps {
 }
 
 export default async function DashboardPage({ searchParams }: PageProps) {
-  const { user, projects } = await getAuthSession();
+  const { projects } = await getAuthSession();
 
   // Await searchParams as required by Next 15+
   const resolvedSearchParams = await searchParams;

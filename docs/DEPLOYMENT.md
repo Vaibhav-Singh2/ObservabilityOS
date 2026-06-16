@@ -152,7 +152,7 @@ Ensure your GitHub OAuth settings match your new production domain:
 
 ## 5. CI/CD & Verification Pipelines
 
-The project features a pre-configured GitHub Actions validation pipeline in **`.github/workflows/verify.yml`**. It automatically runs checks (compilations, lints, builds) on every push or pull request to `main`.
+The project features a pre-configured GitHub Actions validation pipeline in **`.github/workflows/ci.yml`**. It automatically runs checks (compilations, lints, builds, unit/db tests, and Playwright E2E tests) on every push or pull request to `main`.
 
 You can also run verification checks locally:
 
