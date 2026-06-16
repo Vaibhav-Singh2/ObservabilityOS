@@ -29,6 +29,14 @@ COPY turbo.json ./
 # Enable standalone output for Docker builds
 ENV DOCKER_BUILD=true
 
+# Set Sentry release from git SHA for error tracking correlation
+ARG SENTRY_RELEASE
+ENV SENTRY_RELEASE=${SENTRY_RELEASE}
+ENV NEXT_PUBLIC_SENTRY_DSN=${SENTRY_DSN}
+ENV SENTRY_ORG=${SENTRY_ORG}
+ENV SENTRY_PROJECT=${SENTRY_PROJECT}
+ENV SENTRY_AUTH_TOKEN=${SENTRY_AUTH_TOKEN}
+
 # Compile packages and build the Next.js app in standalone mode
 RUN npx turbo build --filter=web...
 

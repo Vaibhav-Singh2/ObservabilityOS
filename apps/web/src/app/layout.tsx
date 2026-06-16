@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import SmoothScroll from "@/components/SmoothScroll";
+import PostHogProvider from "@/components/PostHogProvider";
+import WebVitalsReporter from "@/components/WebVitalsReporter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -77,7 +79,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <SmoothScroll />
-        {children}
+        <PostHogProvider>
+          <WebVitalsReporter />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

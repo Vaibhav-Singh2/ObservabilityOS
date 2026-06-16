@@ -1,6 +1,8 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import PostHogProvider from "@/components/PostHogProvider";
+import WebVitalsReporter from "@/components/WebVitalsReporter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -68,7 +70,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
     >
       <body className="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
-        {children}
+        <PostHogProvider>
+          <WebVitalsReporter />
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

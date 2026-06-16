@@ -2,6 +2,7 @@
  * Custom SRE resilience utilities.
  * Includes timeout control, exponential backoff retries, and a stateful circuit breaker.
  */
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * Rejection error thrown when an operation times out.
@@ -203,6 +204,13 @@ export class CircuitBreaker {
   private onFailure(error: unknown): void {
     this.successCount = 0;
     this.failureCount++;
+    Sentry.captureException(error, {
+      tags: {
+        circuit_breaker: this.name,
+        failure_count: String(this.failureCount),
+        state: this.state,
+      },
+    });
     console.warn(
       `[CircuitBreaker:${this.name}] Failure #${this.failureCount}:`,
       error instanceof Error ? error.message : error,
@@ -223,6 +231,12 @@ export class CircuitBreaker {
     this.successCount = 0;
     if (newState === "CLOSED") {
       this.failureCount = 0;
+    }
+    if (newState === "OPEN") {
+      Sentry.captureMessage(`Circuit breaker "${this.name}" opened`, {
+        level: "warning",
+        tags: { circuit_breaker: this.name, state: "OPEN" },
+      });
     }
     console.warn(
       `[CircuitBreaker:${this.name}] State transition: ${oldState} -> ${newState}`,

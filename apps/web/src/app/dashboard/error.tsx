@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AlertOctagon, RefreshCw, Home, Terminal } from "lucide-react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -11,7 +12,7 @@ interface ErrorProps {
 
 export default function DashboardError({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Log the error to central console or SRE tracking systems
+    Sentry.captureException(error);
     console.error("[DashboardErrorBoundary] Unhandled UI crash:", error);
   }, [error]);
 

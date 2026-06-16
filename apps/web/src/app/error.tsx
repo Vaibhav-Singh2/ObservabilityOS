@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { AlertTriangle, RotateCcw, Home } from "lucide-react";
 import Link from "next/link";
+import * as Sentry from "@sentry/nextjs";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -11,6 +12,7 @@ interface ErrorProps {
 
 export default function RootError({ error, reset }: ErrorProps) {
   useEffect(() => {
+    Sentry.captureException(error);
     console.error("[RootErrorBoundary] Fatal system crash:", error);
   }, [error]);
 
