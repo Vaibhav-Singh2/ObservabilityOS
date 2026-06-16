@@ -75,10 +75,19 @@ export default async function BillingPage({ searchParams }: PageProps) {
     console.error("Failed to fetch log volume usage:", err);
   }
 
+  const isSandbox =
+    !process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET;
+
   const usage = {
     serviceCount,
     logVolumeBytes,
   };
 
-  return <BillingView project={serializedProject} usage={usage} />;
+  return (
+    <BillingView
+      project={serializedProject}
+      usage={usage}
+      isSandbox={isSandbox}
+    />
+  );
 }

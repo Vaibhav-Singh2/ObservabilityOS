@@ -25,11 +25,16 @@ interface BillingViewProps {
     serviceCount: number;
     logVolumeBytes: number;
   };
+  isSandbox: boolean;
 }
 
 import { PLANS, PlanDetails as Plan } from "@/lib/plans";
 
-export default function BillingView({ project, usage }: BillingViewProps) {
+export default function BillingView({
+  project,
+  usage,
+  isSandbox,
+}: BillingViewProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const gateway = "razorpay";
@@ -603,36 +608,39 @@ export default function BillingView({ project, usage }: BillingViewProps) {
       </div>
 
       {/* Sandbox Tools */}
-      <section className="bg-slate-900 border border-dashed border-slate-800 rounded-2xl p-6">
-        <div className="flex items-center gap-2.5 mb-2.5">
-          <Cpu className="w-4 h-4 text-indigo-400" />
-          <h4 className="text-sm font-bold uppercase tracking-wider text-slate-350">
-            Developer Sandbox Bypass
-          </h4>
-        </div>
-        <p className="text-xs text-slate-500 leading-relaxed mb-4">
-          Local sandbox environment detected. Use the quick toggle below to
-          simulate Razorpay webhook outcomes instantly without configuring keys.
-        </p>
+      {isSandbox && (
+        <section className="bg-slate-900 border border-dashed border-slate-800 rounded-2xl p-6">
+          <div className="flex items-center gap-2.5 mb-2.5">
+            <Cpu className="w-4 h-4 text-indigo-400" />
+            <h4 className="text-sm font-bold uppercase tracking-wider text-slate-350">
+              Developer Sandbox Bypass
+            </h4>
+          </div>
+          <p className="text-xs text-slate-500 leading-relaxed mb-4">
+            Local sandbox environment detected. Use the quick toggle below to
+            simulate Razorpay webhook outcomes instantly without configuring
+            keys.
+          </p>
 
-        <div className="flex flex-wrap items-center gap-2">
-          {["free", "pro", "self-host"].map((p) => {
-            if (p === currentPlan) return null;
-            return (
-              <button
-                key={p}
-                onClick={() =>
-                  handleSandboxOverride(p as "free" | "pro" | "self-host")
-                }
-                disabled={isSandboxUpdating}
-                className="px-3.5 py-2 bg-slate-955 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer uppercase"
-              >
-                Set to {p === "self-host" ? "self-host" : p}
-              </button>
-            );
-          })}
-        </div>
-      </section>
+          <div className="flex flex-wrap items-center gap-2">
+            {["free", "pro", "self-host"].map((p) => {
+              if (p === currentPlan) return null;
+              return (
+                <button
+                  key={p}
+                  onClick={() =>
+                    handleSandboxOverride(p as "free" | "pro" | "self-host")
+                  }
+                  disabled={isSandboxUpdating}
+                  className="px-3.5 py-2 bg-slate-955 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-lg text-xs font-semibold tracking-wide transition-all disabled:opacity-50 cursor-pointer uppercase"
+                >
+                  Set to {p === "self-host" ? "self-host" : p}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
