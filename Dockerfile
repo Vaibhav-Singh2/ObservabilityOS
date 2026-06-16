@@ -26,6 +26,9 @@ RUN yarn install --immutable
 COPY --from=pruner /app/out/full/ ./
 COPY turbo.json ./
 
+# Enable standalone output for Docker builds
+ENV DOCKER_BUILD=true
+
 # Compile packages and build the Next.js app in standalone mode
 RUN npx turbo build --filter=web...
 

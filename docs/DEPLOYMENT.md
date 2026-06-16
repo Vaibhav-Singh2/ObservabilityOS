@@ -46,7 +46,7 @@ The `turbo.json` file defines the build execution order:
 }
 ```
 
-Next.js standalone mode is already pre-configured in `apps/web/next.config.ts` (`output: "standalone"`), generating a minimal optimized server layout.
+Next.js standalone mode is configured conditionally in `apps/web/next.config.ts` — set `DOCKER_BUILD=true` to enable `output: "standalone"`. This keeps `yarn start` working normally outside Docker.
 
 ---
 
