@@ -18,6 +18,16 @@ export interface PlanDetails {
   available: boolean;
 }
 
+// Plans config — single source of truth for pricing, limits, and features.
+// Every claim below is enforced by the codebase (see audit trail in doc comment).
+//
+// Enforcement verification:
+// - Quota limits: derived via PLAN_LIMITS in quota.ts, enforced in ingest/route.ts & services/route.ts
+// - AI analysis: bypassLLM=true for free in anomaly.ts:383
+// - Multi-channel alerts: NOT gated by plan — all tiers can configure webhooks (alerts.ts, anomaly.ts)
+// - Audit log: NOT gated by plan — all tiers can view audit log (audit-logs/route.ts)
+// - Team management: Membership model exists but no invite/management UI is implemented yet
+
 export const PLANS: PlanDetails[] = [
   {
     id: "free",
@@ -48,12 +58,11 @@ export const PLANS: PlanDetails[] = [
         included: true,
       },
       { text: "Service health dashboard, SLO & SSE stream", included: true },
-      { text: "Multi-channel Slack, Discord & Teams alerts", included: false },
+      { text: "Multi-channel Slack, Discord & Teams alerts", included: true },
       {
         text: "AI root cause analysis, post-mortems & digests",
         included: false,
       },
-      { text: "Audit log trail & team collaboration", included: false },
     ],
     available: true,
   },
@@ -82,7 +91,7 @@ export const PLANS: PlanDetails[] = [
         included: true,
       },
       {
-        text: "Multi-signal anomaly detection & auto-incident creation",
+        text: "AI-powered anomaly detection & auto-incident creation",
         included: true,
       },
       {
@@ -95,7 +104,6 @@ export const PLANS: PlanDetails[] = [
         text: "AI root cause analysis, post-mortems & daily digests",
         included: true,
       },
-      { text: "Audit log trail & team collaboration", included: true },
     ],
     available: true,
   },
@@ -123,7 +131,7 @@ export const PLANS: PlanDetails[] = [
         included: true,
       },
       {
-        text: "Multi-signal anomaly detection & auto-incident creation",
+        text: "AI-powered anomaly detection & auto-incident creation",
         included: true,
       },
       {
@@ -135,7 +143,6 @@ export const PLANS: PlanDetails[] = [
         text: "Multi-channel alerts & AI analysis (bring your own keys)",
         included: true,
       },
-      { text: "Audit log trail & unlimited team members", included: true },
       {
         text: "Docker / Compose deployment & GitHub community support",
         included: true,
