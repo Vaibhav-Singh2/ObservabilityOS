@@ -58,8 +58,8 @@ export default async function BillingPage({ searchParams }: PageProps) {
   if (!activeProject) {
     redirect("/dashboard");
   }
-
-  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+  const isSelfHosted =
+    !process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET;
 
   // Self-host users get redirected — billing is cloud-only
   if (isSelfHosted) {

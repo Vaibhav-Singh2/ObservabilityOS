@@ -61,7 +61,8 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
 
   // Self-host users don't use billing
   if (
-    process.env.NEXT_PUBLIC_SELF_HOSTED === "true" ||
+    !process.env.RAZORPAY_KEY_ID ||
+    !process.env.RAZORPAY_KEY_SECRET ||
     project.plan === "self-host"
   ) {
     redirect(`/dashboard?projectId=${projectId}`);

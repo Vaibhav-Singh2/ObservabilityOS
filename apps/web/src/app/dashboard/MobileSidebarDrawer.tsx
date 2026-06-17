@@ -14,11 +14,13 @@ interface ProjectItem {
 interface MobileSidebarDrawerProps {
   projects: ProjectItem[];
   profileFooter: React.ReactNode;
+  isSelfHost: boolean;
 }
 
 export default function MobileSidebarDrawer({
   projects,
   profileFooter,
+  isSelfHost,
 }: MobileSidebarDrawerProps) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -69,6 +71,7 @@ export default function MobileSidebarDrawer({
         <SidebarNavList
           projects={projects}
           onCloseMobile={() => setIsOpen(false)}
+          isSelfHost={isSelfHost}
         />
 
         {/* Footer info & logout */}

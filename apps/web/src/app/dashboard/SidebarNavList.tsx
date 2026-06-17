@@ -20,11 +20,13 @@ interface ProjectItem {
 interface SidebarNavListProps {
   projects: ProjectItem[];
   onCloseMobile?: () => void;
+  isSelfHost: boolean;
 }
 
 export default function SidebarNavList({
   projects,
   onCloseMobile,
+  isSelfHost,
 }: SidebarNavListProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -112,7 +114,7 @@ export default function SidebarNavList({
             Playground
           </Link>
 
-          {process.env.NEXT_PUBLIC_SELF_HOSTED !== "true" && (
+          {!isSelfHost && (
             <Link
               id="nav_billing"
               href={
@@ -164,7 +166,7 @@ export default function SidebarNavList({
             <Terminal className="w-4 h-4 text-slate-700" />
             Playground
           </div>
-          {process.env.NEXT_PUBLIC_SELF_HOSTED !== "true" && (
+          {!isSelfHost && (
             <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
               <CreditCard className="w-4 h-4 text-slate-700" />
               Billing

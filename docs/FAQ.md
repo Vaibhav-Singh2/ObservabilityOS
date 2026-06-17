@@ -83,7 +83,7 @@ We wanted to ensure that the code remains fully open and accessible for develope
 
 **No.** The self-host Open Source edition is completely free. You run it on your own infrastructure with your own API keys. The billing management page is disabled for self-host projects — all features are unlocked without any subscription or payment.
 
-Set `NEXT_PUBLIC_SELF_HOSTED=true` in your `.env` file to enable self-host mode. This auto-upgrades all projects to the self-host plan (unlimited services, logs, and retention) and hides all billing-related UI.
+Self-host mode is auto-detected: if `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are not configured, the app automatically runs in self-host mode. This auto-upgrades all projects to the self-host plan (unlimited services, logs, and retention) and hides all billing-related UI. To enable cloud mode (billing UI, plan limits), add your Razorpay credentials to `.env`.
 
 ### Q: Can my company build proprietary products that integrate with the SDK?
 

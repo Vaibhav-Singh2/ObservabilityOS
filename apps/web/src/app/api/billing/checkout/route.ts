@@ -23,7 +23,7 @@ const checkoutSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+  if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     return NextResponse.json(
       { error: { code: "NOT_FOUND", message: "Not found" } },
       { status: 404 },

@@ -26,8 +26,15 @@ export default async function DashboardLayout({
     email: user.email || "",
   };
 
+  const isSelfHost =
+    !process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET;
+
   return (
-    <DashboardShell user={userObj} projects={serializedProjects}>
+    <DashboardShell
+      user={userObj}
+      projects={serializedProjects}
+      isSelfHost={isSelfHost}
+    >
       {children}
     </DashboardShell>
   );

@@ -1,5 +1,9 @@
 # Production Deployment Guide — ObservabilityOS
 
+> ⚠️ **License Restriction**
+>
+> ObservabilityOS is released under a **source-available license** (see [`LICENSE`](../LICENSE)). You are free to self-host, modify, and use the platform for **internal company projects, personal use, and development**. However, you may **not** offer ObservabilityOS (or modified versions of it) as a **commercial SaaS or managed service** to third parties. This includes, but is not limited to, selling access to the hosted dashboard, ingestion endpoints, or root-cause diagnostics as a paid subscription. Contact `sales@observabilityos.com` for commercial licensing if needed.
+
 This guide covers deploying ObservabilityOS to production environments using **Vercel** (for the Next.js frontend and API router), **Docker** (for self-hosted deployments), and managed database services.
 
 ---

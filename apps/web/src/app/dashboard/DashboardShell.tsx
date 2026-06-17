@@ -20,12 +20,14 @@ interface DashboardShellProps {
   };
   projects: ProjectItem[];
   children: React.ReactNode;
+  isSelfHost: boolean;
 }
 
 export default function DashboardShell({
   user,
   projects,
   children,
+  isSelfHost,
 }: DashboardShellProps) {
   const profileFooter = <SidebarProfileFooter user={user} />;
 
@@ -50,7 +52,7 @@ export default function DashboardShell({
         </div>
 
         {/* Sidebar Nav */}
-        <SidebarNavList projects={projects} />
+        <SidebarNavList projects={projects} isSelfHost={isSelfHost} />
 
         {/* Footer info & logout */}
         {profileFooter}
@@ -86,7 +88,11 @@ export default function DashboardShell({
       </div>
 
       {/* Mobile Drawer */}
-      <MobileSidebarDrawer projects={projects} profileFooter={profileFooter} />
+      <MobileSidebarDrawer
+        projects={projects}
+        profileFooter={profileFooter}
+        isSelfHost={isSelfHost}
+      />
     </div>
   );
 }

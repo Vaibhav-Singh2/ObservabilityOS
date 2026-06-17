@@ -116,11 +116,13 @@ curl -X POST http://localhost:3000/api/ingest \
 
 When a project is on the `self-host` plan, the billing page hides all subscription, pricing, and payment sections. Instead it shows a self-host info card with a link to the deployment guide. The cancel, restore, and checkout API routes all return 400 if called for a self-host project.
 
-**For self-hosted deployments**, set `NEXT_PUBLIC_SELF_HOSTED=true` in your `.env` file. This:
+**Self-host mode is auto-detected**: if `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are not set (or commented out), the app automatically runs in self-host mode. This:
 
-- Auto-upgrades all projects to the `self-host` plan on first billing page visit (unlimited quotas).
-- Disables the sandbox mode detection (even without Razorpay keys).
-- Ensures new projects start with unlimited limits immediately.
+- Auto-upgrades all projects to the `self-host` plan (unlimited services, logs, retention).
+- Hides the billing UI, sidebar "Billing" link, and all billing API routes (return 404).
+- Is the default behavior when running locally without Razorpay credentials.
+
+To enable Cloud Mode (billing UI, plan limits), uncomment the Razorpay keys in your `.env` file.
 
 ### 3. Sandbox Billing Toggles
 
