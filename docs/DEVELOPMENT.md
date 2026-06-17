@@ -119,7 +119,24 @@ Our local environment includes a developer sandbox bypass card located on the Bi
 - You can click any of the tier buttons (**Set to free**, **pro**, or **self-host**) to instantly trigger database plan overrides.
 - This calls `POST /api/billing/manual`, bypassing external payment processor keys (Razorpay) for frictionless offline testing.
 
-### 3. Redis Invalidation Monitoring
+### 3. Cancel / Downgrade Subscription Flow
+
+Production users can cancel their Razorpay subscription or downgrade to the Free Tier from the Billing Management page:
+
+- **"Cancel Subscription"** button — shown in the plan status card when the user has an active Razorpay subscription.
+- **"Downgrade to Free"** button — shown on the Free plan card when the user is on a paid plan.
+
+Both actions open a **confirmation modal** that clearly warns about feature loss (service limit, log volume, retention, alerts) and confirms auto-pay will be stopped. The user can confirm or keep their plan.
+
+On confirm, the frontend calls `POST /api/billing/cancel`, which:
+
+1. Calls `razorpay.subscriptions.cancel(id, true)` to cancel the Razorpay subscription **at the end of the current billing period** (customer retains paid features until then).
+2. Sets `subscriptionStatus: "cancelling"` in MongoDB — the plan remains unchanged.
+3. When the billing period ends, Razorpay sends a `subscription.cancelled` webhook, which the webhook handler catches and downgrades the project to `free`.
+
+If no Razorpay keys are configured (e.g. local development), the cancel endpoint downgrades immediately (same behaviour as the manual override).
+
+### 4. Redis Invalidation Monitoring
 
 If your dashboard cache is out of sync, you can flush local cache entries manually using Redis-CLI:
 

@@ -63,6 +63,7 @@ export default async function BillingPage({ searchParams }: PageProps) {
     stripeSubscriptionId: activeProject.stripeSubscriptionId || "",
     razorpayCustomerId: activeProject.razorpayCustomerId || "",
     razorpaySubscriptionId: activeProject.razorpaySubscriptionId || "",
+    subscriptionEndsAt: activeProject.subscriptionEndsAt?.toISOString(),
   };
 
   const serviceCount = await Service.countDocuments({

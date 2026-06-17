@@ -20,6 +20,7 @@ interface BillingViewProps {
     plan: string;
     subscriptionStatus: string;
     billingProvider: string;
+    subscriptionEndsAt?: string;
   };
   usage: {
     serviceCount: number;
@@ -53,6 +54,15 @@ export default function BillingView({
   );
   const [isVerifyingUpgrade, setIsVerifyingUpgrade] = useState(false);
   const [targetPlanId, setTargetPlanId] = useState<string | null>(null);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelModalType, setCancelModalType] = useState<
+    "downgrade" | "cancel"
+  >("downgrade");
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [currentSubEndsAt, setCurrentSubEndsAt] = useState<string | null>(
+    project.subscriptionEndsAt ?? null,
+  );
 
   const planDetails =
     PLANS.find((p) => p.backendPlan === currentPlan) || PLANS[0];
@@ -281,7 +291,86 @@ export default function BillingView({
     }
   };
 
-  /** Resolve the display price based on gateway selection */
+  const handleCancelSubscription = async () => {
+    setIsCancelling(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const res = await fetch("/api/billing/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: project.id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Failed to cancel subscription");
+      }
+
+      if (data.cancelledImmediately) {
+        setCurrentPlan("free");
+        setCurrentSubStatus("none");
+        setCurrentBillingProvider("none");
+        setCurrentSubEndsAt(null);
+        setSuccessMsg(
+          "Subscription cancelled. You've been downgraded to Free Tier.",
+        );
+      } else {
+        setCurrentSubStatus("cancelling");
+        setCurrentSubEndsAt(data.subscriptionEndsAt ?? null);
+        setSuccessMsg(
+          data.subscriptionEndsAt
+            ? `Your subscription will cancel on ${new Date(data.subscriptionEndsAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}. You'll retain Pro features until then.`
+            : "Your subscription will cancel at the end of the current billing period. You'll retain Pro features until then.",
+        );
+      }
+      router.refresh();
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Failed to cancel subscription",
+      );
+    } finally {
+      setIsCancelling(false);
+      setShowCancelModal(false);
+    }
+  };
+
+  const handleRestoreSubscription = async () => {
+    setIsRestoring(true);
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    try {
+      const res = await fetch("/api/billing/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId: project.id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(
+          data.error?.message || "Failed to restore subscription",
+        );
+      }
+
+      setCurrentSubStatus("active");
+      setCurrentSubEndsAt(null);
+      setSuccessMsg(
+        "Subscription restored! Your plan will continue as normal.",
+      );
+      router.refresh();
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error ? err.message : "Failed to restore subscription",
+      );
+    } finally {
+      setIsRestoring(false);
+    }
+  };
+
+  /** Resolve the display price based on gateway selector */
   const formatPrice = (
     plan: Plan,
   ): { primary: string; secondary: string | null } => {
@@ -361,28 +450,70 @@ export default function BillingView({
               </span>
             </div>
             <p className="text-xs text-slate-400 mt-1">
-              {currentPlan !== "free"
-                ? `Active subscription managed via ${(currentBillingProvider || "").toUpperCase()}`
-                : "Limited to 1 service, 500MB logs/month & 7-day retention."}
+              {currentPlan !== "free" && currentSubStatus === "cancelling"
+                ? currentSubEndsAt
+                  ? `Subscription ends on ${new Date(currentSubEndsAt).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })} — managed via ${(currentBillingProvider || "").toUpperCase()}`
+                  : `Subscription ending at end of billing period — managed via ${(currentBillingProvider || "").toUpperCase()}`
+                : currentPlan !== "free"
+                  ? `Active subscription managed via ${(currentBillingProvider || "").toUpperCase()}`
+                  : "Limited to 1 service, 500MB logs/month & 7-day retention."}
             </p>
           </div>
 
-          <span
-            className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full self-start sm:self-center ${
-              currentSubStatus === "active"
-                ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
-                : "text-slate-400 bg-slate-950 border border-slate-800"
-            }`}
-          >
+          <div className="flex items-center gap-3 self-start sm:self-center">
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
+              className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
                 currentSubStatus === "active"
-                  ? "bg-emerald-400 animate-pulse"
-                  : "bg-slate-600"
+                  ? "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20"
+                  : currentSubStatus === "cancelling"
+                    ? "text-amber-400 bg-amber-500/10 border border-amber-500/20"
+                    : "text-slate-400 bg-slate-950 border border-slate-800"
               }`}
-            />
-            Status: {currentSubStatus === "active" ? "Active" : "None / Unpaid"}
-          </span>
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  currentSubStatus === "active"
+                    ? "bg-emerald-400 animate-pulse"
+                    : currentSubStatus === "cancelling"
+                      ? "bg-amber-400"
+                      : "bg-slate-600"
+                }`}
+              />
+              Status:{" "}
+              {currentSubStatus === "active"
+                ? "Active"
+                : currentSubStatus === "cancelling"
+                  ? currentSubEndsAt
+                    ? `Cancelling — ends ${new Date(currentSubEndsAt).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}`
+                    : "Cancelling"
+                  : "None / Unpaid"}
+            </span>
+            {currentSubStatus === "active" &&
+              currentPlan !== "free" &&
+              currentBillingProvider === "razorpay" && (
+                <button
+                  onClick={() => {
+                    setCancelModalType("cancel");
+                    setShowCancelModal(true);
+                  }}
+                  disabled={isCancelling}
+                  className="px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-rose-600/10 hover:bg-rose-600/20 text-rose-400 border border-rose-600/20 hover:border-rose-500/30 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  Cancel Subscription
+                </button>
+              )}
+            {currentSubStatus === "cancelling" &&
+              currentPlan !== "free" &&
+              currentBillingProvider === "razorpay" && (
+                <button
+                  onClick={handleRestoreSubscription}
+                  disabled={isRestoring}
+                  className="px-3 py-1.5 rounded-xl text-[11px] font-semibold bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-400 border border-emerald-600/20 hover:border-emerald-500/30 transition-all cursor-pointer disabled:opacity-50"
+                >
+                  {isRestoring ? "Restoring..." : "Undo Cancel"}
+                </button>
+              )}
+          </div>
         </div>
       </div>
 
@@ -577,10 +708,20 @@ export default function BillingView({
                     Deploy Now
                     <ArrowRight className="w-3.5 h-3.5" />
                   </a>
+                ) : currentSubStatus === "cancelling" ? (
+                  <button
+                    disabled
+                    className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed"
+                  >
+                    Cancellation Pending
+                  </button>
                 ) : (
                   <button
-                    onClick={() => handleSandboxOverride("free")}
-                    disabled={isSandboxUpdating}
+                    onClick={() => {
+                      setCancelModalType("downgrade");
+                      setShowCancelModal(true);
+                    }}
+                    disabled={isSandboxUpdating || isCancelling}
                     className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white cursor-pointer transition-all disabled:opacity-50"
                   >
                     Downgrade to Free
@@ -640,6 +781,108 @@ export default function BillingView({
             })}
           </div>
         </section>
+      )}
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={() => setShowCancelModal(false)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg font-bold text-white mb-2">
+              {cancelModalType === "downgrade"
+                ? "Downgrade to Free Tier?"
+                : "Cancel Subscription?"}
+            </h3>
+            <p className="text-sm text-slate-400 mb-4 leading-relaxed">
+              {cancelModalType === "downgrade"
+                ? "Your subscription will be cancelled at the end of the current billing period. You'll lose access to Pro features and be downgraded to the Free Tier with these limits:"
+                : "Your subscription will be cancelled at the end of the current billing period. Once cancelled, you'll be downgraded to the Free Tier with these limits:"}
+            </p>
+            <ul className="space-y-2 mb-6">
+              <li className="flex items-start gap-2 text-xs text-slate-400">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                {usage.serviceCount > 1 ? (
+                  <>
+                    Service limit drops to{" "}
+                    <span className="text-slate-300 font-semibold">1</span> —{" "}
+                    <span className="text-rose-400 font-semibold">
+                      you have {usage.serviceCount} services
+                    </span>{" "}
+                    ({usage.serviceCount - 1} will be blocked after downgrade)
+                  </>
+                ) : (
+                  <>
+                    Services limited to{" "}
+                    <span className="text-slate-300 font-semibold">1</span>{" "}
+                    (currently {usage.serviceCount})
+                  </>
+                )}
+              </li>
+              <li className="flex items-start gap-2 text-xs text-slate-400">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                {usage.logVolumeBytes > 500 * 1024 * 1024 ? (
+                  <>
+                    Log volume drops to{" "}
+                    <span className="text-slate-300 font-semibold">500 MB</span>
+                    /month —{" "}
+                    <span className="text-rose-400 font-semibold">
+                      you've used {formatVolume(usage.logVolumeBytes)}
+                    </span>{" "}
+                    (logs will be rejected after downgrade)
+                  </>
+                ) : (
+                  <>
+                    Log volume limited to{" "}
+                    <span className="text-slate-300 font-semibold">500 MB</span>
+                    /month (currently {formatVolume(usage.logVolumeBytes)})
+                  </>
+                )}
+              </li>
+              <li className="flex items-start gap-2 text-xs text-slate-400">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                Data retention drops to{" "}
+                <span className="text-slate-300 font-semibold">7 days</span>{" "}
+                (older logs will be purged)
+              </li>
+              <li className="flex items-start gap-2 text-xs text-slate-400">
+                <AlertCircle className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                No multi-channel alerts or AI analysis
+              </li>
+            </ul>
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-950 border border-slate-850 mb-5">
+              <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
+              <p className="text-[10px] text-slate-500 leading-normal">
+                Auto-pay will be stopped. You won't be charged again. You can
+                re-subscribe at any time before the billing period ends to keep
+                Pro features.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCancelModal(false)}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all cursor-pointer"
+              >
+                Keep My Plan
+              </button>
+              <button
+                onClick={handleCancelSubscription}
+                disabled={isCancelling}
+                className="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-rose-600 hover:bg-rose-500 text-white transition-all cursor-pointer disabled:opacity-50"
+              >
+                {isCancelling
+                  ? "Processing..."
+                  : cancelModalType === "downgrade"
+                    ? "Confirm Downgrade"
+                    : "Confirm Cancellation"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -56,6 +56,17 @@ We store service metric aggregates in Redis under `cache:project:<id>:metrics` w
 
 **No.** The sandbox manual billing route (`POST /api/billing/manual`) bypasses the Razorpay processor completely. It directly mutates the database's `plan` schema value to the requested tier (`free`, `pro`, or `self-host`) for offline developer testing.
 
+### Q: How does subscription cancellation work?
+
+**Cancellation is confirmed and scheduled.** When a user clicks "Cancel Subscription" or "Downgrade to Free", a confirmation modal appears detailing the feature limits they'll lose. On confirm, the app calls `POST /api/billing/cancel`, which:
+
+1. Cancels the Razorpay subscription **at the end of the current billing period** (no immediate feature loss).
+2. Sets the subscription status to `cancelling` in the database.
+3. Razorpay stops auto-pay — the user will not be charged again.
+4. At the end of the billing period, Razorpay sends a `subscription.cancelled` webhook which automatically downgrades the project to the **Free Tier**.
+
+Users can re-subscribe at any time before the billing period ends to retain paid features.
+
 ---
 
 ## 📜 5. Licensing & Commercial Restrictions FAQs

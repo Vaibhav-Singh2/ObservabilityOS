@@ -22,12 +22,19 @@ export interface IProject {
   minErrorCount?: number;
   zScoreThreshold?: number;
   plan: "free" | "pro" | "self-host";
-  subscriptionStatus: "active" | "trialing" | "past_due" | "canceled" | "none";
+  subscriptionStatus:
+    | "active"
+    | "trialing"
+    | "past_due"
+    | "canceled"
+    | "cancelling"
+    | "none";
   billingProvider: "stripe" | "razorpay" | "manual" | "none";
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   razorpayCustomerId?: string;
   razorpaySubscriptionId?: string;
+  subscriptionEndsAt?: Date;
   savedQueries?: ISavedQuery[];
 }
 
@@ -60,7 +67,14 @@ const ProjectSchema = new Schema<IProject>(
     plan: { type: String, enum: ["free", "pro", "self-host"], default: "free" },
     subscriptionStatus: {
       type: String,
-      enum: ["active", "trialing", "past_due", "canceled", "none"],
+      enum: [
+        "active",
+        "trialing",
+        "past_due",
+        "canceled",
+        "cancelling",
+        "none",
+      ],
       default: "none",
     },
     billingProvider: {
@@ -72,6 +86,7 @@ const ProjectSchema = new Schema<IProject>(
     stripeSubscriptionId: { type: String },
     razorpayCustomerId: { type: String },
     razorpaySubscriptionId: { type: String },
+    subscriptionEndsAt: { type: Date },
     savedQueries: { type: [SavedQuerySchema], default: [] },
   },
   { timestamps: true },

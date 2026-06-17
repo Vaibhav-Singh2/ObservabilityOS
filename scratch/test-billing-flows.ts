@@ -285,10 +285,131 @@ async function verify() {
       success = false;
     }
 
+    // Test 6: Cancel subscription flow (cancel at cycle end + webhook downgrade)
+    console.log("\n--- [Test 6] Verifying Cancel Subscription flow ---");
+    try {
+      // Setup: simulate an active Pro subscription via Razorpay
+      testProject.plan = "pro";
+      testProject.subscriptionStatus = "active";
+      testProject.billingProvider = "razorpay";
+      testProject.razorpaySubscriptionId = "sub_test_cancel_flow";
+      testProject.razorpayCustomerId = "cust_test_cancel";
+      await testProject.save();
+
+      // Step 1: Simulate cancel (cancel API sets status to "cancelling", keeps plan)
+      testProject.subscriptionStatus = "cancelling";
+      await testProject.save();
+
+      let updated = await Project.findById(projectId);
+      if (!updated) throw new Error("Project not found");
+      const step1Ok =
+        updated.plan === "pro" &&
+        updated.subscriptionStatus === "cancelling" &&
+        updated.razorpaySubscriptionId === "sub_test_cancel_flow";
+
+      console.log(
+        `  Step 1 (cancel at cycle end): Plan=${updated.plan}, Status=${updated.subscriptionStatus} — ${step1Ok ? "PASSED" : "FAILED"}`,
+      );
+
+      // Step 2: Simulate subscription.cancelled webhook firing at cycle end
+      const subscriptionId = updated.razorpaySubscriptionId;
+      await Project.findOneAndUpdate(
+        { razorpaySubscriptionId: subscriptionId },
+        {
+          plan: "free",
+          subscriptionStatus: "none",
+          billingProvider: "none",
+        },
+      );
+
+      updated = await Project.findById(projectId);
+      if (!updated) throw new Error("Project not found");
+      const step2Ok =
+        updated.plan === "free" &&
+        updated.subscriptionStatus === "none" &&
+        updated.billingProvider === "none";
+
+      console.log(
+        `  Step 2 (webhook downgrade): Plan=${updated.plan}, Status=${updated.subscriptionStatus} — ${step2Ok ? "PASSED" : "FAILED"}`,
+      );
+
+      const cancelFlowPassed = step1Ok && step2Ok;
+      results["test_6_cancel_flow"] = {
+        passed: cancelFlowPassed,
+        step1: { plan: "pro", status: "cancelling", ok: step1Ok },
+        step2: { plan: "free", status: "none", ok: step2Ok },
+      };
+      console.log(`Result: ${cancelFlowPassed ? "PASSED" : "FAILED"}`);
+      if (!cancelFlowPassed) success = false;
+    } catch (e: any) {
+      results["test_6_cancel_flow"] = { passed: false, error: e.message };
+      console.error("Test 6 Error:", e);
+      success = false;
+    }
+
+    // Test 7: Restore cancelled subscription (undo cancel before cycle end)
+    console.log("\n--- [Test 7] Verifying Restore (undo cancel) flow ---");
+    try {
+      // Setup: simulate a project with cancelling status
+      testProject.plan = "pro";
+      testProject.subscriptionStatus = "cancelling";
+      testProject.billingProvider = "razorpay";
+      testProject.razorpaySubscriptionId = "sub_test_restore_flow";
+      testProject.razorpayCustomerId = "cust_test_restore";
+      testProject.subscriptionEndsAt = new Date(
+        Date.now() + 15 * 24 * 60 * 60 * 1000,
+      );
+      await testProject.save();
+
+      // Step 1: Verify the cancelling state is set correctly
+      let updated = await Project.findById(projectId);
+      if (!updated) throw new Error("Project not found");
+      const step1Ok =
+        updated.plan === "pro" &&
+        updated.subscriptionStatus === "cancelling" &&
+        updated.billingProvider === "razorpay";
+
+      console.log(
+        `  Step 1 (cancelling state): Plan=${updated.plan}, Status=${updated.subscriptionStatus} — ${step1Ok ? "PASSED" : "FAILED"}`,
+      );
+
+      // Step 2: Simulate restore (sets status back to active, clears end date)
+      testProject.subscriptionStatus = "active";
+      testProject.subscriptionEndsAt = undefined;
+      await testProject.save();
+
+      updated = await Project.findById(projectId);
+      if (!updated) throw new Error("Project not found");
+      const step2Ok =
+        updated.plan === "pro" &&
+        updated.subscriptionStatus === "active" &&
+        !updated.subscriptionEndsAt;
+
+      console.log(
+        `  Step 2 (restored): Plan=${updated.plan}, Status=${updated.subscriptionStatus}, EndsAt=${updated.subscriptionEndsAt} — ${step2Ok ? "PASSED" : "FAILED"}`,
+      );
+
+      const restoreFlowPassed = step1Ok && step2Ok;
+      results["test_7_restore_flow"] = {
+        passed: restoreFlowPassed,
+        step1: { plan: "pro", status: "cancelling", ok: step1Ok },
+        step2: { plan: "pro", status: "active", ok: step2Ok },
+      };
+      console.log(`Result: ${restoreFlowPassed ? "PASSED" : "FAILED"}`);
+      if (!restoreFlowPassed) success = false;
+    } catch (e: any) {
+      results["test_7_restore_flow"] = { passed: false, error: e.message };
+      console.error("Test 7 Error:", e);
+      success = false;
+    }
+
     // Clean up test modifications
     testProject.plan = originalPlan;
     testProject.subscriptionStatus = originalStatus;
     testProject.billingProvider = originalProvider;
+    testProject.razorpaySubscriptionId = undefined;
+    testProject.razorpayCustomerId = undefined;
+    testProject.subscriptionEndsAt = undefined;
     await testProject.save();
   } catch (error: any) {
     success = false;

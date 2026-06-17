@@ -1,0 +1,165 @@
+import { getAuthenticatedUser } from "@/lib/auth";
+import { NextResponse } from "next/server";
+import { Project } from "@repo/db";
+import { z } from "zod";
+import razorpay from "@/lib/razorpay";
+
+const cancelSchema = z.object({
+  projectId: z.string().min(1, "projectId is required"),
+});
+
+export async function POST(request: Request) {
+  try {
+    const user = await getAuthenticatedUser();
+    if (!user) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Not logged in" } },
+        { status: 401 },
+      );
+    }
+
+    const rawBody = await request.json();
+    const validatedData = cancelSchema.parse(rawBody);
+    const { projectId } = validatedData;
+
+    const project = await Project.findOne({
+      _id: projectId,
+      ownerId: user._id,
+    });
+
+    if (!project) {
+      return NextResponse.json(
+        { error: { code: "NOT_FOUND", message: "Project not found" } },
+        { status: 404 },
+      );
+    }
+
+    if (
+      project.subscriptionStatus === "none" ||
+      project.subscriptionStatus === "canceled"
+    ) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "No active subscription to cancel",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    if (project.subscriptionStatus === "cancelling") {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Subscription is already scheduled for cancellation",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    const razorpayKeyId = process.env.RAZORPAY_KEY_ID;
+    const razorpayKeySecret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (
+      !razorpayKeyId ||
+      !razorpayKeySecret ||
+      !project.razorpaySubscriptionId
+    ) {
+      project.plan = "free";
+      project.subscriptionStatus = "none";
+      project.billingProvider = "none";
+      project.razorpaySubscriptionId = undefined;
+      project.razorpayCustomerId = undefined;
+      project.subscriptionEndsAt = undefined;
+
+      await project.save();
+
+      return NextResponse.json({
+        success: true,
+        cancelledImmediately: true,
+        project: {
+          id: project._id.toString(),
+          plan: project.plan,
+          subscriptionStatus: project.subscriptionStatus,
+        },
+      });
+    }
+
+    const cancelledSubscription = await razorpay.subscriptions.cancel(
+      project.razorpaySubscriptionId,
+      true,
+    );
+
+    const endAt = (cancelledSubscription as Record<string, unknown>).end_at as
+      | number
+      | undefined;
+    const subscriptionEndsAt = endAt ? new Date(endAt * 1000) : undefined;
+
+    project.subscriptionStatus = "cancelling";
+    project.subscriptionEndsAt = subscriptionEndsAt;
+    await project.save();
+
+    console.log(
+      `[Cancel Subscription] Project ${projectId} subscription ${project.razorpaySubscriptionId} will cancel at cycle end (${subscriptionEndsAt?.toISOString() ?? "unknown"}).`,
+    );
+
+    return NextResponse.json({
+      success: true,
+      cancelledAtCycleEnd: true,
+      subscriptionEndsAt: subscriptionEndsAt?.toISOString() ?? null,
+      project: {
+        id: project._id.toString(),
+        plan: project.plan,
+        subscriptionStatus: project.subscriptionStatus,
+      },
+    });
+  } catch (error) {
+    console.error("Cancel Subscription Error:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message:
+              "Validation failed: " +
+              error.errors.map((e) => e.message).join(", "),
+          },
+        },
+        { status: 400 },
+      );
+    }
+
+    const msg =
+      error instanceof Error ? error.message : "Failed to cancel subscription";
+    if (
+      msg.includes("already cancelled") ||
+      msg.includes("already canceled") ||
+      msg.includes("subscription cancelled")
+    ) {
+      return NextResponse.json(
+        {
+          error: {
+            code: "CONFLICT",
+            message: "Subscription was already cancelled",
+          },
+        },
+        { status: 409 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        error: {
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to cancel subscription",
+        },
+      },
+      { status: 500 },
+    );
+  }
+}
