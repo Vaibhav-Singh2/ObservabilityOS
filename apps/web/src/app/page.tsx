@@ -226,6 +226,12 @@ export default async function LandingPage() {
             >
               FAQ
             </Link>
+            <Link
+              href="/blog"
+              className="hover:text-slate-200 transition-colors"
+            >
+              Blog
+            </Link>
             <a
               href={process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"}
               target="_blank"
@@ -1366,6 +1372,14 @@ export default async function LandingPage() {
                     className="hover:text-slate-350 transition-colors"
                   >
                     Technical FAQs
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/blog"
+                    className="hover:text-slate-350 transition-colors"
+                  >
+                    Blog
                   </Link>
                 </li>
               </ul>
