@@ -409,7 +409,7 @@ export default function BillingView({
           Billing Management
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Scale your project's limits. Upgrade to unlock advanced anomaly
+          Scale your project&apos;s limits. Upgrade to unlock advanced anomaly
           alerts, webhook integration channels, and team notifications.
         </p>
       </div>
@@ -833,7 +833,7 @@ export default function BillingView({
                     <span className="text-slate-300 font-semibold">500 MB</span>
                     /month —{" "}
                     <span className="text-rose-400 font-semibold">
-                      you've used {formatVolume(usage.logVolumeBytes)}
+                      you&apos;ve used {formatVolume(usage.logVolumeBytes)}
                     </span>{" "}
                     (logs will be rejected after downgrade)
                   </>
@@ -859,9 +859,9 @@ export default function BillingView({
             <div className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-950 border border-slate-850 mb-5">
               <ShieldCheck className="w-4 h-4 text-indigo-400 shrink-0 mt-0.5" />
               <p className="text-[10px] text-slate-500 leading-normal">
-                Auto-pay will be stopped. You won't be charged again. You can
-                re-subscribe at any time before the billing period ends to keep
-                Pro features.
+                Auto-pay will be stopped. You won&apos;t be charged again. You
+                can re-subscribe at any time before the billing period ends to
+                keep Pro features.
               </p>
             </div>
             <div className="flex gap-3">

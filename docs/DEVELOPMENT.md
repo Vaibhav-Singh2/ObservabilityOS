@@ -61,6 +61,9 @@ npx tsx scratch/test-week-9.ts
 
 # Run week 10 tests (Atlas Search fallbacks, Redis caching, Rate-limit middlewares)
 npx tsx scratch/test-week-10.ts
+
+# Run billing flow tests (Cancel, restore, self-host auto-detection)
+npx tsx scratch/test-billing-flows.ts
 ```
 
 ### TypeScript Validation
@@ -114,7 +117,7 @@ curl -X POST http://localhost:3000/api/ingest \
 
 ### 2. Self-Host Plan: Billing Disabled
 
-When a project is on the `self-host` plan, the billing page hides all subscription, pricing, and payment sections. Instead it shows a self-host info card with a link to the deployment guide. The cancel, restore, and checkout API routes all return 400 if called for a self-host project.
+When a project is on the `self-host` plan, the billing page redirects to `/dashboard`, the sidebar "Billing" link is hidden, and all billing API routes return 404. All features are unlocked without any subscription or payment.
 
 **Self-host mode is auto-detected**: if `RAZORPAY_KEY_ID` and `RAZORPAY_KEY_SECRET` are not set (or commented out), the app automatically runs in self-host mode. This:
 
@@ -148,7 +151,7 @@ On confirm, the frontend calls `POST /api/billing/cancel`, which:
 
 If the user changes their mind before the cycle ends, they can click **"Undo Cancel"** to restore the subscription via `POST /api/billing/restore`.
 
-If no Razorpay keys are configured (e.g. local development), the cancel endpoint downgrades immediately (same behaviour as the manual override).
+If no Razorpay keys are configured (self-host mode), the cancel, restore, and checkout API routes all return 404 — billing is fully disabled. Use the sandbox manual billing override (`POST /api/billing/manual`) to change plans locally for testing.
 
 ### 5. Redis Invalidation Monitoring
 

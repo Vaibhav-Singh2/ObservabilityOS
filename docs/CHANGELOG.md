@@ -2,6 +2,22 @@
 
 All notable changes to the ObservabilityOS project are documented here, grouped by release tags.
 
+## [v1.5.0] — Billing Overhaul: Self-Host Auto-Detection, Cancel/Restore, Plan Realignment
+
+### Added
+
+- **Self-Host Mode Auto-Detection**: Removed `NEXT_PUBLIC_SELF_HOSTED` env var. The app now auto-detects self-host mode based on Razorpay key presence. When `RAZORPAY_KEY_ID`/`RAZORPAY_KEY_SECRET` are missing, all billing API routes return 404, the billing page redirects to `/dashboard`, and the sidebar "Billing" link is hidden.
+- **Subscription Cancel/Restore Flow**: Added `POST /api/billing/cancel` (cancels Razorpay subscription at cycle end, sets `cancelling` status) and `POST /api/billing/restore` (undoes pending cancellation via `cancel_at_cycle_end: false`). Billing UI now includes confirmation modals, cancel/restore buttons, and status badges showing the end date.
+- **Data-Driven Landing Page Pricing**: Landing page pricing section now iterates the centralized `PLANS` config instead of hardcoded cards, keeping billing view and marketing page in sync.
+
+### Changed
+
+- **Plan Features Realigned**: Free plan no longer claims gated access to "Multi-channel alerts" or "Audit log trail & team collaboration" — these features work for all tiers. Free plan correctly shows only AI analysis as a gated feature. Pro plan differentiates with "AI-powered anomaly detection" instead of "Multi-signal" (same Z-score engine for all plans).
+- **Billing Dead Code Removed**: Cleaned up `BillingView.tsx` (removed header variants, info card, sandbox guards no longer needed).
+- **TypeScript Fixes**: Fixed `subscriptionEndsAt` Mongoose type, `cancel_at_cycle_end` cast in Razorpay subscription update, and `Record` cast for billing API routes.
+
+---
+
 ## [v1.4.1] — AI Gateway Consolidation & Dynamic Routing
 
 ### Added

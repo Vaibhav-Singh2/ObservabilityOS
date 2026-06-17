@@ -24,6 +24,9 @@ erDiagram
         float zScoreThreshold "Default 3.0"
         int minErrorCount "Default 3"
         string plan "free | pro | self-host"
+        string subscriptionId "Razorpay subscription ID"
+        string subscriptionStatus "none | active | cancelling | canceled"
+        date subscriptionEndsAt "End of current billing period"
     }
 
     SERVICE {
