@@ -49,7 +49,7 @@ const GUIDES: Record<string, GuideData> = {
 
 exporters:
   otlphttp/observabilityos:
-    endpoint: "https://ingest.observabilityos.com/v1/telemetry"
+    endpoint: "https://ingest.observabilityos.in/v1/telemetry"
     headers:
       x-api-key: "your_project_secret_api_key_here"
 

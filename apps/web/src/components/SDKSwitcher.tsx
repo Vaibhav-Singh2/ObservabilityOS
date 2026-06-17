@@ -10,9 +10,9 @@ const SDK_DATA = {
     filename: "server.js",
     lang: "javascript",
     code: `// Install SDK
-// npm install observability-os
+// npm install @observability-os/sdk
 
-import { Observability } from "observability-os";
+import { Observability } from "@observability-os/sdk";
 
 const obs = new Observability({
   apiKey: process.env.OBS_API_KEY,
@@ -32,10 +32,10 @@ obs.info("Payment processed successfully", {
     filename: "instrumentation.ts",
     lang: "typescript",
     code: `// Install SDK
-// npm install observability-os
+// npm install @observability-os/sdk
 
 // Setup Next.js instrumentation file
-import { initObservability } from "observability-os/next";
+import { initObservability } from "@observability-os/sdk/next";
 
 export function register() {
   initObservability({
@@ -51,10 +51,10 @@ export function register() {
     filename: "app.js",
     lang: "javascript",
     code: `// Install SDK
-// npm install express observability-os
+// npm install express @observability-os/sdk
 
 const express = require("express");
-const { expressMiddleware } = require("observability-os/express");
+const { expressMiddleware } = require("@observability-os/sdk/express");
 
 const app = express();
 

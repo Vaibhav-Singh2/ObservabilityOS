@@ -58,7 +58,7 @@ async function run() {
     user = await User.create({
       githubId: "verify-user-week10",
       username: "Week10SRE",
-      email: "week10@observabilityos.io",
+      email: "support@observabilityos.in",
     });
   }
   console.log(`Using User: ${user.username} (${user._id})`);

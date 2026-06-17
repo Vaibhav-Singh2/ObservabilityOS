@@ -15,8 +15,8 @@ A commercial license grants you the legal right to run ObservabilityOS commercia
 
 To discuss enterprise pricing, commercial licensing terms, and tailored support agreements, please contact our licensing team:
 
-- **Email**: commercial@observabilityos.com
-- **Website**: [https://observabilityos.com/pricing](https://observabilityos.com/pricing)
+- **Email**: support@observabilityos.in
+- **Website**: [https://www.observabilityos.in/pricing](https://www.observabilityos.in/pricing)
 
 ---
 

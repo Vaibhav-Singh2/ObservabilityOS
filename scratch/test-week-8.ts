@@ -67,14 +67,14 @@ async function run() {
     user = await User.create({
       githubId: "verify-user-123",
       username: "VerifySRE",
-      email: "verify@observabilityos.io",
+      email: "support@observabilityos.in",
     });
   }
   console.log(`Using User: ${user.username} (${user._id})`);
 
   // Test 1: Update service runbooks & troubleshooting steps
   console.log("\n--- [Test 1] Modifying service runbooks and steps ---");
-  const testUrl = "https://wiki.observabilityos.io/runbooks/db-outage";
+  const testUrl = "https://docs.observabilityos.in/runbooks/db-outage";
   const testSteps =
     "1. Check MongoDB Atlas connection string.\n2. Verify local docker-compose service status.\n3. Validate replica set member health.";
 

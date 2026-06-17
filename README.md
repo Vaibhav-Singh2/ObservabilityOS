@@ -174,4 +174,4 @@ ObservabilityOS is licensed under a hybrid licensing model:
 - **Core Application & Packages**: Licensed under the **ObservabilityOS Source Available License** (see [LICENSE](LICENSE)). This allows free personal, internal development, and non-SaaS production use, but prohibits offering the platform as a commercial SaaS or managed service.
 - **Logger SDK (`packages/sdk`)**: Licensed under the highly permissive **MIT License** (see [packages/sdk/LICENSE](packages/sdk/LICENSE)) to allow frictionless integration into any proprietary codebase.
 
-For commercial licenses, custom terms, or SaaS rights, please read [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) or contact sales@observabilityos.com.
+For commercial licenses, custom terms, or SaaS rights, please read [COMMERCIAL_LICENSE.md](COMMERCIAL_LICENSE.md) or contact support@observabilityos.in.

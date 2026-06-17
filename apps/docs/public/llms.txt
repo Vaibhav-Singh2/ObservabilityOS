@@ -29,4 +29,4 @@ The documentation is grouped into the following categories and logical slugs:
 - **Release Changelog** (`/docs/changelog`): Historical release notes, features completed, and visual modifications.
 
 ---
-For dynamic sitemaps of all documentation, fetch the raw sitemap XML at: `https://docs.observabilityos.com/sitemap.xml`.
+For dynamic sitemaps of all documentation, fetch the raw sitemap XML at: `https://docs.observabilityos.in/sitemap.xml`.

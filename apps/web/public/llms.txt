@@ -11,7 +11,7 @@ ObservabilityOS is an open-source, developer-first observability and log analyti
 
 ## Integration & Getting Started
 
-Refer to the main documentation hosted at https://docs.observabilityos.com.
+Refer to the main documentation hosted at https://docs.observabilityos.in.
 
 ### JavaScript/TypeScript SDK Integration
 ```typescript

@@ -95,7 +95,7 @@ You violate the license if you package ObservabilityOS (or modified versions of 
 
 ### Q: How do I obtain commercial rights or enterprise support?
 
-If you want to bypass the SaaS restrictions, obtain enterprise SLA support, or request custom branding options, please refer to the [COMMERCIAL_LICENSE.md](../COMMERCIAL_LICENSE.md) file or contact sales@observabilityos.com.
+If you want to bypass the SaaS restrictions, obtain enterprise SLA support, or request custom branding options, please refer to the [COMMERCIAL_LICENSE.md](../COMMERCIAL_LICENSE.md) file or contact support@observabilityos.in.
 
 ---
 

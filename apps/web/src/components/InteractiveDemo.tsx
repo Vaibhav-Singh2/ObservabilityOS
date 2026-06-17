@@ -40,7 +40,7 @@ export default function InteractiveDemo() {
             <span className="w-3 h-3 rounded-full bg-green-500/80" />
           </div>
           <span className="text-xs text-slate-500 font-mono select-none">
-            dashboard.observabilityos.com/project_devops_prod
+            dashboard.observabilityos.in/project_devops_prod
           </span>
         </div>
 

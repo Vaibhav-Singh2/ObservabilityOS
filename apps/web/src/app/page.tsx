@@ -1487,7 +1487,7 @@ export default async function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="mailto:support@observabilityos.com"
+                    href="mailto:support@observabilityos.in"
                     className="hover:text-slate-350 transition-colors"
                   >
                     Support Email
@@ -1495,7 +1495,7 @@ export default async function LandingPage() {
                 </li>
                 <li>
                   <a
-                    href="mailto:sales@observabilityos.com"
+                    href="mailto:support@observabilityos.in"
                     className="hover:text-slate-350 transition-colors"
                   >
                     Contact Sales
