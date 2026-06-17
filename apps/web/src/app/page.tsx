@@ -28,6 +28,7 @@ import SDKSwitcher from "@/components/SDKSwitcher";
 import InteractiveDemo from "@/components/InteractiveDemo";
 import FAQAccordion from "@/components/FAQAccordion";
 import BackToTop from "@/components/BackToTop";
+import { PLANS } from "@/lib/plans";
 
 export const metadata = {
   title:
@@ -1087,167 +1088,104 @@ export default async function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
-            {/* Free Developer Plan */}
-            <div className="bg-slate-950 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between text-left hover:border-slate-850 transition-colors">
-              <div>
-                <h3 className="text-base font-bold text-slate-200">
-                  Free Developer
-                </h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
-                  Side projects & local testing.
-                </p>
-                <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">
-                    $0
-                  </strong>
-                  <span className="text-xs text-slate-500"> / month</span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/60 pt-5">
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
-                    1 service monitored
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                    500MB logs / month
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                    7-day data retention
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
-                    Basic statistical anomaly checking
-                  </li>
-                  <li className="flex items-start gap-2 text-slate-650 line-through">
-                    <X className="w-3.5 h-3.5 text-slate-700 shrink-0 mt-0.5" />
-                    Multi-channel alerts
-                  </li>
-                  <li className="flex items-start gap-2 text-slate-650 line-through">
-                    <X className="w-3.5 h-3.5 text-slate-700 shrink-0 mt-0.5" />
-                    AI incident root cause
-                  </li>
-                </ul>
-              </div>
-              <a
-                href="/api/auth/github"
-                className="mt-6 w-full inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold h-10 rounded-lg text-xs transition-colors cursor-pointer"
-              >
-                Start Free
-              </a>
-            </div>
+            {PLANS.map((plan) => {
+              const isHighlighted = plan.id === "pro";
 
-            {/* Pro Cloud Plan (Highlighted) */}
-            <div className="bg-slate-900 border-2 border-indigo-500/40 p-6 rounded-2xl flex flex-col justify-between text-left relative shadow-xl shadow-indigo-900/10">
-              <div className="absolute top-0 right-5 -translate-y-1/2 bg-linear-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
-                Most Popular
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-200 flex items-center gap-1.5">
-                  Pro Cloud
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-                </h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
-                  Solo founders & small teams in production.
-                </p>
-                <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">
-                    $29
-                  </strong>
-                  <span className="text-xs text-slate-500"> / month</span>
-                  <span className="block text-[10px] text-slate-500 mt-0.5">
-                    ≈ ₹2,499 / month in India
-                  </span>
-                </div>
-                <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/80 pt-5">
-                  <li className="flex items-start gap-2 font-semibold text-slate-200">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Up to 10 services monitored
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    10GB logs / month
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    30-day secure data retention
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Slack, Discord & Teams alerts
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    AI SRE Analyst incident diagnostics
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    1 team member seat
-                  </li>
-                </ul>
-              </div>
-              <a
-                href="/api/auth/github"
-                className="mt-6 w-full inline-flex items-center justify-center bg-white hover:bg-slate-100 text-slate-950 font-bold h-10 rounded-lg text-xs transition-transform duration-150 hover:-translate-y-0.5 cursor-pointer shadow-md shadow-white/5"
-              >
-                Upgrade Now
-              </a>
-            </div>
+              return (
+                <div
+                  key={plan.id}
+                  className={`p-6 rounded-2xl flex flex-col justify-between text-left transition-colors ${
+                    isHighlighted
+                      ? "bg-slate-900 border-2 border-indigo-500/40 relative shadow-xl shadow-indigo-900/10"
+                      : "bg-slate-950 border border-slate-900 hover:border-slate-850"
+                  }`}
+                >
+                  {/* Badge */}
+                  {plan.badge && (
+                    <div className="absolute top-0 right-5 -translate-y-1/2 bg-linear-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
+                      {plan.badge}
+                    </div>
+                  )}
 
-            {/* Self-Host Open Source Plan */}
-            <div className="bg-slate-950 border border-slate-900 p-6 rounded-2xl flex flex-col justify-between text-left hover:border-slate-850 transition-colors">
-              <div>
-                <h3 className="text-base font-bold text-slate-200 flex items-center gap-1.5">
-                  Self-Host OSS
-                  <Zap className="w-3.5 h-3.5 text-amber-400" />
-                </h3>
-                <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
-                  Run on your own infrastructure.
-                </p>
-                <div className="my-5">
-                  <strong className="text-3xl font-extrabold text-white">
-                    Free
-                  </strong>
-                  <span className="text-xs text-slate-500"> / Open Source</span>
+                  <div>
+                    <h3 className="text-base font-bold text-slate-200 flex items-center gap-1.5">
+                      {plan.name}
+                      {plan.id === "pro" && (
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                      )}
+                      {plan.id === "self-host" && (
+                        <Zap className="w-3.5 h-3.5 text-amber-400" />
+                      )}
+                    </h3>
+                    <p className="text-[11px] text-slate-550 mt-1.5 leading-relaxed">
+                      {plan.description}
+                    </p>
+
+                    {/* Price */}
+                    <div className="my-5">
+                      <strong className="text-3xl font-extrabold text-white">
+                        {plan.priceUSD === 0 ? "Free" : `$${plan.priceUSD}`}
+                      </strong>
+                      <span className="text-xs text-slate-500">
+                        {plan.priceUSD === 0 ? " / Open Source" : " / month"}
+                      </span>
+                      {plan.id === "pro" && (
+                        <span className="block text-[10px] text-slate-500 mt-0.5">
+                          ≈ ₹2,499 / month in India
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Features */}
+                    <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/60 pt-5">
+                      {plan.features.map((feature, i) => (
+                        <li
+                          key={i}
+                          className={`flex items-start gap-2 ${
+                            feature.included
+                              ? ""
+                              : "text-slate-650 line-through"
+                          }`}
+                        >
+                          {feature.included ? (
+                            <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                          ) : (
+                            <X className="w-3.5 h-3.5 text-slate-700 shrink-0 mt-0.5" />
+                          )}
+                          {feature.text}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* CTA */}
+                  {plan.id === "self-host" ? (
+                    <a
+                      href={`${
+                        process.env.NEXT_PUBLIC_DOCS_URL ||
+                        "http://localhost:3001"
+                      }/docs/deployment`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-6 w-full inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold h-10 rounded-lg text-xs transition-colors cursor-pointer text-center"
+                    >
+                      Deploy Now
+                    </a>
+                  ) : (
+                    <a
+                      href="/api/auth/github"
+                      className={`mt-6 w-full inline-flex items-center justify-center h-10 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                        plan.id === "pro"
+                          ? "bg-white hover:bg-slate-100 text-slate-950 font-bold hover:-translate-y-0.5 shadow-md shadow-white/5"
+                          : "bg-slate-900 hover:bg-slate-800 text-slate-200"
+                      }`}
+                    >
+                      {plan.id === "free" ? "Start Free" : "Upgrade Now"}
+                    </a>
+                  )}
                 </div>
-                <ul className="space-y-3 text-xs text-slate-350 border-t border-slate-900/60 pt-5">
-                  <li className="flex items-start gap-2 font-semibold text-slate-200">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Unlimited services monitored
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Unlimited logs / month
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Unlimited data retention
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Community z-score anomaly checker
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    Self-service Docker/Compose setup
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
-                    GitHub community support
-                  </li>
-                </ul>
-              </div>
-              <a
-                href={`${
-                  process.env.NEXT_PUBLIC_DOCS_URL || "http://localhost:3001"
-                }/docs/deployment`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 w-full inline-flex items-center justify-center bg-slate-900 hover:bg-slate-800 text-slate-200 font-semibold h-10 rounded-lg text-xs transition-colors cursor-pointer text-center"
-              >
-                Deploy Now
-              </a>
-            </div>
+              );
+            })}
           </div>
 
           {/* Expansion Revenue Info */}
