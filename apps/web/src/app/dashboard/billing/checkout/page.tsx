@@ -59,6 +59,14 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
     redirect("/dashboard/billing");
   }
 
+  // Self-host users don't use billing
+  if (
+    process.env.NEXT_PUBLIC_SELF_HOSTED === "true" ||
+    project.plan === "self-host"
+  ) {
+    redirect(`/dashboard?projectId=${projectId}`);
+  }
+
   const serializedProject = {
     id: project._id.toString(),
     name: project.name,

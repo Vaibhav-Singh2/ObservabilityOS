@@ -393,7 +393,6 @@ export default function BillingView({
 
   const currentDisplayName = () => {
     if (currentPlan === "pro") return "Pro Cloud";
-    if (currentPlan === "self-host") return "Self-Host OSS";
     if (currentPlan === "free") return "Free Tier";
     return currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1);
   };
@@ -410,7 +409,7 @@ export default function BillingView({
           Billing Management
         </h1>
         <p className="text-slate-400 text-sm mt-1">
-          Scale your project&apos;s limits. Upgrade to unlock advanced anomaly
+          Scale your project's limits. Upgrade to unlock advanced anomaly
           alerts, webhook integration channels, and team notifications.
         </p>
       </div>
@@ -429,7 +428,6 @@ export default function BillingView({
         </div>
       )}
 
-      {/* Current Subscription Status */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-linear-to-br from-indigo-500/5 to-transparent pointer-events-none" />
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 relative z-10">
@@ -585,168 +583,172 @@ export default function BillingView({
 
       <div className="pt-2" />
 
-      {/* Pricing Cards — responsive 1→3 column grid aligned with usage stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {PLANS.map((plan) => {
-          const price = formatPrice(plan);
-          const isCurrent = isCurrentPlan(plan);
-          const isHighlighted = plan.id === "pro";
+      {/* Pricing Cards */}
+      {currentPlan !== "self-host" && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {PLANS.map((plan) => {
+            const price = formatPrice(plan);
+            const isCurrent = isCurrentPlan(plan);
+            const isHighlighted = plan.id === "pro";
 
-          return (
-            <div
-              key={plan.id}
-              className={`rounded-3xl p-6 flex flex-col justify-between relative transition-all ${
-                isHighlighted
-                  ? "bg-slate-900 border-2 border-indigo-500/40 shadow-2xl shadow-indigo-500/5"
-                  : "bg-slate-900/60 border border-slate-800/80 hover:border-slate-700"
-              } ${!plan.available ? "opacity-70" : ""}`}
-            >
-              {/* Badges */}
-              {plan.badge && (
-                <div className="absolute top-0 right-5 -translate-y-1/2 bg-linear-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
-                  {plan.badge}
-                </div>
-              )}
-              {!plan.available && (
-                <div className="absolute top-0 left-5 -translate-y-1/2 bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-slate-700">
-                  Coming Soon
-                </div>
-              )}
-
-              {/* Plan Name */}
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-1.5">
-                  {plan.name}
-                  {plan.id === "pro" && (
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
-                  )}
-                  {plan.id === "self-host" && (
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
-                  )}
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                  {plan.description}
-                </p>
-
-                {/* Price */}
-                <div className="mt-5">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-extrabold text-white">
-                      {price.primary}
-                    </span>
-                    <span className="text-slate-500 text-[11px] font-medium">
-                      / mo
-                    </span>
+            return (
+              <div
+                key={plan.id}
+                className={`rounded-3xl p-6 flex flex-col justify-between relative transition-all ${
+                  isHighlighted
+                    ? "bg-slate-900 border-2 border-indigo-500/40 shadow-2xl shadow-indigo-500/5"
+                    : "bg-slate-900/60 border border-slate-800/80 hover:border-slate-700"
+                } ${!plan.available ? "opacity-70" : ""}`}
+              >
+                {/* Badges */}
+                {plan.badge && (
+                  <div className="absolute top-0 right-5 -translate-y-1/2 bg-linear-to-r from-indigo-600 to-violet-600 text-white text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg">
+                    {plan.badge}
                   </div>
-                  {price.secondary && (
-                    <span className="text-[10px] text-slate-600 mt-0.5 block">
-                      ≈ {price.secondary}
-                    </span>
-                  )}
-                </div>
-
-                {/* Features */}
-                <ul className="mt-5 space-y-2.5">
-                  {plan.features.map((feature, i) => (
-                    <li
-                      key={i}
-                      className={`flex items-start gap-2 text-[12px] leading-relaxed ${
-                        feature.included
-                          ? "text-slate-300"
-                          : "text-slate-600 line-through"
-                      }`}
-                    >
-                      <Check
-                        className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
-                          feature.included
-                            ? "text-emerald-400"
-                            : "text-slate-700"
-                        }`}
-                      />
-                      {feature.text}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* CTA */}
-              <div className="mt-6">
-                {!plan.available ? (
-                  <button
-                    disabled
-                    className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed"
-                  >
-                    Notify Me
-                  </button>
-                ) : isCurrent ? (
-                  <div className="text-center py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
-                    <Check className="w-3.5 h-3.5" />
-                    Current Plan
-                  </div>
-                ) : plan.id === "pro" ? (
-                  <button
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/billing/checkout?projectId=${project.id}&planId=${plan.id}`,
-                      )
-                    }
-                    className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
-                  >
-                    Select Plan
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                ) : plan.id === "self-host" ? (
-                  <a
-                    href={`${
-                      process.env.NEXT_PUBLIC_DOCS_URL ||
-                      "http://localhost:3001"
-                    }/docs/deployment`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-xl text-[11px] font-bold border border-slate-750 transition-all cursor-pointer text-center"
-                  >
-                    Deploy Now
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
-                ) : currentSubStatus === "cancelling" ? (
-                  <button
-                    disabled
-                    className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed"
-                  >
-                    Cancellation Pending
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      setCancelModalType("downgrade");
-                      setShowCancelModal(true);
-                    }}
-                    disabled={isSandboxUpdating || isCancelling}
-                    className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white cursor-pointer transition-all disabled:opacity-50"
-                  >
-                    Downgrade to Free
-                  </button>
                 )}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+                {!plan.available && (
+                  <div className="absolute top-0 left-5 -translate-y-1/2 bg-slate-800 text-slate-400 text-[9px] font-black uppercase tracking-wider px-3 py-1 rounded-full border border-slate-700">
+                    Coming Soon
+                  </div>
+                )}
 
-      {/* Expansion Revenue Info */}
-      <div className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5">
-        <p className="text-[11px] text-slate-500 leading-relaxed">
-          <span className="text-slate-400 font-semibold">
-            Usage-based add-ons:
-          </span>{" "}
-          Log overages at <span className="text-slate-300">$0.10/GB</span> above
-          plan limit · Additional AI analysis credits at{" "}
-          <span className="text-slate-300">$20 / 100 credits</span> · Extra
-          seats at <span className="text-slate-300">$30/seat/mo</span> ·{" "}
-          <span className="text-indigo-400 font-semibold">20% off</span> with
-          annual billing.
-        </p>
-      </div>
+                {/* Plan Name */}
+                <div>
+                  <h3 className="text-base font-bold text-white flex items-center gap-1.5">
+                    {plan.name}
+                    {plan.id === "pro" && (
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-400 animate-pulse" />
+                    )}
+                    {plan.id === "self-host" && (
+                      <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    )}
+                  </h3>
+                  <p className="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
+                    {plan.description}
+                  </p>
+
+                  {/* Price */}
+                  <div className="mt-5">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-extrabold text-white">
+                        {price.primary}
+                      </span>
+                      <span className="text-slate-500 text-[11px] font-medium">
+                        / mo
+                      </span>
+                    </div>
+                    {price.secondary && (
+                      <span className="text-[10px] text-slate-600 mt-0.5 block">
+                        ≈ {price.secondary}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Features */}
+                  <ul className="mt-5 space-y-2.5">
+                    {plan.features.map((feature, i) => (
+                      <li
+                        key={i}
+                        className={`flex items-start gap-2 text-[12px] leading-relaxed ${
+                          feature.included
+                            ? "text-slate-300"
+                            : "text-slate-600 line-through"
+                        }`}
+                      >
+                        <Check
+                          className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${
+                            feature.included
+                              ? "text-emerald-400"
+                              : "text-slate-700"
+                          }`}
+                        />
+                        {feature.text}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* CTA */}
+                <div className="mt-6">
+                  {!plan.available ? (
+                    <button
+                      disabled
+                      className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed"
+                    >
+                      Notify Me
+                    </button>
+                  ) : isCurrent ? (
+                    <div className="text-center py-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-[11px] font-bold uppercase tracking-wider flex items-center justify-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" />
+                      Current Plan
+                    </div>
+                  ) : plan.id === "pro" ? (
+                    <button
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/billing/checkout?projectId=${project.id}&planId=${plan.id}`,
+                        )
+                      }
+                      className="w-full flex items-center justify-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/35 transition-all cursor-pointer"
+                    >
+                      Select Plan
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  ) : plan.id === "self-host" ? (
+                    <a
+                      href={`${
+                        process.env.NEXT_PUBLIC_DOCS_URL ||
+                        "http://localhost:3001"
+                      }/docs/deployment`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-white py-2 rounded-xl text-[11px] font-bold border border-slate-750 transition-all cursor-pointer text-center"
+                    >
+                      Deploy Now
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  ) : currentSubStatus === "cancelling" ? (
+                    <button
+                      disabled
+                      className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-950 border border-slate-800 text-slate-600 cursor-not-allowed"
+                    >
+                      Cancellation Pending
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setCancelModalType("downgrade");
+                        setShowCancelModal(true);
+                      }}
+                      disabled={isSandboxUpdating || isCancelling}
+                      className="w-full py-2 rounded-xl text-[11px] font-semibold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-white cursor-pointer transition-all disabled:opacity-50"
+                    >
+                      Downgrade to Free
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Expansion Revenue Info — not shown for self-host */}
+      {currentPlan !== "self-host" && (
+        <div className="bg-slate-900/40 border border-slate-800/60 rounded-2xl p-5">
+          <p className="text-[11px] text-slate-500 leading-relaxed">
+            <span className="text-slate-400 font-semibold">
+              Usage-based add-ons:
+            </span>{" "}
+            Log overages at <span className="text-slate-300">$0.10/GB</span>{" "}
+            above plan limit · Additional AI analysis credits at{" "}
+            <span className="text-slate-300">$20 / 100 credits</span> · Extra
+            seats at <span className="text-slate-300">$30/seat/mo</span> ·{" "}
+            <span className="text-indigo-400 font-semibold">20% off</span> with
+            annual billing.
+          </p>
+        </div>
+      )}
 
       {/* Sandbox Tools */}
       {isSandbox && (
@@ -764,7 +766,7 @@ export default function BillingView({
           </p>
 
           <div className="flex flex-wrap items-center gap-2">
-            {["free", "pro", "self-host"].map((p) => {
+            {["free", "pro"].map((p) => {
               if (p === currentPlan) return null;
               return (
                 <button

@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project, Service } from "@repo/db";
+import {
+  connectToDatabase,
+  User,
+  Project,
+  Service,
+  type IProject,
+} from "@repo/db";
 import jwt from "jsonwebtoken";
 import BillingView from "./BillingView";
 import { getLogVolumeUsage } from "@/lib/quota";
@@ -53,6 +59,28 @@ export default async function BillingPage({ searchParams }: PageProps) {
     redirect("/dashboard");
   }
 
+  const isSelfHosted = process.env.NEXT_PUBLIC_SELF_HOSTED === "true";
+
+  // Self-host users get redirected — billing is cloud-only
+  if (isSelfHosted) {
+    // Auto-upgrade to self-host plan before redirecting
+    if (activeProject.plan !== "self-host") {
+      activeProject.plan = "self-host";
+      activeProject.subscriptionStatus = "none";
+      activeProject.billingProvider = "none";
+      activeProject.stripeCustomerId = undefined;
+      activeProject.stripeSubscriptionId = undefined;
+      activeProject.razorpayCustomerId = undefined;
+      activeProject.razorpaySubscriptionId = undefined;
+      (activeProject as IProject).subscriptionEndsAt = undefined;
+      await activeProject.save();
+      console.log(
+        `[Self-Host] Auto-upgraded project ${activeProject._id} to self-host plan.`,
+      );
+    }
+    redirect(`/dashboard?projectId=${activeProject._id}`);
+  }
+
   const serializedProject = {
     id: activeProject._id.toString(),
     name: activeProject.name,
@@ -63,7 +91,9 @@ export default async function BillingPage({ searchParams }: PageProps) {
     stripeSubscriptionId: activeProject.stripeSubscriptionId || "",
     razorpayCustomerId: activeProject.razorpayCustomerId || "",
     razorpaySubscriptionId: activeProject.razorpaySubscriptionId || "",
-    subscriptionEndsAt: activeProject.subscriptionEndsAt?.toISOString(),
+    subscriptionEndsAt: (
+      activeProject as IProject
+    ).subscriptionEndsAt?.toISOString(),
   };
 
   const serviceCount = await Service.countDocuments({

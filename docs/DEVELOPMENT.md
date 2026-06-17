@@ -112,14 +112,24 @@ curl -X POST http://localhost:3000/api/ingest \
   }'
 ```
 
-### 2. Sandbox Billing Toggles
+### 2. Self-Host Plan: Billing Disabled
+
+When a project is on the `self-host` plan, the billing page hides all subscription, pricing, and payment sections. Instead it shows a self-host info card with a link to the deployment guide. The cancel, restore, and checkout API routes all return 400 if called for a self-host project.
+
+**For self-hosted deployments**, set `NEXT_PUBLIC_SELF_HOSTED=true` in your `.env` file. This:
+
+- Auto-upgrades all projects to the `self-host` plan on first billing page visit (unlimited quotas).
+- Disables the sandbox mode detection (even without Razorpay keys).
+- Ensures new projects start with unlimited limits immediately.
+
+### 3. Sandbox Billing Toggles
 
 Our local environment includes a developer sandbox bypass card located on the Billing Management page.
 
 - You can click any of the tier buttons (**Set to free**, **pro**, or **self-host**) to instantly trigger database plan overrides.
 - This calls `POST /api/billing/manual`, bypassing external payment processor keys (Razorpay) for frictionless offline testing.
 
-### 3. Cancel / Downgrade Subscription Flow
+### 4. Cancel / Downgrade Subscription Flow
 
 Production users can cancel their Razorpay subscription or downgrade to the Free Tier from the Billing Management page:
 
@@ -134,9 +144,11 @@ On confirm, the frontend calls `POST /api/billing/cancel`, which:
 2. Sets `subscriptionStatus: "cancelling"` in MongoDB — the plan remains unchanged.
 3. When the billing period ends, Razorpay sends a `subscription.cancelled` webhook, which the webhook handler catches and downgrades the project to `free`.
 
+If the user changes their mind before the cycle ends, they can click **"Undo Cancel"** to restore the subscription via `POST /api/billing/restore`.
+
 If no Razorpay keys are configured (e.g. local development), the cancel endpoint downgrades immediately (same behaviour as the manual override).
 
-### 4. Redis Invalidation Monitoring
+### 5. Redis Invalidation Monitoring
 
 If your dashboard cache is out of sync, you can flush local cache entries manually using Redis-CLI:
 

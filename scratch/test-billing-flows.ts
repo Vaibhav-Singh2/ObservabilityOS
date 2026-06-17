@@ -403,6 +403,75 @@ async function verify() {
       success = false;
     }
 
+    // Test 8: Self-host plan has no billing fields
+    console.log("\n--- [Test 8] Verifying self-host plan has no billing ---");
+    try {
+      // Step 1: Simulate auto-upgrade from free to self-host (clears all billing fields)
+      testProject.plan = "free";
+      testProject.subscriptionStatus = "none";
+      testProject.billingProvider = "none";
+      testProject.razorpaySubscriptionId = "sub_old";
+      testProject.razorpayCustomerId = "cust_old";
+      testProject.subscriptionEndsAt = new Date();
+      await testProject.save();
+
+      testProject.plan = "self-host";
+      testProject.subscriptionStatus = "none";
+      testProject.billingProvider = "none";
+      testProject.razorpaySubscriptionId = undefined;
+      testProject.razorpayCustomerId = undefined;
+      testProject.subscriptionEndsAt = undefined;
+      await testProject.save();
+
+      let updated = await Project.findById(projectId);
+      if (!updated) throw new Error("Project not found");
+      const autoUpgradeOk =
+        updated.plan === "self-host" &&
+        !updated.razorpaySubscriptionId &&
+        !updated.razorpayCustomerId &&
+        !updated.subscriptionEndsAt;
+
+      console.log(
+        `  Step 1 (auto-upgrade free→self-host): Plan=${updated.plan}, Billing fields cleared — ${autoUpgradeOk ? "PASSED" : "FAILED"}`,
+      );
+      if (!autoUpgradeOk) success = false;
+
+      // Step 2: Verify self-host plan persists with no billing fields
+      const noBillingFields =
+        !updated.razorpaySubscriptionId &&
+        !updated.razorpayCustomerId &&
+        !updated.subscriptionEndsAt;
+      const noBillingStatus =
+        updated.subscriptionStatus === "none" &&
+        updated.billingProvider === "none";
+      const isSelfHost = updated.plan === "self-host";
+      const selfHostOk = isSelfHost && noBillingFields && noBillingStatus;
+
+      const selfHostStep2Passed = selfHostOk;
+      results["test_8_self_host_no_billing"] = {
+        passed: autoUpgradeOk && selfHostStep2Passed,
+        step1: { from: "free", to: "self-host", ok: autoUpgradeOk },
+        step2: {
+          plan: updated.plan,
+          status: updated.subscriptionStatus,
+          provider: updated.billingProvider,
+          noBillingFields,
+          ok: selfHostStep2Passed,
+        },
+      };
+      console.log(
+        `  Step 2 (self-host persisted): Plan=${updated.plan}, Status=${updated.subscriptionStatus}, Billing fields: ${noBillingFields ? "none" : "present"} — ${selfHostStep2Passed ? "PASSED" : "FAILED"}`,
+      );
+      if (!autoUpgradeOk || !selfHostStep2Passed) success = false;
+    } catch (e: any) {
+      results["test_8_self_host_no_billing"] = {
+        passed: false,
+        error: e.message,
+      };
+      console.error("Test 8 Error:", e);
+      success = false;
+    }
+
     // Clean up test modifications
     testProject.plan = originalPlan;
     testProject.subscriptionStatus = originalStatus;

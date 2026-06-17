@@ -79,6 +79,12 @@ We wanted to ensure that the code remains fully open and accessible for develope
 
 **Yes.** You can fully self-host ObservabilityOS for internal development, staging, production monitoring, and personal side projects. This is permitted under the default source-available license as long as you are not offering the platform itself as a service to third parties.
 
+### Q: Does the self-host plan require a paid subscription or billing?
+
+**No.** The self-host Open Source edition is completely free. You run it on your own infrastructure with your own API keys. The billing management page is disabled for self-host projects — all features are unlocked without any subscription or payment.
+
+Set `NEXT_PUBLIC_SELF_HOSTED=true` in your `.env` file to enable self-host mode. This auto-upgrades all projects to the self-host plan (unlimited services, logs, and retention) and hides all billing-related UI.
+
 ### Q: Can my company build proprietary products that integrate with the SDK?
 
 **Yes.** The SDK package (`packages/sdk`) is licensed under the permissive **MIT License**. This ensures you can integrate it into your apps, libraries, and microservices without copyleft concerns.

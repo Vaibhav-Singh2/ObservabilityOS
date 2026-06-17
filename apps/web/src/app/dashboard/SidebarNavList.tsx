@@ -112,23 +112,25 @@ export default function SidebarNavList({
             Playground
           </Link>
 
-          <Link
-            id="nav_billing"
-            href={
-              activeProjectId
-                ? `/dashboard/billing?projectId=${activeProjectId}`
-                : "/dashboard/billing"
-            }
-            onClick={handleLinkClick}
-            className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-              pathname.startsWith("/dashboard/billing")
-                ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
-                : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900"
-            }`}
-          >
-            <CreditCard className="w-4 h-4 text-indigo-400" />
-            Billing
-          </Link>
+          {process.env.NEXT_PUBLIC_SELF_HOSTED !== "true" && (
+            <Link
+              id="nav_billing"
+              href={
+                activeProjectId
+                  ? `/dashboard/billing?projectId=${activeProjectId}`
+                  : "/dashboard/billing"
+              }
+              onClick={handleLinkClick}
+              className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                pathname.startsWith("/dashboard/billing")
+                  ? "bg-indigo-600/15 border border-indigo-500/30 text-white font-semibold"
+                  : "border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900"
+              }`}
+            >
+              <CreditCard className="w-4 h-4 text-indigo-400" />
+              Billing
+            </Link>
+          )}
 
           <Link
             id="nav_settings"
@@ -162,10 +164,12 @@ export default function SidebarNavList({
             <Terminal className="w-4 h-4 text-slate-700" />
             Playground
           </div>
-          <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
-            <CreditCard className="w-4 h-4 text-slate-700" />
-            Billing
-          </div>
+          {process.env.NEXT_PUBLIC_SELF_HOSTED !== "true" && (
+            <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
+              <CreditCard className="w-4 h-4 text-slate-700" />
+              Billing
+            </div>
+          )}
           <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-slate-600 cursor-not-allowed select-none">
             <Settings className="w-4 h-4 text-slate-700" />
             Settings

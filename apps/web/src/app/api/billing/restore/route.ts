@@ -1,6 +1,6 @@
 import { getAuthenticatedUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { Project } from "@repo/db";
+import { Project, type IProject } from "@repo/db";
 import { z } from "zod";
 import razorpay from "@/lib/razorpay";
 
@@ -9,6 +9,13 @@ const restoreSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+    return NextResponse.json(
+      { error: { code: "NOT_FOUND", message: "Not found" } },
+      { status: 404 },
+    );
+  }
+
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
@@ -34,6 +41,18 @@ export async function POST(request: Request) {
       );
     }
 
+    if (project.plan === "self-host") {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Self-host projects do not have subscriptions",
+          },
+        },
+        { status: 400 },
+      );
+    }
+
     if (project.subscriptionStatus !== "cancelling") {
       return NextResponse.json(
         {
@@ -55,7 +74,7 @@ export async function POST(request: Request) {
       !project.razorpaySubscriptionId
     ) {
       project.subscriptionStatus = "active";
-      project.subscriptionEndsAt = undefined;
+      (project as IProject).subscriptionEndsAt = undefined;
       await project.save();
 
       return NextResponse.json({
@@ -71,10 +90,10 @@ export async function POST(request: Request) {
 
     await razorpay.subscriptions.update(project.razorpaySubscriptionId, {
       cancel_at_cycle_end: false,
-    });
+    } as Record<string, unknown>);
 
     project.subscriptionStatus = "active";
-    project.subscriptionEndsAt = undefined;
+    (project as IProject).subscriptionEndsAt = undefined;
     await project.save();
 
     console.log(

@@ -23,6 +23,13 @@ const checkoutSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+    return NextResponse.json(
+      { error: { code: "NOT_FOUND", message: "Not found" } },
+      { status: 404 },
+    );
+  }
+
   try {
     const user = await getAuthenticatedUser();
     if (!user) {

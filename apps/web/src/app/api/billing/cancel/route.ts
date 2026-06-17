@@ -1,6 +1,6 @@
 import { getAuthenticatedUser } from "@/lib/auth";
 import { NextResponse } from "next/server";
-import { Project } from "@repo/db";
+import { Project, type IProject } from "@repo/db";
 import { z } from "zod";
 import razorpay from "@/lib/razorpay";
 
@@ -9,6 +9,13 @@ const cancelSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (process.env.NEXT_PUBLIC_SELF_HOSTED === "true") {
+    return NextResponse.json(
+      { error: { code: "NOT_FOUND", message: "Not found" } },
+      { status: 404 },
+    );
+  }
+
   try {
     const user = await getAuthenticatedUser();
     if (!user) {
@@ -31,6 +38,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: { code: "NOT_FOUND", message: "Project not found" } },
         { status: 404 },
+      );
+    }
+
+    if (project.plan === "self-host") {
+      return NextResponse.json(
+        {
+          error: {
+            code: "BAD_REQUEST",
+            message: "Self-host projects do not have subscriptions",
+          },
+        },
+        { status: 400 },
       );
     }
 
@@ -74,7 +93,7 @@ export async function POST(request: Request) {
       project.billingProvider = "none";
       project.razorpaySubscriptionId = undefined;
       project.razorpayCustomerId = undefined;
-      project.subscriptionEndsAt = undefined;
+      (project as IProject).subscriptionEndsAt = undefined;
 
       await project.save();
 
@@ -94,13 +113,12 @@ export async function POST(request: Request) {
       true,
     );
 
-    const endAt = (cancelledSubscription as Record<string, unknown>).end_at as
-      | number
-      | undefined;
+    const endAt = (cancelledSubscription as unknown as Record<string, unknown>)
+      .end_at as number | undefined;
     const subscriptionEndsAt = endAt ? new Date(endAt * 1000) : undefined;
 
     project.subscriptionStatus = "cancelling";
-    project.subscriptionEndsAt = subscriptionEndsAt;
+    (project as IProject).subscriptionEndsAt = subscriptionEndsAt;
     await project.save();
 
     console.log(
