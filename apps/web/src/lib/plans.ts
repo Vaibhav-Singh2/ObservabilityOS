@@ -4,7 +4,7 @@ export interface PlanFeature {
 }
 
 export interface PlanDetails {
-  id: string; // e.g. 'free', 'pro', 'self-host'
+  id: string;
   name: string;
   priceUSD: number;
   priceINR: number;
@@ -27,37 +27,33 @@ export const PLANS: PlanDetails[] = [
     description: "Side projects & local testing at zero cost.",
     backendPlan: "free",
     maxServices: 1,
-    maxLogVolumeBytes: 500 * 1024 * 1024, // 500MB
+    maxLogVolumeBytes: 500 * 1024 * 1024,
     retentionDays: 7,
     features: [
-      { text: "1 service monitored", included: true },
-      { text: "500MB logs / month", included: true },
-      { text: "7-day data retention", included: true },
-      { text: "Real-time dashboard with service health & SLO", included: true },
       {
-        text: "Full-text log search with filters (level, service, time)",
+        text: "1 service · 500MB logs / month · 7-day retention",
         included: true,
       },
-      { text: "Saved log queries", included: true },
-      { text: "CSV & JSON log export", included: true },
-      { text: "Zero-dep TypeScript SDK with PII redaction", included: true },
-      { text: "OpenTelemetry native OTLP HTTP support", included: true },
-      { text: "GitHub deploy webhook tracking", included: true },
-      { text: "Base Z-score anomaly detection", included: true },
       {
-        text: "Incident list & detail views with threaded comments",
+        text: "Full-text log search, saved queries & CSV/JSON export",
         included: true,
       },
-      { text: "Shared runbooks", included: true },
-      { text: "Incident simulation playground (8 scenarios)", included: true },
-      { text: "SSE real-time monitoring stream", included: true },
-      { text: "Multi-channel alerts (Slack, Discord, Teams)", included: false },
-      { text: "AI incident root cause analysis", included: false },
-      { text: "AI-powered post-mortem generation", included: false },
-      { text: "AI morning digest emails", included: false },
-      { text: "Multi-signal anomaly correlation", included: false },
-      { text: "Audit log trail", included: false },
-      { text: "Team members & collaboration", included: false },
+      {
+        text: "TypeScript SDK with PII redaction & OTLP support",
+        included: true,
+      },
+      { text: "Anomaly detection & auto-incident creation", included: true },
+      {
+        text: "Incident management with threaded comments & runbooks",
+        included: true,
+      },
+      { text: "Service health dashboard, SLO & SSE stream", included: true },
+      { text: "Multi-channel Slack, Discord & Teams alerts", included: false },
+      {
+        text: "AI root cause analysis, post-mortems & digests",
+        included: false,
+      },
+      { text: "Audit log trail & team collaboration", included: false },
     ],
     available: true,
   },
@@ -70,36 +66,36 @@ export const PLANS: PlanDetails[] = [
     badge: "Most Popular",
     backendPlan: "pro",
     maxServices: 10,
-    maxLogVolumeBytes: 10 * 1024 * 1024 * 1024, // 10GB
+    maxLogVolumeBytes: 10 * 1024 * 1024 * 1024,
     retentionDays: 30,
     features: [
-      { text: "Up to 10 services monitored", included: true },
-      { text: "10GB logs / month", included: true },
-      { text: "30-day data retention", included: true },
-      { text: "Real-time dashboard with service health & SLO", included: true },
       {
-        text: "Full-text log search with filters (level, service, time)",
+        text: "10 services · 10GB logs / month · 30-day retention",
         included: true,
       },
-      { text: "Saved log queries", included: true },
-      { text: "CSV & JSON log export", included: true },
-      { text: "Zero-dep TypeScript SDK with PII redaction", included: true },
-      { text: "OpenTelemetry native OTLP HTTP support", included: true },
-      { text: "GitHub deploy webhook tracking", included: true },
-      { text: "Multi-signal anomaly correlation", included: true },
       {
-        text: "Incident list & detail views with threaded comments",
+        text: "Full-text log search, saved queries & CSV/JSON export",
         included: true,
       },
-      { text: "Shared runbooks", included: true },
-      { text: "Incident simulation playground (8 scenarios)", included: true },
-      { text: "SSE real-time monitoring stream", included: true },
-      { text: "Multi-channel alerts (Slack, Discord, Teams)", included: true },
-      { text: "AI incident root cause analysis", included: true },
-      { text: "AI-powered post-mortem generation", included: true },
-      { text: "AI morning digest emails", included: true },
-      { text: "Audit log trail", included: true },
-      { text: "Team members & collaboration", included: true },
+      {
+        text: "TypeScript SDK with PII redaction & OTLP support",
+        included: true,
+      },
+      {
+        text: "Multi-signal anomaly detection & auto-incident creation",
+        included: true,
+      },
+      {
+        text: "Incident management with threaded comments & runbooks",
+        included: true,
+      },
+      { text: "Service health dashboard, SLO & SSE stream", included: true },
+      { text: "Multi-channel Slack, Discord & Teams alerts", included: true },
+      {
+        text: "AI root cause analysis, post-mortems & daily digests",
+        included: true,
+      },
+      { text: "Audit log trail & team collaboration", included: true },
     ],
     available: true,
   },
@@ -108,51 +104,42 @@ export const PLANS: PlanDetails[] = [
     name: "Self-Host Open Source",
     priceUSD: 0,
     priceINR: 0,
-    description:
-      "Run ObservabilityOS on your own infrastructure with full access.",
+    description: "Run on your own infrastructure with full access.",
     backendPlan: "self-host",
-    maxServices: 999999, // Practically Unlimited
-    maxLogVolumeBytes: 999999 * 1024 * 1024 * 1024, // Practically Unlimited
-    retentionDays: 9999, // User controls their own retention
+    maxServices: 999999,
+    maxLogVolumeBytes: 999999 * 1024 * 1024 * 1024,
+    retentionDays: 9999,
     features: [
-      { text: "Unlimited services monitored", included: true },
-      { text: "Unlimited logs / month", included: true },
-      { text: "Unlimited data retention", included: true },
-      { text: "Real-time dashboard with service health & SLO", included: true },
       {
-        text: "Full-text log search with filters (level, service, time)",
-        included: true,
-      },
-      { text: "Saved log queries", included: true },
-      { text: "CSV & JSON log export", included: true },
-      { text: "Zero-dep TypeScript SDK with PII redaction", included: true },
-      { text: "OpenTelemetry native OTLP HTTP support", included: true },
-      { text: "GitHub deploy webhook tracking", included: true },
-      { text: "Multi-signal anomaly correlation", included: true },
-      {
-        text: "Incident list & detail views with threaded comments",
-        included: true,
-      },
-      { text: "Shared runbooks", included: true },
-      { text: "Incident simulation playground (8 scenarios)", included: true },
-      { text: "SSE real-time monitoring stream", included: true },
-      { text: "Multi-channel alerts (Slack, Discord, Teams)", included: true },
-      {
-        text: "AI incident root cause analysis (bring your own keys)",
+        text: "Unlimited services · Unlimited logs · Unlimited retention",
         included: true,
       },
       {
-        text: "AI-powered post-mortem generation (bring your own keys)",
+        text: "Full-text log search, saved queries & CSV/JSON export",
         included: true,
       },
       {
-        text: "AI morning digest emails (bring your own keys)",
+        text: "TypeScript SDK with PII redaction & OTLP support",
         included: true,
       },
-      { text: "Audit log trail", included: true },
-      { text: "Unlimited team members", included: true },
-      { text: "Self-service Docker / Compose deployment", included: true },
-      { text: "GitHub community support", included: true },
+      {
+        text: "Multi-signal anomaly detection & auto-incident creation",
+        included: true,
+      },
+      {
+        text: "Incident management with threaded comments & runbooks",
+        included: true,
+      },
+      { text: "Service health dashboard, SLO & SSE stream", included: true },
+      {
+        text: "Multi-channel alerts & AI analysis (bring your own keys)",
+        included: true,
+      },
+      { text: "Audit log trail & unlimited team members", included: true },
+      {
+        text: "Docker / Compose deployment & GitHub community support",
+        included: true,
+      },
     ],
     available: true,
   },
