@@ -8,8 +8,8 @@ This guide covers system requirements, database setup, environment variable conf
 
 Before installing, ensure your host environment meets the following specifications:
 
-- **Node.js**: `v18.x` or `v20.x` (LTS versions recommended).
-- **Yarn**: `v1.22.x` (Turbopack monorepo workspaces require Yarn Classic).
+- **Node.js**: `v24.x` (or `v18+` compatible; LTS recommended).
+- **Yarn**: `v4.16.0` (Turborepo monorepo workspaces configured via Yarn Modern).
 - **MongoDB**: `v6.0+` (Standalone local database or MongoDB Atlas cluster).
 - **Redis**: `v6.2+` (Standalone instances on port `6379`).
 - **Docker Desktop / Compose**: Required for running MongoDB & Redis dependencies locally.

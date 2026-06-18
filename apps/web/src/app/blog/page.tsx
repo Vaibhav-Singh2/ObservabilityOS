@@ -161,7 +161,7 @@ export default async function BlogPage({
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold font-mono uppercase tracking-wider mb-10">
+        <nav className="flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold font-mono uppercase tracking-wider mb-10">
           <Link href="/" className="hover:text-slate-300 transition-colors">
             Home
           </Link>
@@ -204,7 +204,7 @@ export default async function BlogPage({
                 {featured.tags.slice(0, 3).map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] font-mono text-slate-500 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-full"
+                    className="text-[10px] font-mono text-slate-400 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-full"
                   >
                     #{tag}
                   </span>
@@ -227,17 +227,17 @@ export default async function BlogPage({
                     <p className="text-xs font-semibold text-slate-300 leading-none">
                       {featuredAuthor?.name ?? "ObservabilityOS Team"}
                     </p>
-                    <p className="text-[10px] text-slate-500 mt-0.5">
+                    <p className="text-[10px] text-slate-400 mt-0.5">
                       {featuredAuthor?.role}
                     </p>
                   </div>
                 </div>
                 <span className="text-slate-700">·</span>
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
+                <span className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
                   <Calendar className="w-3.5 h-3.5" />
                   {featured.date}
                 </span>
-                <span className="flex items-center gap-1.5 text-xs text-slate-500 font-mono">
+                <span className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
                   <Clock className="w-3.5 h-3.5" />
                   {featured.readTime}
                 </span>
@@ -275,7 +275,7 @@ export default async function BlogPage({
               >
                 {cat}
                 <span
-                  className={`ml-1.5 text-[10px] ${isActive ? "text-indigo-400" : "text-slate-600"}`}
+                  className={`ml-1.5 text-[10px] ${isActive ? "text-indigo-400" : "text-slate-400"}`}
                 >
                   {count}
                 </span>
@@ -316,7 +316,7 @@ export default async function BlogPage({
                   {post.tags.slice(0, 3).map((tag) => (
                     <span
                       key={tag}
-                      className="text-[10px] font-mono text-slate-600 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-full"
+                      className="text-[10px] font-mono text-slate-400 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-full"
                     >
                       #{tag}
                     </span>
@@ -337,7 +337,7 @@ export default async function BlogPage({
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3 text-[10px] text-slate-600 font-mono">
+                  <div className="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {post.readTime}
@@ -384,7 +384,7 @@ export default async function BlogPage({
         </section>
       </main>
 
-      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-600 font-mono mt-8">
+      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-400 font-mono mt-8">
         <div>
           &copy; {new Date().getFullYear()} ObservabilityOS. All rights
           reserved. Open Source.

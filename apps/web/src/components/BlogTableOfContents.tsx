@@ -51,7 +51,7 @@ export default function BlogTableOfContents({
 
   return (
     <nav aria-label="Table of contents">
-      <p className="text-[10px] font-bold font-mono text-slate-500 uppercase tracking-widest mb-3">
+      <p className="text-[10px] font-bold font-mono text-slate-400 uppercase tracking-widest mb-3">
         On this page
       </p>
       <ul className="space-y-1">
@@ -62,7 +62,7 @@ export default function BlogTableOfContents({
               className={`text-left w-full text-xs leading-relaxed py-0.5 transition-colors duration-150 ${
                 activeId === id
                   ? "text-indigo-400 font-semibold"
-                  : "text-slate-500 hover:text-slate-300"
+                  : "text-slate-400 hover:text-slate-300"
               }`}
             >
               {label}

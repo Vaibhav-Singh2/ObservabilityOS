@@ -5,6 +5,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-v5-blue.svg)]()
 [![Next.js](https://img.shields.io/badge/Next.js-v16.2-black.svg)]()
 
+🔗 **Quick Links**: [Live Console](https://observabilityos.in) | [Documentation](https://docs.observabilityos.in) | [NPM Package (@observability-os/sdk)](https://www.npmjs.com/package/@observability-os/sdk)
+
 ObservabilityOS is an **AI-native DevOps intelligence and log analytics platform** built for high-performance engineering teams. Instead of just displaying raw logs and complex dashboard grids, ObservabilityOS ingests structured logs, automatically redacts sensitive PII locally, calculates standard-deviation anomaly Z-Scores in real-time, and generates structured root-cause post-mortems using GPT-4 and Claude.
 
 ---
@@ -60,7 +62,7 @@ ObservabilityOS is structured as a **Turborepo monorepo workspace**:
 Ensure you have the following installed on your machine:
 
 - [Node.js](https://nodejs.org/) v18+
-- [Yarn](https://classic.yarnpkg.com/en/) v1.22+
+- [Yarn](https://yarnpkg.com/) v4.16.0
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for local database and cache nodes)
 
 ### 2. Boot Infrastructure

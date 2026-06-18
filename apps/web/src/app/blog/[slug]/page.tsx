@@ -178,7 +178,7 @@ export default async function BlogPostPage({ params }: PageProps) {
 
       <main className="flex-1 w-full max-w-7xl mx-auto px-6 py-12">
         {/* Breadcrumb */}
-        <nav className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold font-mono uppercase tracking-wider mb-10">
+        <nav className="flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold font-mono uppercase tracking-wider mb-10">
           <Link href="/" className="hover:text-slate-300 transition-colors">
             Home
           </Link>
@@ -201,7 +201,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             {post.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="text-[10px] font-mono text-slate-600 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-full"
+                className="text-[10px] font-mono text-slate-400 bg-slate-900/60 border border-slate-800 px-2 py-0.5 rounded-full"
               >
                 #{tag}
               </span>
@@ -225,18 +225,18 @@ export default async function BlogPostPage({ params }: PageProps) {
                 <p className="text-sm font-semibold text-slate-200 leading-none mb-0.5">
                   {author?.name ?? "ObservabilityOS Team"}
                 </p>
-                <p className="text-xs text-slate-500">{author?.role}</p>
+                <p className="text-xs text-slate-400">{author?.role}</p>
               </div>
             </div>
-            <div className="flex items-center gap-4 text-xs text-slate-500 font-mono">
+            <div className="flex items-center gap-4 text-xs text-slate-400 font-mono">
               <span className="text-slate-700 hidden sm:inline-block">·</span>
               <span className="flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-slate-600" />
+                <Calendar className="w-3.5 h-3.5 text-slate-400" />
                 {post.date}
               </span>
               <span className="text-slate-700">•</span>
               <span className="flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-600" />
+                <Clock className="w-3.5 h-3.5 text-slate-400" />
                 {post.readTime}
               </span>
             </div>
@@ -431,7 +431,7 @@ export default async function BlogPostPage({ params }: PageProps) {
                           >
                             {relAuthor?.initials ?? "OO"}
                           </div>
-                          <span className="text-[10px] text-slate-500 font-mono">
+                          <span className="text-[10px] text-slate-400 font-mono">
                             {related.readTime}
                           </span>
                         </div>
@@ -468,7 +468,7 @@ export default async function BlogPostPage({ params }: PageProps) {
         </div>
       </main>
 
-      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-600 font-mono">
+      <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-400 font-mono">
         <div>
           &copy; {new Date().getFullYear()} ObservabilityOS. All rights
           reserved. Open Source.
