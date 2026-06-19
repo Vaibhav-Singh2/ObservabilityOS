@@ -55,6 +55,7 @@ erDiagram
         string title
         string aiSummary "Markdown report"
         array relatedLogs "ObjectId refs"
+        array embeddings "Float vector array"
         date createdAt
     }
 

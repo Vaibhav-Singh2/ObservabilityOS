@@ -13,6 +13,13 @@ export interface DeployContext {
   branch: string;
 }
 
+export interface HistoricalIncident {
+  title: string;
+  rootCause: string;
+  suggestedFix: string[];
+  comments?: string[];
+}
+
 export interface IncidentPromptInput {
   serviceName: string;
   environment: string;
@@ -20,6 +27,7 @@ export interface IncidentPromptInput {
   anomalyMetric: string; // e.g. "z-score: 4.2" or "spike from 0 to 15 errors"
   logs: LogContext[];
   deploys: DeployContext[];
+  historicalIncidents?: HistoricalIncident[];
   bypassLLM?: boolean;
 }
 
@@ -46,6 +54,24 @@ export function generateIncidentPrompt(input: IncidentPromptInput): string {
           .join("\n")
       : "No recent deployments detected in the window preceding this anomaly.";
 
+  const historicalSnippet =
+    input.historicalIncidents && input.historicalIncidents.length > 0
+      ? "\n### Similar Historical Incidents & Resolutions:\n" +
+        input.historicalIncidents
+          .map(
+            (h, idx) =>
+              `${idx + 1}. **Title**: ${h.title}\n` +
+              `   - **Root Cause**: ${h.rootCause}\n` +
+              `   - **Suggested Fixes**: ${h.suggestedFix.join(", ")}\n` +
+              (h.comments && h.comments.length > 0
+                ? `   - **Developer Comments/Resolution Notes**:\n` +
+                  h.comments.map((c) => `     > ${c}`).join("\n")
+                : ""),
+          )
+          .join("\n") +
+        "\n"
+      : "";
+
   return `You are ObservabilityOS, an AI-native DevOps and SRE intelligence agent.
 You are analyzing a service anomaly in order to generate a structured Incident Report.
 
@@ -57,6 +83,7 @@ You are analyzing a service anomaly in order to generate a structured Incident R
 
 ### Recent Deployments (Preceding 30 Minutes):
 ${deploySnippet}
+${historicalSnippet}
 
 ### Anomalous Log Snippets:
 \`\`\`text

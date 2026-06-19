@@ -768,3 +768,120 @@ export async function generateEmailDigestSummary(
 
   return generateMockEmailDigestSummary(input);
 }
+
+/**
+ * Deterministically generates a 1536-dimensional float vector from input text
+ * using charCode hashing. Used for local/mock fallback search logic.
+ */
+export function generateMockEmbedding(text: string): number[] {
+  const embedding = new Array<number>(1536).fill(0);
+  let hash = 0;
+  for (let i = 0; i < text.length; i++) {
+    const char = text.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  // Fill the embedding array deterministically
+  for (let i = 0; i < 1536; i++) {
+    const val = Math.sin(hash + i) * 10000;
+    const fraction = val - Math.floor(val);
+    embedding[i] = fraction * 2 - 1; // Fit in [-1.0, 1.0] range
+  }
+  return embedding;
+}
+
+/**
+ * Contacts OpenAI / AICredits embeddings endpoint to calculate text vectors,
+ * falling back to local deterministic mock vectors on cooldowns or missing keys.
+ */
+export async function generateEmbedding(text: string): Promise<number[]> {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  const AICREDITS_API_KEY = process.env.AICREDITS_API_KEY;
+
+  if (OPENAI_API_KEY) {
+    try {
+      enforceCooldown();
+    } catch {
+      console.warn(
+        "[ObservabilityOS AI] Embedding cooldown active, falling back to mock embedding.",
+      );
+      return generateMockEmbedding(text);
+    }
+
+    try {
+      const response = await fetchWithTimeout(
+        "https://api.openai.com/v1/embeddings",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENAI_API_KEY}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "text-embedding-3-small",
+            input: text,
+          }),
+        },
+        5000,
+      );
+
+      if (!response.ok) {
+        throw new Error(`OpenAI Embeddings returned status ${response.status}`);
+      }
+
+      const data = await response.json();
+      const embedding = data.data?.[0]?.embedding;
+      if (Array.isArray(embedding)) {
+        return embedding;
+      }
+    } catch (err) {
+      console.warn(
+        "[ObservabilityOS AI] OpenAI embeddings call failed, falling back to mock embedding:",
+        err,
+      );
+    }
+  } else if (AICREDITS_API_KEY) {
+    try {
+      enforceCooldown();
+    } catch {
+      return generateMockEmbedding(text);
+    }
+
+    try {
+      const response = await fetchWithTimeout(
+        "https://aicredits.in/v1/embeddings",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${AICREDITS_API_KEY}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "text-embedding-3-small",
+            input: text,
+          }),
+        },
+        5000,
+      );
+
+      if (!response.ok) {
+        throw new Error(
+          `AICredits Embeddings returned status ${response.status}`,
+        );
+      }
+
+      const data = await response.json();
+      const embedding = data.data?.[0]?.embedding;
+      if (Array.isArray(embedding)) {
+        return embedding;
+      }
+    } catch (err) {
+      console.warn(
+        "[ObservabilityOS AI] AICredits embeddings call failed, falling back to mock embedding:",
+        err,
+      );
+    }
+  }
+
+  return generateMockEmbedding(text);
+}

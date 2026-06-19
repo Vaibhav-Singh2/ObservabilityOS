@@ -16,6 +16,7 @@ export interface IIncident {
   resolvedAt?: Date;
   ttd: number; // Time-to-detect in ms
   ttr?: number; // Time-to-resolve in ms
+  embeddings?: number[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +58,7 @@ const IncidentSchema = new Schema<IIncident>(
     resolvedAt: { type: Date, required: false },
     ttd: { type: Number, required: true },
     ttr: { type: Number, required: false },
+    embeddings: { type: [Number], required: false },
   },
   { timestamps: true },
 );

@@ -1,6 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { generateIncidentAnalysis } from "./llm.js";
-import { IncidentPromptInput } from "./prompts/incident.js";
+import {
+  IncidentPromptInput,
+  generateIncidentPrompt,
+} from "./prompts/incident.js";
 
 describe("ObservabilityOS AI Engine", () => {
   const mockInput: IncidentPromptInput = {
@@ -309,5 +312,77 @@ describe("ObservabilityOS AI Engine", () => {
     const result = await generateEmailDigestSummary(digestInput);
     expect(result).toContain("SRE anomalies occurred");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  describe("RAG and Embeddings Support", () => {
+    it("should generate deterministic mock embeddings of size 1536", async () => {
+      const { generateMockEmbedding } = await import("./llm.js");
+      const emb1 = generateMockEmbedding("test message one");
+      const emb2 = generateMockEmbedding("test message one");
+      const emb3 = generateMockEmbedding("different message");
+
+      expect(emb1).toHaveLength(1536);
+      expect(emb2).toHaveLength(1536);
+      expect(emb3).toHaveLength(1536);
+
+      // Check determinism
+      expect(emb1).toEqual(emb2);
+      // Check difference
+      expect(emb1).not.toEqual(emb3);
+
+      // Values should be in range [-1.0, 1.0]
+      for (const val of emb1) {
+        expect(val).toBeGreaterThanOrEqual(-1.0);
+        expect(val).toBeLessThanOrEqual(1.0);
+      }
+    });
+
+    it("should call OpenAI embeddings API when OpenAI API key is present", async () => {
+      process.env.OPENAI_API_KEY = "test-openai-key";
+      const mockVector = new Array(1536).fill(0.1);
+
+      const fetchMock = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () =>
+          Promise.resolve({
+            data: [{ embedding: mockVector }],
+          }),
+      });
+      vi.stubGlobal("fetch", fetchMock);
+
+      const { generateEmbedding } = await import("./llm.js");
+      const result = await generateEmbedding("sample text");
+      expect(result).toEqual(mockVector);
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://api.openai.com/v1/embeddings",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining('"model":"text-embedding-3-small"'),
+        }),
+      );
+    });
+
+    it("should serialize historical incident context in generateIncidentPrompt", () => {
+      const inputWithRAG = {
+        ...mockInput,
+        historicalIncidents: [
+          {
+            title: "Old database crash",
+            rootCause: "Pool limit reached",
+            suggestedFix: ["Increase pool size"],
+            comments: ["Fixed by Alice"],
+          },
+        ],
+      };
+
+      const promptText = generateIncidentPrompt(inputWithRAG);
+      expect(promptText).toContain(
+        "Similar Historical Incidents & Resolutions",
+      );
+      expect(promptText).toContain("Old database crash");
+      expect(promptText).toContain("Pool limit reached");
+      expect(promptText).toContain("Fixed by Alice");
+    });
   });
 });

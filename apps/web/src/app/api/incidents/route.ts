@@ -1,7 +1,8 @@
 import { getAuthenticatedUser } from "@/lib/auth";
 
 import { NextResponse } from "next/server";
-import { Incident, Project } from "@repo/db";
+import { Incident, Project, Comment } from "@repo/db";
+import { generateEmbedding } from "@repo/ai";
 
 import { delCache } from "@/lib/redis";
 
@@ -116,9 +117,33 @@ export async function PATCH(request: Request) {
       incident.resolvedAt = new Date();
       incident.ttr =
         incident.resolvedAt.getTime() - incident.createdAt.getTime();
+
+      try {
+        // Gather comments for additional context
+        const incidentComments = await Comment.find({
+          incidentId: incident._id,
+        });
+        const commentsText = incidentComments.map((c) => c.content).join("\n");
+
+        // Aggregate text to embed
+        const textToEmbed =
+          `Title: ${incident.title}\n` +
+          `Summary: ${incident.summary}\n` +
+          `Root Cause: ${incident.rootCause}\n` +
+          `Suggested Fixes: ${incident.suggestedFix.join("\n")}\n` +
+          (commentsText ? `Developer Comments:\n${commentsText}` : "");
+
+        incident.embeddings = await generateEmbedding(textToEmbed);
+      } catch (embErr) {
+        console.error(
+          "[Incidents API] Failed to generate incident embedding:",
+          embErr,
+        );
+      }
     } else if (status !== "resolved" && previousStatus === "resolved") {
       incident.resolvedAt = undefined;
       incident.ttr = undefined;
+      incident.embeddings = undefined;
     }
 
     await incident.save();

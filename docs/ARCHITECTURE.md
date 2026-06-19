@@ -104,16 +104,17 @@ graph TD
     E -- Active incident in last 5m --> F[Merge logs to incident]
     E -- No active incident --> G[Trigger AI Diagnosis]
 
-    subgraph AI Pipeline
+    subgraph AI Pipeline & RAG Loop
         G --> H[Fetch surrounding logs & active endpoint metadata]
         H --> I[Fetch GitHub deployment commits & diffs]
-        I --> J[Compile prompt context]
-        J --> K[Query Gemini/Claude model]
+        I --> J[Retrieve similar resolved incidents & comments from DB]
+        J --> K[Compile prompt context with RAG context]
+        K --> L[Query Gemini/Claude model]
     end
 
-    K --> L[Generate Structured Markdown Post-Mortem]
-    L --> M[Save Incident to MongoDB]
-    M --> N[Dispatch Slack/Discord Webhook alerts]
+    L --> M[Generate Structured Markdown Post-Mortem]
+    M --> N[Save Incident to MongoDB]
+    N --> O[Dispatch Slack/Discord Webhook alerts]
 ```
 
 ### Anomaly Z-Score Formula

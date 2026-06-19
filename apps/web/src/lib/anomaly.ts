@@ -6,8 +6,15 @@ import {
   Incident,
   Project,
   Metric,
+  Comment,
 } from "@repo/db";
-import { generateIncidentAnalysis, LogContext, DeployContext } from "@repo/ai";
+import {
+  generateIncidentAnalysis,
+  generateEmbedding,
+  LogContext,
+  DeployContext,
+  HistoricalIncident,
+} from "@repo/ai";
 import { Types } from "mongoose";
 import { dispatchMultiChannelIncidentAlert } from "./alerts";
 import { delCache } from "./redis";
@@ -104,6 +111,97 @@ export async function triggerAnomalyCheck(
       err,
     );
   });
+}
+
+function cosineSimilarity(a: number[], b: number[]): number {
+  let dotProduct = 0;
+  let mA = 0;
+  let mB = 0;
+  for (let i = 0; i < a.length; i++) {
+    const valA = a[i] ?? 0;
+    const valB = b[i] ?? 0;
+    dotProduct += valA * valB;
+    mA += valA * valA;
+    mB += valB * valB;
+  }
+  return mA === 0 || mB === 0
+    ? 0
+    : dotProduct / (Math.sqrt(mA) * Math.sqrt(mB));
+}
+
+/**
+ * Performs a vector search (or keyword/recency fallback) to retrieve similar past resolved incidents
+ * for RAG augmentation of the incident analysis.
+ */
+export async function retrieveSimilarIncidents(
+  projectId: string,
+  currentLogsText: string,
+  limit = 3,
+): Promise<HistoricalIncident[]> {
+  try {
+    const queryEmbedding = await generateEmbedding(currentLogsText);
+
+    // Fetch up to 50 resolved incidents from the project that have embeddings populated
+    const pastIncidents = await Incident.find({
+      projectId: new Types.ObjectId(projectId),
+      status: "resolved",
+      embeddings: { $exists: true, $not: { $size: 0 } },
+    })
+      .sort({ createdAt: -1 })
+      .limit(50);
+
+    if (pastIncidents.length === 0) {
+      // Fallback: If no embeddings exist in the DB yet, return the 3 most recent resolved incidents
+      const fallbackIncidents = await Incident.find({
+        projectId: new Types.ObjectId(projectId),
+        status: "resolved",
+      })
+        .sort({ createdAt: -1 })
+        .limit(limit);
+
+      const results: HistoricalIncident[] = [];
+      for (const inc of fallbackIncidents) {
+        const comments = await Comment.find({ incidentId: inc._id });
+        results.push({
+          title: inc.title,
+          rootCause: inc.rootCause,
+          suggestedFix: inc.suggestedFix,
+          comments: comments.map((c) => c.content),
+        });
+      }
+      return results;
+    }
+
+    // Compute in-memory cosine similarity
+    const scored = pastIncidents.map((inc) => {
+      const score = inc.embeddings
+        ? cosineSimilarity(queryEmbedding, inc.embeddings)
+        : 0;
+      return { incident: inc, score };
+    });
+
+    // Sort by similarity score descending
+    scored.sort((a, b) => b.score - a.score);
+
+    // Return the top N matching incidents
+    const topMatches = scored.slice(0, limit).map((s) => s.incident);
+
+    const results: HistoricalIncident[] = [];
+    for (const inc of topMatches) {
+      const comments = await Comment.find({ incidentId: inc._id });
+      results.push({
+        title: inc.title,
+        rootCause: inc.rootCause,
+        suggestedFix: inc.suggestedFix,
+        comments: comments.map((c) => c.content),
+      });
+    }
+
+    return results;
+  } catch (err) {
+    console.error("[Anomaly RAG] Failed to retrieve similar incidents:", err);
+    return [];
+  }
 }
 
 /**
@@ -361,6 +459,12 @@ export async function processAnomalyDetection(
   // 7. Invoke AI reasoning pipeline
   let analysis;
   try {
+    const currentLogsText = logContexts.map((l) => l.message).join("\n");
+    const historicalIncidents = await retrieveSimilarIncidents(
+      projectId,
+      currentLogsText,
+    );
+
     // Construct a metric anomaly summary description
     let anomalyMetricDesc = "";
     if (errorAnomaly) {
@@ -380,6 +484,7 @@ export async function processAnomalyDetection(
       anomalyMetric: anomalyMetricDesc || `Metric deviation detected`,
       logs: logContexts,
       deploys: deployContexts,
+      historicalIncidents,
       bypassLLM: projectDoc?.plan === "free",
     });
   } catch (err) {

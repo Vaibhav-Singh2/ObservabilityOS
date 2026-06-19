@@ -19,6 +19,7 @@ import mongoose, { Types } from "mongoose";
 vi.mock("@repo/ai", () => ({
   generateIncidentAnalysis: vi.fn(),
   generateIncidentPrompt: vi.fn(),
+  generateEmbedding: vi.fn().mockResolvedValue(new Array(1536).fill(0)),
 }));
 
 vi.mock("./alerts", () => ({
