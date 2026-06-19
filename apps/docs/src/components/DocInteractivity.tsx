@@ -22,17 +22,16 @@ export default function DocInteractivity() {
     null,
   );
 
-  // Reset zoom & pan when diagram closes
-  useEffect(() => {
-    if (!expandedDiagram) {
-      setScale(1);
-      setTranslateX(0);
-      setTranslateY(0);
-      setIsDragging(false);
-      setTouchStartDist(null);
-      setLastTouch(null);
-    }
-  }, [expandedDiagram]);
+  // Reset states helper
+  const closeDiagram = () => {
+    setExpandedDiagram(null);
+    setScale(1);
+    setTranslateX(0);
+    setTranslateY(0);
+    setIsDragging(false);
+    setTouchStartDist(null);
+    setLastTouch(null);
+  };
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
@@ -93,9 +92,11 @@ export default function DocInteractivity() {
       }
     };
 
-    canvas.addEventListener("wheel", handleWheel as any, { passive: false });
+    canvas.addEventListener("wheel", handleWheel as EventListener, {
+      passive: false,
+    });
     return () => {
-      canvas.removeEventListener("wheel", handleWheel as any);
+      canvas.removeEventListener("wheel", handleWheel as EventListener);
     };
   }, [expandedDiagram]);
 
@@ -320,7 +321,7 @@ export default function DocInteractivity() {
     if (!expandedDiagram) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setExpandedDiagram(null);
+      if (event.key === "Escape") closeDiagram();
     };
 
     const previousBodyOverflow = document.body.style.overflow;
@@ -360,7 +361,7 @@ export default function DocInteractivity() {
       aria-modal="true"
       aria-label="Expanded architecture diagram"
       onMouseDown={(event) => {
-        if (event.target === event.currentTarget) setExpandedDiagram(null);
+        if (event.target === event.currentTarget) closeDiagram();
       }}
     >
       <div className="diagram-modal-panel">
@@ -372,7 +373,7 @@ export default function DocInteractivity() {
           <button
             type="button"
             className="diagram-modal-close"
-            onClick={() => setExpandedDiagram(null)}
+            onClick={closeDiagram}
             aria-label="Close large diagram view"
           >
             <svg
