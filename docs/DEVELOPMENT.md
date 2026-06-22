@@ -175,7 +175,7 @@ yarn --cwd apps/chaos-simulator dev
 
 The simulator binds to `http://localhost:3005`. It offers a dashboard UI containing several outage simulation presets:
 
-1. **Stripe Timeout Outage**: Seeds logs with high latency and database network failures. Tests if the Z-Score engine detects standard-deviation anomaly spikes and compiles Claude/Gemini summaries.
+1. **Stripe Timeout Outage**: Seeds logs with high latency and database network failures. Tests if the Z-Score engine detects standard-deviation anomaly spikes and compiles AI incident summaries.
 2. **Black Friday Peak Traffic**: Injects sudden spikes in log ingestion rates, verifying if the Redis sliding-window rate limiters trigger `429 Too Many Requests` correctly.
 3. **AI Provider Failure Loop**: Tripps the outbound LLM circuit breaker (`SimpleCircuitBreaker` inside `packages/ai`) to verify that the system gracefully falls back to direct OpenAI, direct Anthropic, or local heuristics.
 4. **Plan Limit Bypasses**: Simulates logging under `free` plan tiers to assert that live API credits are not consumed and local mock summaries are loaded instead.

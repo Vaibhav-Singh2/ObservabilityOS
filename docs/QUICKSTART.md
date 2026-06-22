@@ -44,7 +44,10 @@ GITHUB_CLIENT_SECRET=your_github_client_secret
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 # AI Models (Optional - fallbacks to mock summaries if not configured)
-GEMINI_API_KEY=your_gemini_api_key
+AICREDITS_API_KEY=your_aicredits_api_key
+AICREDITS_MODEL=anthropic/claude-3-5-haiku
+# OPENAI_API_KEY=your_openai_api_key
+# ANTHROPIC_API_KEY=your_anthropic_api_key
 ```
 
 ### Step 4: Compile & Run

@@ -58,7 +58,7 @@ graph TD
 
 ### 3. packages/ai
 
-- Interfaces with AI models (such as Gemini/Claude/GPT-4) using optimized prompt contexts.
+- Interfaces with AI models (such as Claude/GPT) using optimized prompt contexts.
 - Formats unstructured log traces and deployment commit messages into readable incident post-mortems.
 
 ### 4. packages/sdk
@@ -109,7 +109,7 @@ graph TD
         H --> I[Fetch GitHub deployment commits & diffs]
         I --> J[Retrieve similar resolved incidents & comments from DB]
         J --> K[Compile prompt context with RAG context]
-        K --> L[Query Gemini/Claude model]
+        K --> L[Query Claude/GPT model]
     end
 
     L --> M[Generate Structured Markdown Post-Mortem]

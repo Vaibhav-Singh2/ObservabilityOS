@@ -45,8 +45,7 @@ Create an `.env` file in `apps/web/.env` to configure the web app and API gatewa
 ### AI Core configurations (Optional)
 
 - `AICREDITS_API_KEY`: API Key for the third-party AICredits gateway (`https://aicredits.in`).
-- `AICREDITS_MODEL`: Target model to run through the gateway (e.g. `anthropic/claude-3-5-haiku-20241022`, `openai/gpt-4o-mini`).
-- `GEMINI_API_KEY`: API Key for the Gemini AI model. Used to summarize raw log anomalies. If omitted, the engine falls back to a structured mock summary.
+- `AICREDITS_MODEL`: Target model to run through the gateway (e.g., `anthropic/claude-3-5-haiku-20241022`, `openai/gpt-4o-mini`).
 - `ANTHROPIC_API_KEY`: Direct API Key for Anthropic Claude.
 - `OPENAI_API_KEY`: Direct API Key for OpenAI GPT.
 

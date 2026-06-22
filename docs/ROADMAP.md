@@ -6,6 +6,8 @@ This document specifies completed features, near-term sprints, and the long-term
 
 ## ✅ Completed Milestones
 
+- **Vector RAG Diagnostic Loop**: Searches historical resolved incidents and developer comment threads using semantic vector embeddings (`text-embedding-3-small` / local sin-hash fallback) to supply relevant historical context for LLM incident diagnosis.
+- **Blog Overhaul & Centralized Data**: Centralized blog database, responsive category filtering, Table of Contents sidebar, reading progress bar, sitemap indexing, and structured JSON-LD schemas.
 - **AI incident diagnostics**: Correlates error logs and commit messages to generate structured root-cause summaries.
 - **Automated Monorepo Testing System**: A complete test architecture comprising unit, integration, DB migrations, AI circuit-breakers, API contracts, security RBAC/isolation, latency benchmarks, and Playwright E2E suites integrated into a GitHub Actions CI pipeline.
 - **PII Redaction Scrubber**: Recursive local and API data scrubbing to redact sensitive customer keys.

@@ -97,7 +97,10 @@ Add all mandatory environment variables inside Vercel's _Settings → Environmen
 - `GITHUB_CLIENT_ID`
 - `GITHUB_CLIENT_SECRET`
 - `NEXT_PUBLIC_APP_URL`
-- `GEMINI_API_KEY`
+- `AICREDITS_API_KEY` (optional, for primary LLM diagnoses and embeddings RAG search)
+- `AICREDITS_MODEL` (optional, target model override, e.g., `anthropic/claude-3-5-haiku-20241022`)
+- `OPENAI_API_KEY` (optional, direct OpenAI provider fallback)
+- `ANTHROPIC_API_KEY` (optional, direct Anthropic provider fallback)
 
 ---
 
