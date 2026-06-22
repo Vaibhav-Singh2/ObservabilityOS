@@ -2,6 +2,33 @@
 
 All notable changes to the ObservabilityOS project are documented here, grouped by release tags.
 
+## [v1.7.0] — AI Incident Diagnostics: Vector RAG & Embeddings Pipeline
+
+### Added
+
+- **Vector RAG Diagnostic Loop**: Integrates a Retrieval-Augmented Generation (RAG) loop to search MongoDB using semantic embeddings and cosine similarity. It retrieves the top 3 similar historical resolved incidents and developer comments to inject as context into the LLM incident diagnosis prompt.
+- **Incident Embeddings persisted on Resolution**: The system computes and stores a 1536-dimensional float vector embedding (`embeddings` field on `Incident`) using the `text-embedding-3-small` model upon incident resolution.
+- **Deterministic Mock Embedding Fallback**: Implements a zero-dependency, local sin-hash based 1536-dimensional float vector generator for local fallback and offline development when LLM API keys are absent or rate-limit cooldowns are active.
+- **Full-Screen Architecture Modal**: Added responsive pan/zoom controls for full-screen architecture diagram viewing in the documentation site.
+
+### Fixed
+
+- **SDK Package License**: Added missing license configuration to `@observability-os/sdk`'s `package.json`, explicitly packaged the `LICENSE` file, and bumped the SDK package version to `0.1.2`.
+
+---
+
+## [v1.6.0] — Blog Overhaul, Yarn Modern, Sentry/PostHog & Observability
+
+### Added
+
+- **Centralized Blog metadata**: Centralized blog posts database (`blog-data.ts` and `blog-code.ts`) with responsive layout hero grid and dynamic category filtering.
+- **Sticky Table of Contents & Reading Progress**: Added reading progress bar and Table of Contents sidebar for detailed blog reading experience.
+- **Sitemap & SEO Optimization**: Added dynamic blog routes inside sitemap XML configuration and structured JSON-LD schemas.
+- **Yarn Modern & Dependencies**: Migrated workspace to Yarn Modern (Yarn 4, v4.16.0) with immutable installs, and added a vulnerability check script.
+- **Observability Integrations**: Integrated Sentry (error tracking), PostHog (analytics), and Lighthouse CI.
+
+---
+
 ## [v1.5.0] — Billing Overhaul: Self-Host Auto-Detection, Cancel/Restore, Plan Realignment
 
 ### Added
