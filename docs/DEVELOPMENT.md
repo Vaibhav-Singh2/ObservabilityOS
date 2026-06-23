@@ -43,12 +43,6 @@ Follow these steps to run a local development workspace:
 
    _Dev server binds to `http://localhost:3000`._
 
-6. **Start Chaos Simulator (Optional)**: Start the telemetry workload and failure generator:
-   ```bash
-   yarn --cwd apps/chaos-simulator dev
-   ```
-   _Simulator binds to `http://localhost:3005`._
-
 ---
 
 ## 🧪 Running Validation & Verification Scripts
@@ -162,20 +156,3 @@ docker exec -it <redis-container-id> redis-cli flushall
 ```
 
 The codebase invalidates Redis cache keys dynamically upon new log ingestion anomalies or microservice state updates (refer to the cache schema details in **[DATABASE.md](DATABASE.md)**).
-
----
-
-## ⚡ Chaos Simulator & Local Load Injection
-
-To test SRE resilience features (such as cache invalidations, circuit breakers, rate-limiting, and AI diagnostic failovers), you can run the Chaos Simulator:
-
-```bash
-yarn --cwd apps/chaos-simulator dev
-```
-
-The simulator binds to `http://localhost:3005`. It offers a dashboard UI containing several outage simulation presets:
-
-1. **Stripe Timeout Outage**: Seeds logs with high latency and database network failures. Tests if the Z-Score engine detects standard-deviation anomaly spikes and compiles AI incident summaries.
-2. **Black Friday Peak Traffic**: Injects sudden spikes in log ingestion rates, verifying if the Redis sliding-window rate limiters trigger `429 Too Many Requests` correctly.
-3. **AI Provider Failure Loop**: Tripps the outbound LLM circuit breaker (`SimpleCircuitBreaker` inside `packages/ai`) to verify that the system gracefully falls back to direct OpenAI, direct Anthropic, or local heuristics.
-4. **Plan Limit Bypasses**: Simulates logging under `free` plan tiers to assert that live API credits are not consumed and local mock summaries are loaded instead.

@@ -11,7 +11,6 @@ We split our testing suite into distinct layers, allowing rapid local iteration 
 ```text
 observabilityos/
 ├── apps/
-│   ├── chaos-simulator/        # Workload and failure generator UI & API
 │   └── web/
 │       ├── playwright.config.ts        # Playwright E2E configuration
 │       ├── e2e/
@@ -125,22 +124,3 @@ The pipeline:
 3. Enforces formatting (`Prettier`), styles (`ESLint`), and type constraints (`tsc`).
 4. Executes all Vitest suites and generates coverage reports.
 5. Installs Chromium dependencies and triggers the Playwright E2E browser checks.
-
----
-
-## ⚡ Chaos and Load Testing (Chaos Simulator)
-
-We maintain a dedicated simulator application at [apps/chaos-simulator](../apps/chaos-simulator) to validate system resilience, statistical anomaly detection, and AI incident generation.
-
-### Triggering Outages & Incidents
-
-1. Boot the platform server (`yarn dev` on `http://localhost:3000`).
-2. Boot the simulator:
-   ```bash
-   yarn --cwd apps/chaos-simulator dev
-   ```
-3. Navigate to `http://localhost:3005` and verify the sandbox seeding status.
-4. Run testing presets (e.g. **Payment Outage**, **Black Friday Traffic**, **Incident Storm**) or manual scenario engines to assert correct pipeline ingestion, Redis invalidations, and AI incident report creations.
-
-> [!NOTE]
-> By default, the seeded sandbox project runs on the `free` tier. This automatically bypasses LLM calls and writes incident summaries using local heuristic templates, consuming 0 tokens. To test the full AI incident reasoning pipeline, use the **Use Custom API Key / Endpoints** form in the header to paste the credentials of a project upgraded to a `pro` (or higher) plan.

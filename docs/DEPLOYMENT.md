@@ -36,8 +36,7 @@ Understanding the inter-package dependencies is critical for correct deployment.
                          ├──> @repo/db ─┤
                          └──> @repo/ui ─┤
 @repo/eslint-config (devDependency)     │
-                                         ├──> apps/web (Next.js)
-                                         ├──> apps/chaos-simulator (Next.js)
+                                         └──> apps/web (Next.js)
 ```
 
 The `turbo.json` file defines the build execution order:

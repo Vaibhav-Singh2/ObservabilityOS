@@ -29,7 +29,6 @@ ObservabilityOS is an **AI-native DevOps intelligence and log analytics platform
 - **AI Incident Diagnostics**: Processes raw logs and deployment diffs to compile narrative post-mortems explaining "What happened", "Why", and "Suggested hotfix" in under 10 seconds.
 - **Outbound Failover & Circuit Breakers**: Standardizes outgoing provider calls with stateful circuit breakers to prevent thread blocks, falling back dynamically across providers.
 - **Lucene Full-text Log Search**: Full-text log query console powered by a Lucene-based MongoDB Atlas Search index with a regex fallback for local development.
-- **Chaos & Load Simulator**: A built-in traffic and failure generator app to simulate Black Friday spikes, database outages, or security breaches and verify system telemetry.
 - **Multi-channel Alerts**: Delivers rich, markdown-styled incident alerts directly to Slack, Discord, and Microsoft Teams.
 
 ---
@@ -41,8 +40,7 @@ ObservabilityOS is structured as a **Turborepo monorepo workspace**:
 ```text
 ├── apps
 │   ├── web                   # Next.js 16 Web Dashboard, APIs & Rate Limiters
-│   ├── docs                  # Next.js Static Documentation Portal
-│   └── chaos-simulator       # Incident, failure, and traffic workload generator UI
+│   └── docs                  # Next.js Static Documentation Portal
 ├── packages
 │   ├── db                    # Shared Mongoose/MongoDB connection, schemas & cache fallbacks
 │   ├── ai                    # Prompt builders, failover models, and LLM wrappers
