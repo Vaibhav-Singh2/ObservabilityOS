@@ -303,7 +303,7 @@ export default async function LandingPage() {
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/15 text-xs font-semibold uppercase tracking-wider transition-colors cursor-pointer"
             >
               <Github className="w-3.5 h-3.5" />
-              100% Open Source Self-Host Available
+              100% Source-Available Self-Host Available
             </a>
           </div>
 
@@ -1133,7 +1133,9 @@ export default async function LandingPage() {
                         {plan.priceUSD === 0 ? "Free" : `$${plan.priceUSD}`}
                       </strong>
                       <span className="text-xs text-slate-500">
-                        {plan.priceUSD === 0 ? " / Open Source" : " / month"}
+                        {plan.priceUSD === 0
+                          ? " / Source-Available"
+                          : " / month"}
                       </span>
                       {plan.id === "pro" && (
                         <span className="block text-[10px] text-slate-500 mt-0.5">
@@ -1471,7 +1473,8 @@ export default async function LandingPage() {
                     rel="noopener noreferrer"
                     className="hover:text-slate-350 transition-colors flex items-center gap-1"
                   >
-                    Open Source Code <ExternalLink className="w-2.5 h-2.5" />
+                    Source-Available Code{" "}
+                    <ExternalLink className="w-2.5 h-2.5" />
                   </a>
                 </li>
               </ul>

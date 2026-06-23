@@ -217,7 +217,7 @@ export default function TermsPage() {
       <footer className="border-t border-slate-900 bg-slate-950 py-8 text-center text-xs text-slate-650 font-mono">
         <div>
           &copy; {new Date().getFullYear()} ObservabilityOS. All rights
-          reserved. Open Source.
+          reserved. Source-Available.
         </div>
       </footer>
     </div>
