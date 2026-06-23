@@ -1,15 +1,7 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import {
-  connectToDatabase,
-  User,
-  Project,
-  Service,
-  Deploy,
-  Incident,
-} from "@repo/db";
-import jwt from "jsonwebtoken";
+import { Service, Deploy, Incident } from "@repo/db";
 import ServiceDetailView from "./ServiceDetailView";
+import { getAuthSession } from "@/lib/auth-cache";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -20,30 +12,7 @@ export default async function ServiceDetailPage({
   params,
   searchParams,
 }: PageProps) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-
-  if (!token) {
-    redirect("/");
-  }
-
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    redirect("/");
-  }
-
-  let decoded: { userId: string };
-  try {
-    decoded = jwt.verify(token, jwtSecret) as { userId: string };
-  } catch {
-    redirect("/");
-  }
-
-  await connectToDatabase();
-  const user = await User.findById(decoded.userId);
-  if (!user) {
-    redirect("/");
-  }
+  const { user, projects } = await getAuthSession();
 
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
@@ -56,7 +25,7 @@ export default async function ServiceDetailPage({
   }
 
   // Tenant isolation verification: Ensure the user owns the project
-  const project = await Project.findOne({ _id: projectId, ownerId: user._id });
+  const project = projects.find((p) => p._id.toString() === projectId);
   if (!project) {
     redirect("/dashboard");
   }

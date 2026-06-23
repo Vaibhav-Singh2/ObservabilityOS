@@ -1,45 +1,14 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import {
-  connectToDatabase,
-  User,
-  Project,
-  Incident,
-  Log,
-  Comment,
-} from "@repo/db";
-import jwt from "jsonwebtoken";
+import { Incident, Log, Comment } from "@repo/db";
 import IncidentDetailsView from "./IncidentDetailsView";
+import { getAuthSession } from "@/lib/auth-cache";
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
 export default async function IncidentDetailPage({ params }: PageProps) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-
-  if (!token) {
-    redirect("/");
-  }
-
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    redirect("/");
-  }
-
-  let decoded: { userId: string };
-  try {
-    decoded = jwt.verify(token, jwtSecret) as { userId: string };
-  } catch {
-    redirect("/");
-  }
-
-  await connectToDatabase();
-  const user = await User.findById(decoded.userId);
-  if (!user) {
-    redirect("/");
-  }
+  const { user, projects } = await getAuthSession();
 
   const resolvedParams = await params;
 
@@ -59,10 +28,9 @@ export default async function IncidentDetailPage({ params }: PageProps) {
   }
 
   // Tenant isolation verification: Ensure the user owns the project this incident belongs to
-  const project = await Project.findOne({
-    _id: incident.projectId,
-    ownerId: user._id,
-  });
+  const project = projects.find(
+    (p) => p._id.toString() === incident.projectId.toString(),
+  );
   if (!project) {
     redirect("/dashboard/incidents");
   }

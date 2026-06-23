@@ -21,13 +21,13 @@ export const getAuthSession = cache(async () => {
   try {
     decoded = jwt.verify(token, jwtSecret) as { userId: string };
   } catch {
-    redirect("/");
+    redirect("/api/auth/logout");
   }
 
   await connectToDatabase();
   const user = await User.findById(decoded.userId);
   if (!user) {
-    redirect("/");
+    redirect("/api/auth/logout");
   }
 
   const projects = await Project.find({ ownerId: user._id }).sort({

@@ -1,39 +1,14 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { connectToDatabase, User, Project } from "@repo/db";
-import jwt from "jsonwebtoken";
 import CheckoutView from "./CheckoutView";
 import { PLANS } from "@/lib/plans";
+import { getAuthSession } from "@/lib/auth-cache";
 
 interface PageProps {
   searchParams: Promise<{ projectId?: string; planId?: string }>;
 }
 
 export default async function CheckoutPage({ searchParams }: PageProps) {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("session")?.value;
-
-  if (!token) {
-    redirect("/");
-  }
-
-  const jwtSecret = process.env.JWT_SECRET;
-  if (!jwtSecret) {
-    redirect("/");
-  }
-
-  let decoded: { userId: string };
-  try {
-    decoded = jwt.verify(token, jwtSecret) as { userId: string };
-  } catch {
-    redirect("/");
-  }
-
-  await connectToDatabase();
-  const user = await User.findById(decoded.userId);
-  if (!user) {
-    redirect("/");
-  }
+  const { user, projects } = await getAuthSession();
 
   const resolvedSearchParams = await searchParams;
   const planId = resolvedSearchParams.planId;
@@ -50,10 +25,7 @@ export default async function CheckoutPage({ searchParams }: PageProps) {
   }
 
   // Fetch target project
-  const project = await Project.findOne({
-    _id: projectId,
-    ownerId: user._id,
-  });
+  const project = projects.find((p) => p._id.toString() === projectId);
 
   if (!project) {
     redirect("/dashboard/billing");
