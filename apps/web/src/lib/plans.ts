@@ -109,7 +109,7 @@ export const PLANS: PlanDetails[] = [
   },
   {
     id: "self-host",
-    name: "Self-Host Open Source",
+    name: "Self-Host Source-Available",
     priceUSD: 0,
     priceINR: 0,
     description: "Run on your own infrastructure with full access.",
