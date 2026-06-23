@@ -61,14 +61,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Rate Limiting: 100 requests per 60 seconds per API key
-    const rateLimit = await checkRateLimit(apiKey, 100, 60000);
+    // Rate Limiting per API key (default: 100 requests per 60 seconds)
+    const limit = process.env.RATE_LIMIT_MAX_REQUESTS
+      ? parseInt(process.env.RATE_LIMIT_MAX_REQUESTS, 10)
+      : 100;
+    const windowMs = process.env.RATE_LIMIT_WINDOW_MS
+      ? parseInt(process.env.RATE_LIMIT_WINDOW_MS, 10)
+      : 60000;
+
+    const rateLimit = await checkRateLimit(apiKey, limit, windowMs);
     if (!rateLimit.allowed) {
       return NextResponse.json(
         {
           error: {
             code: "TOO_MANY_REQUESTS",
-            message: "Rate limit exceeded. Maximum 100 requests per minute.",
+            message: `Rate limit exceeded. Maximum ${limit} requests per ${windowMs / 1000} seconds.`,
           },
         },
         { status: 429 },
